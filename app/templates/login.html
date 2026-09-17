@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Connexion{% endblock %}
+{% block body %}
+<h1>Connexion modérateur</h1>
+{% if error %}<div class="card" style="border-color:#e0c0c0;color:#a11">{{ error }}</div>{% endif %}
+<form method="post" action="/moderation/login" class="card">
+  <label for="username">Adresse e-mail</label>
+  <input type="email" id="username" name="username" required autofocus>
+  <label for="password">Mot de passe</label>
+  <input type="password" id="password" name="password" required>
+  <p><button type="submit">Se connecter</button></p>
+</form>
+<p class="mu">Un compte modérateur se crée en ligne de commande :
+<code>docker compose exec api python -m app.cli create-superuser</code></p>
+{% endblock %}

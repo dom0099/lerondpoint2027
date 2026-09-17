@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Conversations{% endblock %}
+{% block body %}
+<h1>Conversations</h1>
+
+{% if conversations %}
+<table>
+  <tr><th>Titre</th><th>État</th><th>Propositions</th><th>Modération</th></tr>
+  {% for c, approved, pending in conversations %}
+  <tr>
+    <td><a href="/moderation/conversations/{{ c.id }}">{{ c.title }}</a>
+        <div class="mu">/{{ c.slug }}</div></td>
+    <td><span class="tag">{{ c.state.value }}</span></td>
+    <td>{{ approved }} approuvée{{ 's' if approved > 1 else '' }}</td>
+    <td>{% if pending %}<strong>{{ pending }} en attente</strong>{% else %}<span class="mu">—</span>{% endif %}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+<p class="empty">Aucune conversation pour l'instant.</p>
+{% endif %}
+
+<h2>Nouvelle conversation</h2>
+<form method="post" action="/moderation/conversations" class="card">
+  <label for="title">Titre</label>
+  <input type="text" id="title" name="title" required maxlength="300">
+  <label for="description">Description (facultative)</label>
+  <textarea id="description" name="description"></textarea>
+  {# Plus de choix de modération depuis le MOD-14 : une proposition déposée est publiée,
+     et le contrôle se fait après, par le signalement. Un menu qui ne commande plus rien
+     serait pire qu'absent. #}
+  <p><button type="submit">Créer</button></p>
+</form>
+{% endblock %}

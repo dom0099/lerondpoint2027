@@ -1,0 +1,133 @@
+{#
+  Carte 2D des groupes d'opinion — tracé seul (chantier D5).
+
+  Ce gabarit N'ÉCRIT QUE DES BALISES : toutes les décisions (échelle, couleurs, ce qui
+  entre dans la légende, ce qui reçoit le gris du reliquat) sont prises dans
+  `app/services/carte_rendu.py`, sous test. Il attend une variable `dessin`.
+
+  Il ne porte AUCUNE explication de ce qu'est cette carte : la phrase d'accueil est
+  écrite par la page qui l'inclut, parce qu'elle dépend du contexte d'affichage.
+
+  `carte_message` (vrai par défaut) dit s'il faut afficher le message destiné à un
+  visiteur non situé. La page de conversation le met à faux : le bloc qui précède la
+  carte porte déjà cette explication, et la répéter à trois centimètres d'intervalle
+  ferait douter le lecteur d'avoir bien lu la première fois.
+
+  `groupes_carte` (facultatif) porte la part de chaque groupe : quand la page la
+  fournit, la légende l'écrit entre parenthèses après le nom.
+
+  Fluide par construction : le SVG n'a pas de dimensions en pixels, seulement un
+  `viewBox` et une largeur de 100 %. Il occupe la place qu'on lui donne, sur un
+  téléphone comme sur un écran large.
+#}
+{% if dessin %}
+<figure class="carte">
+  <svg viewBox="0 0 {{ dessin.largeur }} {{ dessin.hauteur }}"
+       width="100%" height="auto"
+       preserveAspectRatio="xMidYMid meet"
+       role="img"
+       aria-label="Carte des groupes d'opinion : chaque point est un participant, chaque zone colorée un groupe.">
+
+    {# Les contours sous les points : un participant ne doit jamais être masqué par
+       l'aplat de son propre groupe.
+
+       Un `<path>` et non un `<polygon>` : le contour est une spline fermée qui passe
+       par les mêmes sommets, calculée par `carte_rendu.chemin_lisse`. Le
+       `stroke-linejoin` reste utile — il sert au repli en polygone droit.
+
+       Le gabarit ne sait toujours rien de la géométrie : il écrit le `d` qu'on lui
+       donne, comme il écrivait les `points`. #}
+    {% for contour in dessin.contours %}
+    <path d="{{ contour.chemin }}"
+          fill="{{ contour.couleur }}" fill-opacity="0.14"
+          stroke="{{ contour.couleur }}" stroke-opacity="0.45"
+          stroke-width="3" stroke-linejoin="round" />
+    {% endfor %}
+
+    {# Un cercle par participant. Aucun `<title>`, aucun attribut de données : rien
+       à révéler au survol, parce qu'il n'y a rien à révéler. #}
+    {% for point in dessin.points %}
+    <circle cx="{{ point.cx }}" cy="{{ point.cy }}" r="{{ rayon_point }}"
+            fill="{{ point.couleur }}" fill-opacity="0.85" />
+    {% endfor %}
+
+    {# Les noms de groupe, PAR-DESSUS le nuage mais sans le masquer (chantier E6b).
+
+       Deux dispositifs se cumulent, et il en faut deux :
+
+       - le cartouche est translucide (72 %), donc les points qu'il recouvre restent
+         visibles à travers lui — on voit qu'il y a du monde dessous, ce qui est
+         justement l'information que la carte porte ;
+       - le texte est cerné de blanc (`paint-order="stroke"`), donc il reste lisible
+         là où le cartouche laisse passer un point sombre. Sans ce cerne, la
+         transparence rendrait le nom illisible sur les groupes denses — c'est-à-dire
+         sur les plus intéressants.
+
+       Le trait du cartouche reprend la couleur du groupe : c'est ce qui rattache le
+       nom à son nuage quand deux étiquettes se retrouvent côte à côte.
+
+       `pointer-events="none"` : l'étiquette ne doit jamais intercepter un geste
+       destiné à la carte, ni sur téléphone ni au survol.
+
+       `aria-hidden` : les noms sont déjà dans la légende, en texte, sous la carte. Les
+       faire lire deux fois par un lecteur d'écran allongerait la page sans rien
+       ajouter. #}
+    {% for etiquette in dessin.etiquettes %}
+    <g pointer-events="none" aria-hidden="true">
+      <rect x="{{ etiquette.x }}" y="{{ etiquette.y }}"
+            width="{{ etiquette.largeur }}" height="{{ etiquette.hauteur }}"
+            rx="{{ rayon_cartouche }}"
+            fill="#FFFFFF" fill-opacity="0.72"
+            stroke="{{ etiquette.couleur }}" stroke-opacity="0.9" stroke-width="2" />
+      <text x="{{ etiquette.cx }}"
+            y="{{ etiquette.y + marge_etiquette + taille_etiquette * 0.78 }}"
+            text-anchor="middle"
+            font-size="{{ taille_etiquette }}"
+            font-weight="600"
+            fill="#1F2A44"
+            stroke="#FFFFFF" stroke-width="4" paint-order="stroke"
+            stroke-linejoin="round">
+        {% for ligne in etiquette.lignes %}
+        <tspan x="{{ etiquette.cx }}"
+               {% if not loop.first %}dy="{{ interligne_etiquette }}"{% endif %}>{{ ligne }}</tspan>
+        {% endfor %}
+      </text>
+    </g>
+    {% endfor %}
+
+    {# Le visiteur par-dessus tout le reste : plus gros, cerné de blanc puis de sa
+       couleur, pour rester repérable au milieu des siens comme sur un aplat. #}
+    {% if dessin.visiteur %}
+    <circle cx="{{ dessin.visiteur.cx }}" cy="{{ dessin.visiteur.cy }}"
+            r="{{ rayon_visiteur }}"
+            fill="{{ dessin.visiteur.couleur }}"
+            stroke="#FFFFFF" stroke-width="{{ epaisseur_visiteur }}" />
+    <circle cx="{{ dessin.visiteur.cx }}" cy="{{ dessin.visiteur.cy }}"
+            r="{{ rayon_visiteur + epaisseur_visiteur }}"
+            fill="none"
+            stroke="{{ dessin.visiteur.couleur }}" stroke-width="2" />
+    {% endif %}
+  </svg>
+
+  <figcaption>
+    {% if dessin.legende %}
+    <ul class="legende">
+      {% for nom, couleur in dessin.legende %}
+      <li>
+        <span class="pastille" aria-hidden="true"
+              style="background:{{ couleur }}"></span>
+        {% set part = groupes_carte|default([])|selectattr("nom", "equalto", nom)|first %}
+        <span>Groupe {{ nom }}{% if part %} ({{ part.part }}%){% endif %}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if dessin.visiteur %}
+    <p class="mu">Le point cerclé, c'est vous.</p>
+    {% elif dessin.message_visiteur and carte_message|default(true) %}
+    <p class="mu">{{ dessin.message_visiteur }}</p>
+    {% endif %}
+  </figcaption>
+</figure>
+{% endif %}

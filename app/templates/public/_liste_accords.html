@@ -1,0 +1,73 @@
+{#
+  L'onglet « Le plus consensuel » (chantier L6) — et c'est le seul onglet de la barre
+  qui change l'OBJET de la liste au lieu de l'ordonner.
+
+  « Récent », « Le plus voté » et « Le plus clivant » rangent les mêmes débats
+  autrement ; celui-ci montre des propositions, prises dans tous les débats ouverts.
+  Un écran qui change de nature sans le dire passerait pour une panne : d'où le
+  chapeau, qui n'est pas décoratif.
+
+  Sortie dans son propre fichier comme la carte d'un débat au G10 : deux écrans la
+  rendent — l'accueil et la page « Débats » —, et recopiée elle aurait divergé.
+#}
+
+{% macro chapeau() %}
+<p class="mu chapeau-accords">
+  Les propositions sur lesquelles <strong>tous les groupes d'opinion</strong> d'un débat
+  se rejoignent, prises dans les consultations ouvertes. Trois au plus par débat, pour
+  qu'un seul ne remplisse pas la liste.
+</p>
+{% endmacro %}
+
+{% macro accord(a) %}
+  {#
+    Ce qui s'affiche : la proposition, sa direction, et le débat d'où elle vient.
+
+    LA DIRECTION EST UNE PHRASE GARANTIE, PAS UNE MOYENNE ARRONDIE. Elle n'est écrite
+    que si chaque groupe qui s'est exprimé penche de ce côté — c'est la règle (b),
+    retenue par le client le 6 septembre 2026 après le rendu réel du L3, et c'est la
+    même fonction qui la vérifie ici et sur la page du débat.
+
+    C'est aussi ce qui permet de ne PAS imprimer les barres par groupe : la phrase ne
+    peut être démentie par aucun chiffre, et le titre du débat mène à celles-ci. Le
+    contraire — une phrase absolue et pas de moyen de la vérifier — est précisément le
+    défaut que le L3 a corrigé deux fois.
+
+    Aucun score, ni « 0,37 », ni pourcentage de consensus : des mots et des entiers.
+  #}
+  <li class="accord">
+    <p class="accord-texte">{{ a.texte }}</p>
+    <p class="mu accord-meta">
+      <span class="etiquette etiquette--sens">
+        {%- if a.sens.value == 'accord' -%}
+          Les groupes l'approuvent
+        {%- else -%}
+          Les groupes la rejettent
+        {%- endif -%}
+      </span>
+      <span class="chiffre">{{ a.n_votes }}</span> vote{{ 's' if a.n_votes > 1 else '' }}
+      · <a href="/c/{{ a.slug_debat }}">{{ a.titre_debat }}</a>
+    </p>
+  </li>
+{% endmacro %}
+
+{% macro vide(filtre) %}
+{#
+  L'état vide n'est pas une panne, et il ne doit pas en avoir l'air. Il est même
+  l'état NORMAL d'un site jeune : il faut un calcul abouti, des groupes d'au moins
+  deux personnes, et une proposition que tous approuvent — ou que tous rejettent.
+
+  Même règle qu'à la mini-barre grise du G3 : dire qu'on attend vaut mieux que montrer
+  un vide qui se lirait « personne n'est d'accord sur rien ».
+#}
+<p class="empty">
+  {% if filtre.actif %}
+    Aucun accord relevé sur {% if filtre.sur_mes_themes %}vos thèmes{% else %}ce thème{% endif %}
+    pour l'instant.
+  {% else %}
+    Aucun accord relevé pour l'instant.
+  {% endif %}
+  Les groupes d'opinion se forment à mesure que les gens votent : cette liste se
+  remplira d'elle-même. <a href="/debats">Voir les débats</a>.
+</p>
+{% endmacro %}

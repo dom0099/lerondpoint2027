@@ -1,0 +1,597 @@
+{
+  "points": [
+    {
+      "jeu": "net/20260903",
+      "regime_attendu": "net",
+      "couverture": 0.9,
+      "G_ecart_valeurs_propres": 0.4223,
+      "S_silhouette_avant": 0.5895,
+      "k_avant": 3,
+      "variance_expliquee_2C_%": 40.9,
+      "residu_auto_%": 7.1,
+      "identite_auto": "2/3",
+      "jaccard_froid_vs_chaud_auto": 1.0
+    },
+    {
+      "jeu": "net/7",
+      "regime_attendu": "net",
+      "couverture": 0.9,
+      "G_ecart_valeurs_propres": 0.4102,
+      "S_silhouette_avant": 0.6956,
+      "k_avant": 4,
+      "variance_expliquee_2C_%": 43.9,
+      "residu_auto_%": 6.4,
+      "identite_auto": "4/4",
+      "jaccard_froid_vs_chaud_auto": 1.0
+    },
+    {
+      "jeu": "net/1234",
+      "regime_attendu": "net",
+      "couverture": 0.9,
+      "G_ecart_valeurs_propres": 0.5009,
+      "S_silhouette_avant": 0.5986,
+      "k_avant": 4,
+      "variance_expliquee_2C_%": 41.3,
+      "residu_auto_%": 7.0,
+      "identite_auto": "4/4",
+      "jaccard_froid_vs_chaud_auto": 1.0
+    },
+    {
+      "jeu": "net/99991",
+      "regime_attendu": "net",
+      "couverture": 0.9,
+      "G_ecart_valeurs_propres": 0.4161,
+      "S_silhouette_avant": 0.5558,
+      "k_avant": 3,
+      "variance_expliquee_2C_%": 42.8,
+      "residu_auto_%": 5.1,
+      "identite_auto": "2/2",
+      "jaccard_froid_vs_chaud_auto": 0.5674
+    },
+    {
+      "jeu": "flou/20260903",
+      "regime_attendu": "flou",
+      "couverture": 0.7,
+      "G_ecart_valeurs_propres": 0.174,
+      "S_silhouette_avant": 0.3883,
+      "k_avant": 3,
+      "variance_expliquee_2C_%": 19.1,
+      "residu_auto_%": 64.0,
+      "identite_auto": "3/3",
+      "jaccard_froid_vs_chaud_auto": 1.0
+    },
+    {
+      "jeu": "flou/7",
+      "regime_attendu": "flou",
+      "couverture": 0.7,
+      "G_ecart_valeurs_propres": 0.0863,
+      "S_silhouette_avant": 0.4464,
+      "k_avant": 5,
+      "variance_expliquee_2C_%": 18.2,
+      "residu_auto_%": 50.2,
+      "identite_auto": "4/4",
+      "jaccard_froid_vs_chaud_auto": 0.6605
+    },
+    {
+      "jeu": "flou/1234",
+      "regime_attendu": "flou",
+      "couverture": 0.7,
+      "G_ecart_valeurs_propres": 0.0394,
+      "S_silhouette_avant": 0.3201,
+      "k_avant": 3,
+      "variance_expliquee_2C_%": 18.3,
+      "residu_auto_%": 53.6,
+      "identite_auto": "2/3",
+      "jaccard_froid_vs_chaud_auto": 0.5426
+    },
+    {
+      "jeu": "flou/99991",
+      "regime_attendu": "flou",
+      "couverture": 0.7,
+      "G_ecart_valeurs_propres": 0.1251,
+      "S_silhouette_avant": 0.3806,
+      "k_avant": 4,
+      "variance_expliquee_2C_%": 18.7,
+      "residu_auto_%": 73.4,
+      "identite_auto": "4/4",
+      "jaccard_froid_vs_chaud_auto": 0.7752
+    },
+    {
+      "jeu": "flou/couv0.5/20260903",
+      "regime_attendu": "flou",
+      "couverture": 0.5,
+      "G_ecart_valeurs_propres": 0.0997,
+      "S_silhouette_avant": 0.4241,
+      "k_avant": 3,
+      "variance_expliquee_2C_%": 20.3,
+      "residu_auto_%": 50.3,
+      "identite_auto": null,
+      "jaccard_froid_vs_chaud_auto": null
+    },
+    {
+      "jeu": "flou/couv0.5/7",
+      "regime_attendu": "flou",
+      "couverture": 0.5,
+      "G_ecart_valeurs_propres": 0.0994,
+      "S_silhouette_avant": 0.369,
+      "k_avant": 3,
+      "variance_expliquee_2C_%": 17.9,
+      "residu_auto_%": 57.5,
+      "identite_auto": null,
+      "jaccard_froid_vs_chaud_auto": null
+    },
+    {
+      "jeu": "flou/couv0.5/1234",
+      "regime_attendu": "flou",
+      "couverture": 0.5,
+      "G_ecart_valeurs_propres": 0.0435,
+      "S_silhouette_avant": 0.3892,
+      "k_avant": 3,
+      "variance_expliquee_2C_%": 17.7,
+      "residu_auto_%": 79.4,
+      "identite_auto": null,
+      "jaccard_froid_vs_chaud_auto": null
+    },
+    {
+      "jeu": "net/couv0.5/20260903",
+      "regime_attendu": "net",
+      "couverture": 0.5,
+      "G_ecart_valeurs_propres": 0.4112,
+      "S_silhouette_avant": 0.494,
+      "k_avant": 3,
+      "variance_expliquee_2C_%": 30.7,
+      "residu_auto_%": 12.8,
+      "identite_auto": null,
+      "jaccard_froid_vs_chaud_auto": null
+    },
+    {
+      "jeu": "net/couv0.5/7",
+      "regime_attendu": "net",
+      "couverture": 0.5,
+      "G_ecart_valeurs_propres": 0.3562,
+      "S_silhouette_avant": 0.466,
+      "k_avant": 2,
+      "variance_expliquee_2C_%": 29.3,
+      "residu_auto_%": 19.3,
+      "identite_auto": null,
+      "jaccard_froid_vs_chaud_auto": null
+    },
+    {
+      "jeu": "net/couv0.5/1234",
+      "regime_attendu": "net",
+      "couverture": 0.5,
+      "G_ecart_valeurs_propres": 0.2095,
+      "S_silhouette_avant": 0.4723,
+      "k_avant": 4,
+      "variance_expliquee_2C_%": 30.3,
+      "residu_auto_%": 15.9,
+      "identite_auto": null,
+      "jaccard_froid_vs_chaud_auto": null
+    },
+    {
+      "jeu": "flou/couv0.6/20260903",
+      "regime_attendu": "flou",
+      "couverture": 0.6,
+      "G_ecart_valeurs_propres": 0.0625,
+      "S_silhouette_avant": 0.3492,
+      "k_avant": 4,
+      "variance_expliquee_2C_%": 19.0,
+      "residu_auto_%": 59.5,
+      "identite_auto": null,
+      "jaccard_froid_vs_chaud_auto": null
+    },
+    {
+      "jeu": "flou/couv0.6/7",
+      "regime_attendu": "flou",
+      "couverture": 0.6,
+      "G_ecart_valeurs_propres": 0.1366,
+      "S_silhouette_avant": 0.3866,
+      "k_avant": 3,
+      "variance_expliquee_2C_%": 18.3,
+      "residu_auto_%": 59.4,
+      "identite_auto": null,
+      "jaccard_froid_vs_chaud_auto": null
+    },
+    {
+      "jeu": "flou/couv0.6/1234",
+      "regime_attendu": "flou",
+      "couverture": 0.6,
+      "G_ecart_valeurs_propres": 0.1961,
+      "S_silhouette_avant": 0.3678,
+      "k_avant": 3,
+      "variance_expliquee_2C_%": 19.4,
+      "residu_auto_%": 59.0,
+      "identite_auto": null,
+      "jaccard_froid_vs_chaud_auto": null
+    },
+    {
+      "jeu": "net/couv0.6/20260903",
+      "regime_attendu": "net",
+      "couverture": 0.6,
+      "G_ecart_valeurs_propres": 0.553,
+      "S_silhouette_avant": 0.534,
+      "k_avant": 5,
+      "variance_expliquee_2C_%": 33.1,
+      "residu_auto_%": 16.3,
+      "identite_auto": null,
+      "jaccard_froid_vs_chaud_auto": null
+    },
+    {
+      "jeu": "net/couv0.6/7",
+      "regime_attendu": "net",
+      "couverture": 0.6,
+      "G_ecart_valeurs_propres": 0.4443,
+      "S_silhouette_avant": 0.5,
+      "k_avant": 4,
+      "variance_expliquee_2C_%": 29.6,
+      "residu_auto_%": 14.2,
+      "identite_auto": null,
+      "jaccard_froid_vs_chaud_auto": null
+    },
+    {
+      "jeu": "net/couv0.6/1234",
+      "regime_attendu": "net",
+      "couverture": 0.6,
+      "G_ecart_valeurs_propres": 0.4834,
+      "S_silhouette_avant": 0.5189,
+      "k_avant": 2,
+      "variance_expliquee_2C_%": 30.1,
+      "residu_auto_%": 19.3,
+      "identite_auto": null,
+      "jaccard_froid_vs_chaud_auto": null
+    },
+    {
+      "jeu": "flou/couv0.7/20260903",
+      "regime_attendu": "flou",
+      "couverture": 0.7,
+      "G_ecart_valeurs_propres": 0.174,
+      "S_silhouette_avant": 0.3883,
+      "k_avant": 3,
+      "variance_expliquee_2C_%": 19.1,
+      "residu_auto_%": 64.0,
+      "identite_auto": null,
+      "jaccard_froid_vs_chaud_auto": null
+    },
+    {
+      "jeu": "flou/couv0.7/7",
+      "regime_attendu": "flou",
+      "couverture": 0.7,
+      "G_ecart_valeurs_propres": 0.0863,
+      "S_silhouette_avant": 0.4464,
+      "k_avant": 5,
+      "variance_expliquee_2C_%": 18.2,
+      "residu_auto_%": 50.2,
+      "identite_auto": null,
+      "jaccard_froid_vs_chaud_auto": null
+    },
+    {
+      "jeu": "flou/couv0.7/1234",
+      "regime_attendu": "flou",
+      "couverture": 0.7,
+      "G_ecart_valeurs_propres": 0.0394,
+      "S_silhouette_avant": 0.3201,
+      "k_avant": 3,
+      "variance_expliquee_2C_%": 18.3,
+      "residu_auto_%": 53.6,
+      "identite_auto": null,
+      "jaccard_froid_vs_chaud_auto": null
+    },
+    {
+      "jeu": "net/couv0.7/20260903",
+      "regime_attendu": "net",
+      "couverture": 0.7,
+      "G_ecart_valeurs_propres": 0.4573,
+      "S_silhouette_avant": 0.5313,
+      "k_avant": 2,
+      "variance_expliquee_2C_%": 35.0,
+      "residu_auto_%": 11.3,
+      "identite_auto": null,
+      "jaccard_froid_vs_chaud_auto": null
+    },
+    {
+      "jeu": "net/couv0.7/7",
+      "regime_attendu": "net",
+      "couverture": 0.7,
+      "G_ecart_valeurs_propres": 0.4733,
+      "S_silhouette_avant": 0.5201,
+      "k_avant": 4,
+      "variance_expliquee_2C_%": 33.9,
+      "residu_auto_%": 12.0,
+      "identite_auto": null,
+      "jaccard_froid_vs_chaud_auto": null
+    },
+    {
+      "jeu": "net/couv0.7/1234",
+      "regime_attendu": "net",
+      "couverture": 0.7,
+      "G_ecart_valeurs_propres": 0.5008,
+      "S_silhouette_avant": 0.5588,
+      "k_avant": 4,
+      "variance_expliquee_2C_%": 35.4,
+      "residu_auto_%": 10.6,
+      "identite_auto": null,
+      "jaccard_froid_vs_chaud_auto": null
+    },
+    {
+      "jeu": "flou/couv0.8/20260903",
+      "regime_attendu": "flou",
+      "couverture": 0.8,
+      "G_ecart_valeurs_propres": 0.1784,
+      "S_silhouette_avant": 0.3689,
+      "k_avant": 2,
+      "variance_expliquee_2C_%": 20.2,
+      "residu_auto_%": 48.4,
+      "identite_auto": null,
+      "jaccard_froid_vs_chaud_auto": null
+    },
+    {
+      "jeu": "flou/couv0.8/7",
+      "regime_attendu": "flou",
+      "couverture": 0.8,
+      "G_ecart_valeurs_propres": 0.0788,
+      "S_silhouette_avant": 0.3998,
+      "k_avant": 3,
+      "variance_expliquee_2C_%": 17.8,
+      "residu_auto_%": 71.6,
+      "identite_auto": null,
+      "jaccard_froid_vs_chaud_auto": null
+    },
+    {
+      "jeu": "flou/couv0.8/1234",
+      "regime_attendu": "flou",
+      "couverture": 0.8,
+      "G_ecart_valeurs_propres": 0.1214,
+      "S_silhouette_avant": 0.4235,
+      "k_avant": 5,
+      "variance_expliquee_2C_%": 17.6,
+      "residu_auto_%": 74.6,
+      "identite_auto": null,
+      "jaccard_froid_vs_chaud_auto": null
+    },
+    {
+      "jeu": "net/couv0.8/20260903",
+      "regime_attendu": "net",
+      "couverture": 0.8,
+      "G_ecart_valeurs_propres": 0.3809,
+      "S_silhouette_avant": 0.6132,
+      "k_avant": 4,
+      "variance_expliquee_2C_%": 36.5,
+      "residu_auto_%": 9.2,
+      "identite_auto": null,
+      "jaccard_froid_vs_chaud_auto": null
+    },
+    {
+      "jeu": "net/couv0.8/7",
+      "regime_attendu": "net",
+      "couverture": 0.8,
+      "G_ecart_valeurs_propres": 0.4688,
+      "S_silhouette_avant": 0.5452,
+      "k_avant": 4,
+      "variance_expliquee_2C_%": 36.6,
+      "residu_auto_%": 12.9,
+      "identite_auto": null,
+      "jaccard_froid_vs_chaud_auto": null
+    },
+    {
+      "jeu": "net/couv0.8/1234",
+      "regime_attendu": "net",
+      "couverture": 0.8,
+      "G_ecart_valeurs_propres": 0.4211,
+      "S_silhouette_avant": 0.6137,
+      "k_avant": 4,
+      "variance_expliquee_2C_%": 42.0,
+      "residu_auto_%": 7.9,
+      "identite_auto": null,
+      "jaccard_froid_vs_chaud_auto": null
+    },
+    {
+      "jeu": "flou/couv0.9/20260903",
+      "regime_attendu": "flou",
+      "couverture": 0.9,
+      "G_ecart_valeurs_propres": 0.2329,
+      "S_silhouette_avant": 0.3658,
+      "k_avant": 3,
+      "variance_expliquee_2C_%": 18.5,
+      "residu_auto_%": 50.2,
+      "identite_auto": null,
+      "jaccard_froid_vs_chaud_auto": null
+    },
+    {
+      "jeu": "flou/couv0.9/7",
+      "regime_attendu": "flou",
+      "couverture": 0.9,
+      "G_ecart_valeurs_propres": 0.0824,
+      "S_silhouette_avant": 0.4076,
+      "k_avant": 5,
+      "variance_expliquee_2C_%": 20.3,
+      "residu_auto_%": 32.7,
+      "identite_auto": null,
+      "jaccard_froid_vs_chaud_auto": null
+    },
+    {
+      "jeu": "flou/couv0.9/1234",
+      "regime_attendu": "flou",
+      "couverture": 0.9,
+      "G_ecart_valeurs_propres": 0.082,
+      "S_silhouette_avant": 0.3546,
+      "k_avant": 5,
+      "variance_expliquee_2C_%": 17.1,
+      "residu_auto_%": 72.5,
+      "identite_auto": null,
+      "jaccard_froid_vs_chaud_auto": null
+    },
+    {
+      "jeu": "net/couv0.9/20260903",
+      "regime_attendu": "net",
+      "couverture": 0.9,
+      "G_ecart_valeurs_propres": 0.4223,
+      "S_silhouette_avant": 0.5895,
+      "k_avant": 3,
+      "variance_expliquee_2C_%": 40.9,
+      "residu_auto_%": 7.1,
+      "identite_auto": null,
+      "jaccard_froid_vs_chaud_auto": null
+    },
+    {
+      "jeu": "net/couv0.9/7",
+      "regime_attendu": "net",
+      "couverture": 0.9,
+      "G_ecart_valeurs_propres": 0.4102,
+      "S_silhouette_avant": 0.6956,
+      "k_avant": 4,
+      "variance_expliquee_2C_%": 43.9,
+      "residu_auto_%": 6.4,
+      "identite_auto": null,
+      "jaccard_froid_vs_chaud_auto": null
+    },
+    {
+      "jeu": "net/couv0.9/1234",
+      "regime_attendu": "net",
+      "couverture": 0.9,
+      "G_ecart_valeurs_propres": 0.5009,
+      "S_silhouette_avant": 0.5986,
+      "k_avant": 4,
+      "variance_expliquee_2C_%": 41.3,
+      "residu_auto_%": 7.0,
+      "identite_auto": null,
+      "jaccard_froid_vs_chaud_auto": null
+    },
+    {
+      "jeu": "flou/couv1.0/20260903",
+      "regime_attendu": "flou",
+      "couverture": 1.0,
+      "G_ecart_valeurs_propres": 0.1821,
+      "S_silhouette_avant": 0.383,
+      "k_avant": 4,
+      "variance_expliquee_2C_%": 18.4,
+      "residu_auto_%": 49.7,
+      "identite_auto": null,
+      "jaccard_froid_vs_chaud_auto": null
+    },
+    {
+      "jeu": "flou/couv1.0/7",
+      "regime_attendu": "flou",
+      "couverture": 1.0,
+      "G_ecart_valeurs_propres": 0.2142,
+      "S_silhouette_avant": 0.4242,
+      "k_avant": 3,
+      "variance_expliquee_2C_%": 17.5,
+      "residu_auto_%": 88.8,
+      "identite_auto": null,
+      "jaccard_froid_vs_chaud_auto": null
+    },
+    {
+      "jeu": "flou/couv1.0/1234",
+      "regime_attendu": "flou",
+      "couverture": 1.0,
+      "G_ecart_valeurs_propres": 0.1626,
+      "S_silhouette_avant": 0.4083,
+      "k_avant": 3,
+      "variance_expliquee_2C_%": 18.6,
+      "residu_auto_%": 67.1,
+      "identite_auto": null,
+      "jaccard_froid_vs_chaud_auto": null
+    },
+    {
+      "jeu": "net/couv1.0/20260903",
+      "regime_attendu": "net",
+      "couverture": 1.0,
+      "G_ecart_valeurs_propres": 0.469,
+      "S_silhouette_avant": 0.5776,
+      "k_avant": 4,
+      "variance_expliquee_2C_%": 41.7,
+      "residu_auto_%": 6.7,
+      "identite_auto": null,
+      "jaccard_froid_vs_chaud_auto": null
+    },
+    {
+      "jeu": "net/couv1.0/7",
+      "regime_attendu": "net",
+      "couverture": 1.0,
+      "G_ecart_valeurs_propres": 0.537,
+      "S_silhouette_avant": 0.6862,
+      "k_avant": 4,
+      "variance_expliquee_2C_%": 45.7,
+      "residu_auto_%": 7.3,
+      "identite_auto": null,
+      "jaccard_froid_vs_chaud_auto": null
+    },
+    {
+      "jeu": "net/couv1.0/1234",
+      "regime_attendu": "net",
+      "couverture": 1.0,
+      "G_ecart_valeurs_propres": 0.3299,
+      "S_silhouette_avant": 0.7293,
+      "k_avant": 4,
+      "variance_expliquee_2C_%": 49.0,
+      "residu_auto_%": 5.3,
+      "identite_auto": null,
+      "jaccard_froid_vs_chaud_auto": null
+    },
+    {
+      "jeu": "REEL Pol.is (14 ptpt)",
+      "regime_attendu": "réel",
+      "couverture": 1.0,
+      "G_ecart_valeurs_propres": 0.2195,
+      "S_silhouette_avant": 0.2996,
+      "k_avant": 2,
+      "variance_expliquee_2C_%": 57.2,
+      "residu_auto_%": 46.8,
+      "identite_auto": "1/2",
+      "jaccard_froid_vs_chaud_auto": 0.3571
+    }
+  ],
+  "resume": {
+    "n_points": 45,
+    "separation_G": {
+      "seuil": 0.2814,
+      "erreurs": 1,
+      "n": 45,
+      "exactitude_%": 97.8
+    },
+    "separation_S": {
+      "seuil": 0.4562,
+      "erreurs": 0,
+      "n": 45,
+      "exactitude_%": 100.0
+    },
+    "plages": {
+      "G_ecart_valeurs_propres / net": [
+        0.2095,
+        0.553
+      ],
+      "G_ecart_valeurs_propres / flou": [
+        0.0394,
+        0.2329
+      ],
+      "G_ecart_valeurs_propres / réel": [
+        0.2195,
+        0.2195
+      ],
+      "S_silhouette_avant / net": [
+        0.466,
+        0.7293
+      ],
+      "S_silhouette_avant / flou": [
+        0.3201,
+        0.4464
+      ],
+      "S_silhouette_avant / réel": [
+        0.2996,
+        0.2996
+      ],
+      "residu_auto_% / net": [
+        5.1,
+        19.3
+      ],
+      "residu_auto_% / flou": [
+        32.7,
+        88.8
+      ],
+      "residu_auto_% / réel": [
+        46.8,
+        46.8
+      ]
+    }
+  }
+}

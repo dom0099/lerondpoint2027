@@ -1,0 +1,428 @@
+[
+  {
+    "corpus": "net",
+    "graine": 20260903,
+    "n_communs": 50,
+    "temoin_bit_a_bit": true,
+    "k_avant": 3,
+    "k_apres_froid": 4,
+    "deplacement_%_rayon": {
+      "sans correction": 148.8,
+      "flip_x": 22.7,
+      "flip_y": 191.1,
+      "flip_x+flip_y (defaut biblio)": 110.6,
+      "ALIGNEMENT AUTO (Procruste)": 7.1
+    },
+    "alignement": {
+      "reflexion": true,
+      "echelle": 1.022,
+      "axe_ou_angle_deg": -167.231
+    },
+    "mesure_3": {
+      "k_chaud_auto": 4,
+      "k_chaud_flipxy": 4,
+      "jaccard_froid_vs_chaud_auto": 1.0,
+      "jaccard_froid_vs_chaud_flipxy": 1.0,
+      "jaccard_avant_vs_froid_communs": 0.76,
+      "jaccard_avant_vs_chaud_auto_communs": 0.76,
+      "identite_froid": {
+        "appariement": {
+          "0": 2,
+          "1": 3,
+          "2": 0
+        },
+        "preservee": false
+      },
+      "identite_chaud_auto": {
+        "appariement": {
+          "0": 0,
+          "1": 1,
+          "2": 3
+        },
+        "preservee": false
+      },
+      "identite_chaud_flipxy": {
+        "appariement": {
+          "0": 1,
+          "1": 0,
+          "2": 3
+        },
+        "preservee": false
+      }
+    }
+  },
+  {
+    "corpus": "net",
+    "graine": 7,
+    "n_communs": 50,
+    "temoin_bit_a_bit": true,
+    "k_avant": 4,
+    "k_apres_froid": 4,
+    "deplacement_%_rayon": {
+      "sans correction": 9.7,
+      "flip_x": 152.3,
+      "flip_y": 111.7,
+      "flip_x+flip_y (defaut biblio)": 192.8,
+      "ALIGNEMENT AUTO (Procruste)": 6.4
+    },
+    "alignement": {
+      "reflexion": false,
+      "echelle": 1.042,
+      "axe_ou_angle_deg": 3.474
+    },
+    "mesure_3": {
+      "k_chaud_auto": 4,
+      "k_chaud_flipxy": 4,
+      "jaccard_froid_vs_chaud_auto": 1.0,
+      "jaccard_froid_vs_chaud_flipxy": 1.0,
+      "jaccard_avant_vs_froid_communs": 0.9617,
+      "jaccard_avant_vs_chaud_auto_communs": 0.9617,
+      "identite_froid": {
+        "appariement": {
+          "0": 0,
+          "1": 1,
+          "2": 2,
+          "3": 3
+        },
+        "preservee": true
+      },
+      "identite_chaud_auto": {
+        "appariement": {
+          "0": 0,
+          "1": 1,
+          "2": 2,
+          "3": 3
+        },
+        "preservee": true
+      },
+      "identite_chaud_flipxy": {
+        "appariement": {
+          "0": 3,
+          "1": 2,
+          "2": 1,
+          "3": 0
+        },
+        "preservee": false
+      }
+    }
+  },
+  {
+    "corpus": "net",
+    "graine": 1234,
+    "n_communs": 50,
+    "temoin_bit_a_bit": true,
+    "k_avant": 4,
+    "k_apres_froid": 4,
+    "deplacement_%_rayon": {
+      "sans correction": 13.6,
+      "flip_x": 154.8,
+      "flip_y": 103.9,
+      "flip_x+flip_y (defaut biblio)": 191.1,
+      "ALIGNEMENT AUTO (Procruste)": 7.0
+    },
+    "alignement": {
+      "reflexion": false,
+      "echelle": 1.033,
+      "axe_ou_angle_deg": 6.878
+    },
+    "mesure_3": {
+      "k_chaud_auto": 4,
+      "k_chaud_flipxy": 4,
+      "jaccard_froid_vs_chaud_auto": 1.0,
+      "jaccard_froid_vs_chaud_flipxy": 1.0,
+      "jaccard_avant_vs_froid_communs": 0.9617,
+      "jaccard_avant_vs_chaud_auto_communs": 0.9617,
+      "identite_froid": {
+        "appariement": {
+          "0": 2,
+          "1": 0,
+          "2": 1,
+          "3": 3
+        },
+        "preservee": false
+      },
+      "identite_chaud_auto": {
+        "appariement": {
+          "0": 0,
+          "1": 1,
+          "2": 2,
+          "3": 3
+        },
+        "preservee": true
+      },
+      "identite_chaud_flipxy": {
+        "appariement": {
+          "0": 2,
+          "1": 3,
+          "2": 0,
+          "3": 1
+        },
+        "preservee": false
+      }
+    }
+  },
+  {
+    "corpus": "net",
+    "graine": 99991,
+    "n_communs": 50,
+    "temoin_bit_a_bit": true,
+    "k_avant": 3,
+    "k_apres_froid": 4,
+    "deplacement_%_rayon": {
+      "sans correction": 7.9,
+      "flip_x": 150.0,
+      "flip_y": 106.7,
+      "flip_x+flip_y (defaut biblio)": 191.8,
+      "ALIGNEMENT AUTO (Procruste)": 5.1
+    },
+    "alignement": {
+      "reflexion": false,
+      "echelle": 1.033,
+      "axe_ou_angle_deg": 3.418
+    },
+    "mesure_3": {
+      "k_chaud_auto": 2,
+      "k_chaud_flipxy": 4,
+      "jaccard_froid_vs_chaud_auto": 0.5674,
+      "jaccard_froid_vs_chaud_flipxy": 0.9265,
+      "jaccard_avant_vs_froid_communs": 0.7812,
+      "jaccard_avant_vs_chaud_auto_communs": 0.8215,
+      "identite_froid": {
+        "appariement": {
+          "0": 0,
+          "1": 1,
+          "2": 3
+        },
+        "preservee": false
+      },
+      "identite_chaud_auto": {
+        "appariement": {
+          "0": 0,
+          "1": 1
+        },
+        "preservee": true
+      },
+      "identite_chaud_flipxy": {
+        "appariement": {
+          "0": 3,
+          "1": 2,
+          "2": 1
+        },
+        "preservee": false
+      }
+    }
+  },
+  {
+    "corpus": "flou",
+    "graine": 20260903,
+    "n_communs": 50,
+    "temoin_bit_a_bit": true,
+    "k_avant": 3,
+    "k_apres_froid": 3,
+    "deplacement_%_rayon": {
+      "sans correction": 114.3,
+      "flip_x": 156.6,
+      "flip_y": 103.5,
+      "flip_x+flip_y (defaut biblio)": 138.3,
+      "ALIGNEMENT AUTO (Procruste)": 64.0
+    },
+    "alignement": {
+      "reflexion": true,
+      "echelle": 0.677,
+      "axe_ou_angle_deg": -53.674
+    },
+    "mesure_3": {
+      "k_chaud_auto": 3,
+      "k_chaud_flipxy": 4,
+      "jaccard_froid_vs_chaud_auto": 1.0,
+      "jaccard_froid_vs_chaud_flipxy": 0.7018,
+      "jaccard_avant_vs_froid_communs": 0.4713,
+      "jaccard_avant_vs_chaud_auto_communs": 0.4713,
+      "identite_froid": {
+        "appariement": {
+          "0": 0,
+          "1": 2,
+          "2": 1
+        },
+        "preservee": false
+      },
+      "identite_chaud_auto": {
+        "appariement": {
+          "0": 0,
+          "1": 1,
+          "2": 2
+        },
+        "preservee": true
+      },
+      "identite_chaud_flipxy": {
+        "appariement": {
+          "0": 1,
+          "1": 0,
+          "2": 2
+        },
+        "preservee": false
+      }
+    }
+  },
+  {
+    "corpus": "flou",
+    "graine": 7,
+    "n_communs": 50,
+    "temoin_bit_a_bit": true,
+    "k_avant": 5,
+    "k_apres_froid": 3,
+    "deplacement_%_rayon": {
+      "sans correction": 114.8,
+      "flip_x": 155.3,
+      "flip_y": 99.6,
+      "flip_x+flip_y (defaut biblio)": 135.9,
+      "ALIGNEMENT AUTO (Procruste)": 50.2
+    },
+    "alignement": {
+      "reflexion": true,
+      "echelle": 0.779,
+      "axe_ou_angle_deg": 60.083
+    },
+    "mesure_3": {
+      "k_chaud_auto": 4,
+      "k_chaud_flipxy": 4,
+      "jaccard_froid_vs_chaud_auto": 0.6605,
+      "jaccard_froid_vs_chaud_flipxy": 0.6302,
+      "jaccard_avant_vs_froid_communs": 0.4223,
+      "jaccard_avant_vs_chaud_auto_communs": 0.4489,
+      "identite_froid": {
+        "appariement": {
+          "1": 0,
+          "2": 2,
+          "4": 1
+        },
+        "preservee": false
+      },
+      "identite_chaud_auto": {
+        "appariement": {
+          "0": 0,
+          "1": 1,
+          "2": 2,
+          "3": 3
+        },
+        "preservee": true
+      },
+      "identite_chaud_flipxy": {
+        "appariement": {
+          "0": 3,
+          "1": 2,
+          "2": 1,
+          "4": 0
+        },
+        "preservee": false
+      }
+    }
+  },
+  {
+    "corpus": "flou",
+    "graine": 1234,
+    "n_communs": 50,
+    "temoin_bit_a_bit": true,
+    "k_avant": 3,
+    "k_apres_froid": 3,
+    "deplacement_%_rayon": {
+      "sans correction": 134.7,
+      "flip_x": 141.4,
+      "flip_y": 111.7,
+      "flip_x+flip_y (defaut biblio)": 131.6,
+      "ALIGNEMENT AUTO (Procruste)": 53.6
+    },
+    "alignement": {
+      "reflexion": false,
+      "echelle": 0.741,
+      "axe_ou_angle_deg": 91.118
+    },
+    "mesure_3": {
+      "k_chaud_auto": 5,
+      "k_chaud_flipxy": 3,
+      "jaccard_froid_vs_chaud_auto": 0.5426,
+      "jaccard_froid_vs_chaud_flipxy": 0.6899,
+      "jaccard_avant_vs_froid_communs": 0.3194,
+      "jaccard_avant_vs_chaud_auto_communs": 0.3565,
+      "identite_froid": {
+        "appariement": {
+          "0": 2,
+          "1": 0,
+          "2": 1
+        },
+        "preservee": false
+      },
+      "identite_chaud_auto": {
+        "appariement": {
+          "0": 0,
+          "1": 4,
+          "2": 2
+        },
+        "preservee": false
+      },
+      "identite_chaud_flipxy": {
+        "appariement": {
+          "0": 1,
+          "1": 2,
+          "2": 0
+        },
+        "preservee": false
+      }
+    }
+  },
+  {
+    "corpus": "flou",
+    "graine": 99991,
+    "n_communs": 50,
+    "temoin_bit_a_bit": true,
+    "k_avant": 4,
+    "k_apres_froid": 4,
+    "deplacement_%_rayon": {
+      "sans correction": 97.4,
+      "flip_x": 159.8,
+      "flip_y": 106.1,
+      "flip_x+flip_y (defaut biblio)": 164.8,
+      "ALIGNEMENT AUTO (Procruste)": 73.4
+    },
+    "alignement": {
+      "reflexion": true,
+      "echelle": 0.493,
+      "axe_ou_angle_deg": 42.818
+    },
+    "mesure_3": {
+      "k_chaud_auto": 4,
+      "k_chaud_flipxy": 5,
+      "jaccard_froid_vs_chaud_auto": 0.7752,
+      "jaccard_froid_vs_chaud_flipxy": 0.499,
+      "jaccard_avant_vs_froid_communs": 0.4081,
+      "jaccard_avant_vs_chaud_auto_communs": 0.3167,
+      "identite_froid": {
+        "appariement": {
+          "0": 1,
+          "1": 2,
+          "2": 0,
+          "3": 3
+        },
+        "preservee": false
+      },
+      "identite_chaud_auto": {
+        "appariement": {
+          "0": 0,
+          "1": 1,
+          "2": 2,
+          "3": 3
+        },
+        "preservee": true
+      },
+      "identite_chaud_flipxy": {
+        "appariement": {
+          "0": 4,
+          "1": 1,
+          "2": 2,
+          "3": 0
+        },
+        "preservee": false
+      }
+    }
+  }
+]

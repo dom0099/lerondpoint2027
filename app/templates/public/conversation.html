@@ -1,0 +1,1683 @@
+{% extends "public/base.html" %}
+{% import "public/_anneau.html" as forme %}
+{% import "public/_carte_debat.html" as debat %}
+{% block title %}{{ conversation.title }} — Le Rond-Point 2027{% endblock %}
+{#
+  `og:image` (chantier Vidéo, VIDEO-4) : seulement quand ce débat porte une vidéo ET
+  qu'une miniature a déjà été retenue pour elle. Un débat attaché par le modérateur
+  (VIDEO-2) peut porter une vidéo SANS miniature choisie tant que l'écran de
+  modération n'a pas tranché parmi les trois candidates — `video_chemin` seul ne
+  suffit donc pas à garantir qu'une image existe à cette adresse.
+
+  URL absolue (`request.url_for`, pas un chemin relatif) : les robots des réseaux
+  sociaux qui lisent cette balise n'ont pas de page de référence depuis laquelle
+  résoudre un chemin.
+#}
+{% block meta %}
+{% if conversation.video_miniature_chemin %}
+<meta property="og:image" content="{{ request.url_for('conversation_video_cover', slug=conversation.slug) }}">
+{% endif %}
+{% endblock %}
+{#
+  Page large (chantier I) : la carte de vote et la carte 2D gagnent une colonne
+  latérale, comme `.grid` dans la maquette `debat-vote.html` — voir `.debat main`
+  dans styles.css, qui reprend le mécanisme déjà en place pour `.accueil`.
+#}
+{% block classe_corps %}debat{% endblock %}
+{% block body %}
+{#
+  Bandeau de titre — `.debate-head` de la maquette debat-vote.html (chantier I2,
+  instruction 9). Le titre à gauche, précédé de ses thèmes ; les deux chiffres de
+  cadrage à droite, alignés sur le bas du bloc, et repliés dessous sur petit écran.
+#}
+<div class="entete-debat">
+  <div class="entete-debat-texte">
+    {#
+      Les thèmes du débat, AU-DESSUS du titre : ils disent de quoi il s'agit avant
+      qu'on lise quoi que ce soit d'autre, ce qui est exactement leur rôle. C'est ici
+      leur vraie place — l'instruction 4 les a retirés des cartes de l'accueil, pas du
+      site.
+
+      Le dessin change avec le chantier I2 : `.tag` de la maquette, du texte en
+      capitales souligné de jaune, et non plus l'étiquette encadrée des cartes. Un
+      débat en porte un à trois, en tête d'une page qui n'en montre qu'un seul : trois
+      cadres y pèseraient plus que le titre qu'ils annoncent.
+
+      `<ul>` et non une suite de `<span>` : c'est une liste, et un lecteur d'écran
+      annonce alors combien il y a de thèmes.
+    #}
+    {% if conversation.libelles_themes %}
+    <ul class="themes-tags">
+      {% for libelle in conversation.libelles_themes %}
+      <li class="tag-debat">{{ libelle }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+    <h1 class="titre-page-debat">{{ conversation.title }}</h1>
+  </div>
+
+  {#
+    Les deux chiffres de cadrage. `participants_debat` compte les personnes distinctes
+    ayant voté ici (pas les votes, et pas les participants du dernier calcul de
+    groupes) ; `total_statements` est le nombre de propositions visibles — le même « sur
+    N » que la carte de vote affiche plus bas, repris et non recompté.
+  #}
+  <p class="cadrage-debat">
+    <span><b>{{ participants_debat }}</b>participant{{ 's' if participants_debat > 1 else '' }}</span>
+    <span><b>{{ total_statements }}</b>proposition{{ 's' if total_statements > 1 else '' }}</span>
+  </p>
+
+  {#
+    La vidéo de présentation (chantier Vidéo, VIDEO-4) — à droite du titre, à sa
+    hauteur (choix du client : gauche ou droite laissé libre, hauteur alignée sur
+    le titre imposée).
+
+    Depuis le 17/09/2026 (demande du client) : une miniature AGRANDIE qui lance la
+    vidéo dans une fenêtre en grand, refermée d'elle-même à la fin — le lecteur
+    natif posé à la taille d'une vignette ne se regardait pas. Le mécanisme est
+    commun avec les cartes de liste : `.lancer-video` + `static/video.js`. Sans
+    script, le lien ouvre le fichier lui-même, que tout navigateur sait lire.
+
+    La mention « Vidéo publiée par l'auteur du débat. Vos droits… » est retirée à la
+    même date, à la demande du client ; les droits restent décrits sur
+    `/confidentialite`.
+
+    Le bouton « Partager » partage l'adresse de la PAGE du débat, pas celle du
+    fichier : le lien reçu mène au débat (avec son `og:image`), et une vidéo
+    retirée par la modération cesse d'être servie à cette adresse. Caché tant que
+    le script ne l'a pas activé — sans script, il ne ferait rien.
+
+    Gardée sur `video_miniature_chemin`, PAS sur `video_chemin` seul, exactement
+    comme la carte de liste et l'`og:image` plus haut : un modérateur peut attacher
+    une vidéo à un débat déjà en ligne (VIDEO-2 ne l'interdit qu'à un débat
+    `pending`) et laisser l'écran de choix de miniature ouvert un moment.
+  #}
+  {% if conversation.video_miniature_chemin %}
+  <div class="miniature-video-entete">
+    <a class="lancer-video miniature-video" href="/c/{{ conversation.slug }}/video"
+       aria-label="Regarder la vidéo de présentation"
+       data-titre="{{ conversation.title }}" data-partage="/c/{{ conversation.slug }}">
+      <img src="/c/{{ conversation.slug }}/video/couverture" alt="">
+      <span class="icone-lecture" aria-hidden="true"></span>
+    </a>
+    <button type="button" class="partager-video" hidden
+            data-titre="{{ conversation.title }}" data-partage="/c/{{ conversation.slug }}">Partager la vidéo</button>
+  </div>
+  {% endif %}
+</div>
+
+{% if conversation.description %}<p class="lead">{{ conversation.description }}</p>{% endif %}
+
+{#
+  Le bandeau des chiffres sourcés — `.figures` de la maquette.
+
+  Il ne paraît QUE si ce débat a au moins un chiffre : un bandeau vide, ou un lien vers
+  une page sans chiffre, promet ce qu'il ne montre pas. Il en montre DEUX au plus, et
+  ce sont les deux PREMIERS dans l'ordre voulu par le modérateur (`chiffres_de` trie
+  par `position` puis par identifiant) — c'est lui qui range ces chiffres, et le premier
+  qu'il a mis est celui qu'il veut voir en tête. Le lien donne accès à tous les autres.
+
+  L'attribution sous le lien nomme le ou les DOMAINES réels des chiffres montrés
+  (`ConversationSource.domaine`, recalculé depuis l'URL). Pas de nom de source inventé :
+  le « Sécurité routière » de la maquette appartient à son débat de démonstration.
+#}
+{% if chiffres_en_tete %}
+<div class="bandeau-chiffres">
+  <span class="libelle">Les chiffres</span>
+  {% for chiffre in chiffres_en_tete %}
+  {% if not loop.first %}<span class="separateur-chiffres" aria-hidden="true"></span>{% endif %}
+  <span class="chiffre-en-tete"><b>{{ chiffre.valeur }}</b><span>{{ chiffre.titre }}</span></span>
+  {% endfor %}
+  <span class="lien-chiffres">
+    <a href="/c/{{ conversation.slug }}/chiffres">Tous les chiffres et leurs sources
+      <span aria-hidden="true">→</span></a>
+    <small>
+      {%- set domaines = chiffres_en_tete | map(attribute='domaine') | reject('none') | unique | list -%}
+      {%- if domaines %}{{ domaines | join(' · ') }} · {% endif -%}
+      relevés à la main par la modération
+    </small>
+  </span>
+</div>
+{% endif %}
+
+{% if not is_open %}
+  <div class="msg ok">Cette consultation est close. Les propositions restent
+  consultables ci-dessous, mais il n'est plus possible de voter.</div>
+{% endif %}
+
+{#
+  Grille à deux colonnes (chantier I) : la carte de vote et la carte des groupes
+  d'un côté, le formulaire de proposition — toujours pertinent, qu'on soit en train
+  de voter ou pas — de l'autre. Ce qui vient APRÈS le parcours (remerciement,
+  résultats) reste en pleine largeur plus bas : ça ne s'affiche qu'une fois le vote
+  terminé, et n'a donc rien à faire à côté d'une colonne toujours visible.
+#}
+{#
+  La carte de vote — `.voter` de la maquette debat-vote.html (chantier I2,
+  instruction 10). `.carte-vote` s'ajoute à `.card` : le filet jaune du bord gauche,
+  les coins à 12 px et l'espacement viennent de cette maquette-ci.
+#}
+<div class="card carte-vote" id="zone-vote" {% if not is_open %}hidden{% endif %}>
+  {#
+    LA BOÎTE À HAUTEUR FIXE (chantier I2, instruction 16).
+
+    Tout ce qui change d'une proposition à l'autre est enfermé ici : le chargement, la
+    ligne de méta, la proposition, ses sources. La boîte garde la même hauteur quoi
+    qu'elle contienne, donc « D'accord » et « Pas d'accord » sont TOUJOURS au même
+    endroit de la carte — une phrase de dix mots et une de cinquante donnent le même
+    écran, et le bouton visé ne se dérobe pas entre deux votes.
+
+    C'est une condition de la mesure, pas un confort : si les réponses se déplacent
+    selon la longueur du texte, une main qui a pris l'habitude du geste finit par
+    cliquer à côté, et un vote posé par erreur vaut zéro.
+  #}
+  <div class="zone-proposition" id="zone-proposition">
+    {#
+      La ligne de méta au-dessus de la proposition (`.voter-meta`) : la numérotation à
+      gauche, la mention de source à droite. Les deux sont posées par le script à partir
+      de la réponse du serveur — rien n'est écrit ici par défaut.
+
+      L'attribution (« proposée par un participant » / « proposition d'amorce ») est une
+      VRAIE distinction du modèle : `Statement.is_seed` et `Statement.author_participant_id`
+      existent depuis l'origine. Elle n'est écrite que quand le serveur la donne.
+
+      « Source citée » de même : elle ne paraît que si la proposition porte réellement au
+      moins un lien. Jamais par défaut — les liens eux-mêmes restent affichés sous la
+      proposition, cette mention n'est qu'un repère.
+
+      Elle est DANS la boîte : sur un écran étroit elle passe à deux lignes dès que
+      l'attribution est longue, et hors de la boîte ce repli suffirait à faire descendre
+      les deux réponses.
+    #}
+    {#
+      Le bouton « Signaler » est DANS cette ligne de méta, en haut de la carte, et c'est
+      la seule place qui tienne la contrainte du MOD-3b : **hors du chemin du vote**.
+
+      On vote vite, parfois au clavier, et un bouton de signalement atteignable par
+      erreur au milieu d'une rafale produirait du faux signalement en masse. Ici :
+
+        - il est séparé de « D'accord » / « Pas d'accord » / « Passer » par toute la
+          hauteur de la boîte à proposition, qui est FIXE (cinq à six lignes) — la cible
+          de clic ne jouxte donc aucune réponse, sur aucun écran ;
+        - il vient AVANT les trois réponses dans l'ordre du document, donc jamais entre
+          elles dans l'ordre de tabulation ;
+        - il n'a aucun raccourci clavier, contrairement aux trois réponses. Et le script
+          coupe A / D / espace tant que la fenêtre est ouverte, sans quoi une touche
+          frappée dans la fenêtre voterait derrière elle.
+    #}
+    <p class="meta-vote" id="meta-vote" hidden>
+      <span class="libelle" id="progression"></span>
+      <span class="meta-vote-fin">
+        <span class="mention-source" id="mention-source" hidden>Source citée</span>
+        <button type="button" class="lien-signaler" id="ouvrir-signalement">Signaler</button>
+        {# La même phrase pour tout le monde, quel que soit le motif et quel qu'en soit
+           l'effet. Elle prend la place du bouton sur CETTE proposition : dire « merci »
+           à côté d'un bouton encore actif inviterait à recommencer, et le second envoi
+           ne changerait rien (le dépôt est idempotent). #}
+        <span class="mu" id="merci-signalement" role="status" hidden>Merci, c'est enregistré.</span>
+      </span>
+    </p>
+    {#
+      Le corps occupe ce qui reste de la boîte et centre son contenu : une proposition
+      courte se pose au milieu de la place réservée plutôt que de laisser un trou entre
+      elle et les réponses.
+    #}
+    <div class="corps-proposition">
+      {#
+        Chargement : l'arc tourne autour de l'anneau, l'îlot jaune ne bouge pas — un
+        rond-point ne tourne pas, ce sont les voitures qui tournent autour. Il occupe la
+        place de la proposition à venir, et depuis l'instruction 16 cette place a une
+        hauteur fixe : la carte ne saute plus du tout quand la proposition arrive.
+      #}
+      <div class="zone-chargement" id="chargement" role="status">
+        {{ forme.anneau(32, 'chargement') }}
+        <span>Proposition suivante…</span>
+      </div>
+      <p class="proposition" id="texte" hidden></p>
+      {#
+        La mention de reformulation (MOD-17), entre le texte et les sources.
+
+        **Ce qu'elle dit, et les deux choses qu'elle ne dit pas.** Elle dit au lecteur que
+        ce texte a été réécrit, et sa date. Elle ne montre **pas la formulation
+        précédente** — l'auteur ayant validé lui-même la reformulation, exhiber
+        l'ancienne reviendrait à montrer un brouillon qu'il a écarté (§6.1 du plan v2, et
+        décision de dom du 15 septembre 2026). Et elle ne dit **rien des votes** : ceux
+        déjà portés restent valables, et personne n'est invité à revoter.
+
+        Une ligne et non un bloc dépliable : il n'y a plus rien à déplier. La carte de
+        vote se lit d'un coup d'œil, c'est sa seule qualité.
+      #}
+      <p class="mu" id="reformulee-le" hidden></p>
+      {#
+        Les sources de la proposition, SOUS elle et au-dessus des réponses : elles servent
+        à décider du vote, pas à être lues après. Remplies par le script — le contenu vient
+        d'une réponse JSON, et il est posé en `textContent`, jamais en `innerHTML`.
+      #}
+      <p class="sources-proposition" id="sources" hidden></p>
+    </div>
+  </div>
+  {#
+    Les deux réponses sont rigoureusement symétriques : même largeur, même graisse,
+    même contour de 2 px, aucun aplat. Elles se suivent dans l'ordre de lecture sans
+    qu'aucune ne soit mise en avant — c'est la condition pour que la mesure vaille
+    quelque chose.
+
+    « Passer » est en dessous et en texte : ce n'est pas une troisième réponse, c'est
+    un refus de répondre.
+  #}
+  <div class="choix-de-vote">
+    <button type="button" class="choix-vote" data-vote="1">D'accord <kbd aria-hidden="true">A</kbd></button>
+    <button type="button" class="choix-vote" data-vote="-1">Pas d'accord <kbd aria-hidden="true">D</kbd></button>
+  </div>
+  <p><button type="button" class="lien-action" data-vote="0">Passer <kbd aria-hidden="true">espace</kbd></button></p>
+
+  {#
+    Le résultat immédiat (`.result` de la maquette) : ce que les AUTRES ont répondu sur
+    la proposition qu'on vient de trancher. Il apparaît après le vote et disparaît avec
+    la proposition suivante.
+
+    Les couleurs sont le vert et le rouge de l'accord/désaccord, PAS le brun/bleu de la
+    maquette : ce couple-là distingue des GROUPES d'opinion partout ailleurs sur le
+    site, et l'employer ici pour un résultat mélangerait deux grammaires de couleur.
+    Décision du chantier I, reconduite. Le segment « passé » reste neutre.
+
+    Le nombre total de votes est écrit à côté des pourcentages, et jamais caché : « 75 % »
+    ne veut pas dire la même chose sur 4 votes et sur 400.
+  #}
+  {#
+    Il porte « Proposition précédente » : le parcours enchaîne sur la suivante dès le
+    vote enregistré, donc ce résultat s'affiche à côté d'une AUTRE proposition que
+    celle qu'il décrit. Sans ces deux mots, il se lirait comme le score de celle qu'on
+    a sous les yeux et qu'on n'a pas encore votée.
+  #}
+  <div class="resultat-immediat" id="resultat" role="status" hidden>
+    <p class="resultat-ligne"><span id="resultat-texte"></span><b id="resultat-total"></b></p>
+    <div class="barre-resultat" aria-hidden="true">
+      <i class="part-accord" id="part-accord" style="width:0%"></i>
+      <i class="part-desaccord" id="part-desaccord" style="width:0%"></i>
+      <i class="part-passe" id="part-passe" style="width:0%"></i>
+    </div>
+    <p class="legende-resultat">
+      <span><i class="puce-resultat part-accord" aria-hidden="true"></i>D'accord <b id="cle-accord"></b></span>
+      <span><i class="puce-resultat part-desaccord" aria-hidden="true"></i>Pas d'accord <b id="cle-desaccord"></b></span>
+      <span><i class="puce-resultat part-passe" aria-hidden="true"></i>Passé <b id="cle-passe"></b></span>
+    </p>
+  </div>
+
+  {#
+    La progression vers le déblocage de la carte des avis (`.progress`). Le seuil est
+    celui de CE débat (`min_user_votes_for`, borné par le nombre de propositions) et
+    non le 7 fixe de la maquette : annoncer 7 votes sur un débat qui n'en compte que 3
+    serait une consigne intenable.
+
+    Le bloc disparaît dès que le seuil est atteint : il n'y a plus rien à débloquer, et
+    une barre pleine qui resterait à l'écran ferait chercher ce qu'elle attend encore.
+  #}
+  <p class="progression-situe" id="progression-situe"
+     data-seuil="{{ seuil_situe }}" data-emis="{{ parcours.total }}"
+     {% if parcours.total >= seuil_situe %}hidden{% endif %}>
+    <span class="pastilles" id="pastilles" aria-hidden="true"></span>
+    <span id="progression-texte"></span>
+  </p>
+
+  {#
+    La fenêtre de signalement (MOD-3b).
+
+    Un `<dialog>` natif, ouvert par `showModal()` : le piège à focus, la fermeture à
+    Échap et l'inertie du reste de la page sont donnés par le navigateur. Les refaire à
+    la main aurait ajouté un composant là où la plateforme en fournit un correct — et
+    c'est du même ordre que l'encart de badge juste en dessous, qui se refuse une modale
+    parce qu'il n'a rien à exiger : ici, on exige quelque chose, donc la modale est à sa
+    place.
+
+    Elle est DANS `#zone-vote` : cachée avec la carte quand le parcours est fini, et donc
+    jamais ouvrable sur une proposition qu'on ne regarde plus.
+
+    **Les dix motifs sont écrits par le serveur**, dans l'ordre du module et sans
+    regroupement par famille : un regroupement donnerait une échelle de gravité et
+    orienterait le choix. La `route` de chaque motif n'apparaît nulle part — elle dirait
+    « cette case fait retirer », et la liste deviendrait un menu.
+  #}
+  {#
+    La carte de validation (MOD-4).
+
+    **Elle n'est pas dans le chemin du vote, elle le remplace un instant.** Une fois
+    toutes les sept propositions votées, le serveur joint une proposition d'un autre
+    participant à la réponse du vote, et cette fenêtre s'ouvre. Ce n'est pas une file
+    d'attente : la proposition montrée est **déjà en ligne**, et elle le restera quoi
+    qu'on réponde. La publication ne dépend de rien ici.
+
+    Un `<dialog>` modal, comme le signalement et pour les mêmes raisons — piège à focus,
+    Échap, inertie du reste de la page, tout cela est donné par le navigateur. Et, comme
+    lui, elle est DANS `#zone-vote` : jamais ouvrable sur un parcours terminé.
+
+    **Trois boutons dont un n'est pas une réponse.** « Passer » est en dessous et en
+    texte, exactement comme le « Passer » du vote : ce n'est pas un troisième verdict,
+    c'est un refus de répondre, et il n'enregistre rien du tout. La carte s'est ouverte au
+    milieu d'un parcours que personne n'a demandé à interrompre ; l'écarter doit être
+    gratuit.
+
+    **Le texte de la proposition est posé en `textContent`**, jamais en `innerHTML` :
+    c'est du contenu écrit par un participant.
+  #}
+  <dialog class="fenetre-signalement" id="fenetre-validation"
+          aria-labelledby="titre-validation">
+    <h2 id="titre-validation"></h2>
+    <p class="mu" id="consigne-validation"></p>
+    <p class="proposition" id="texte-validation"></p>
+    <div class="choix-de-vote">
+      <button type="button" class="choix-vote" id="valider-conforme"></button>
+      <button type="button" class="choix-vote" id="valider-a-revoir"></button>
+    </div>
+    <p><button type="button" class="lien-action" id="passer-validation">Passer</button></p>
+  </dialog>
+
+  <dialog class="fenetre-signalement" id="fenetre-signalement"
+          aria-labelledby="titre-signalement">
+    <form method="dialog" id="form-signalement">
+      {# Le titre et l'intro sont réécrits par le script quand la fenêtre sert le
+         chemin « proposition à revoir » du MOD-4 : ce sont les mêmes cases, mais la
+         phrase « signaler cette proposition » serait fausse — on n'a pas cliqué sur
+         « Signaler », on a répondu à une question du site. Les valeurs ci-dessous sont
+         celles du chemin ordinaire, et le script les restaure en sortant de l'autre. #}
+      <h2 id="titre-signalement">Signaler cette proposition</h2>
+      <p class="mu" id="intro-signalement">Choisissez ce qui ne va pas. {{ motifs_max }} réponses au maximum.
+        Votre signalement est lu par une personne ; il ne retire rien tout seul.</p>
+
+      <ul class="motifs-signalement">
+        {% for motif in motifs_signalement %}
+        <li>
+          <label>
+            <input type="checkbox" name="motif" value="{{ motif.code }}">
+            <span>{{ motif.libelle }}</span>
+          </label>
+        </li>
+        {% endfor %}
+      </ul>
+
+      {# Le champ n'apparaît qu'avec « Autre raison », et il est alors obligatoire. Le
+         script pose et retire `required` en même temps que `hidden` : un champ caché et
+         requis bloquerait l'envoi sans rien montrer. #}
+      <div id="bloc-texte-libre" hidden>
+        <label for="texte-libre-signalement">Expliquez en quelques mots</label>
+        <textarea id="texte-libre-signalement" name="texte_libre"
+                  maxlength="{{ texte_libre_max }}" rows="3"></textarea>
+      </div>
+
+      <p class="msg err" id="erreur-signalement" hidden></p>
+
+      {# « Annuler » d'abord, et en secondaire : l'abandon ne doit rien coûter, et la
+         fenêtre s'est ouverte au milieu d'un parcours de vote qu'on n'a pas voulu
+         interrompre. #}
+      <div class="actions-signalement">
+        <button type="button" id="annuler-signalement">Annuler</button>
+        <button type="submit" class="bouton-principal" id="envoyer-signalement">Envoyer</button>
+      </div>
+    </form>
+  </dialog>
+
+  {#
+    Badge obtenu : un encart SOUS la proposition qu'on vient de voter, jamais une
+    fenêtre modale. On ne coupe pas quelqu'un qui est en train de voter — et un
+    encart qui pousse le contenu se remarque autant qu'une boîte qui le recouvre,
+    sans rien exiger avant de continuer.
+
+    L'anneau y est plein : c'est le moment où il se referme.
+  #}
+  <div class="encart badge-obtenu" id="annonce-badge" role="status" hidden>
+    {{ forme.anneau(40, 'badge') }}
+    <p><strong id="badge-titre"></strong><br>
+       <span class="mu" id="badge-detail"></span></p>
+  </div>
+</div>
+
+{#
+  Ce qui parle à la personne qui vient de voter (son statut) — le bloc « En attendant,
+  d'autres débats » qui vivait ici a été retiré.
+
+  `#zone-fin` reste le seul commutateur `hidden`, avec la carte de vote (voir plus bas,
+  même mécanique que jusqu'ici). Il occupe EXACTEMENT la place de cette carte, juste en
+  dessous d'elle dans le gabarit : l'une se cache au moment où l'autre paraît, sans
+  faire chercher plus bas dans la page. Jusqu'au chantier I2 il vivait après la grille à
+  deux colonnes, à un écran de défilement de là où le regard se trouvait.
+
+  Quand le groupe n'est pas connu, `#attente-groupe` porte le motif — jamais rien.
+
+  Et quand la personne a fait sa part — assez voté, mais pas encore située —, le motif
+  cède la place au compte à rebours de `#attente-calcul` (chantier G9). Les deux disent
+  la même chose, l'un à la fréquence près, l'autre à la minute près : les afficher
+  ensemble ferait lire deux fois la même attente.
+#}
+<div id="zone-fin" hidden>
+  {#
+    Bandeau de statut compact — remplace l'ancien titre en Fraunces ~28px
+    « Merci de votre participation, vous appartenez au groupe X ». C'est un point de
+    situation bref, pas un titre de section : il vit directement dans le flux, sans
+    carte autour, à peine plus grand que le texte courant (voir `.statut-parcours`
+    dans `styles.css`).
+
+    « Merci » reste le premier mot lu, suivi de la confirmation que les votes sont
+    bien enregistrés — la question qu'on se pose juste après avoir voté.
+
+    Le bandeau ne nomme PLUS le groupe de la personne, ni n'offre de lien « qu'est-ce
+    que le groupe X ? » (demande du client, 16 septembre 2026) : la carte des avis,
+    juste en dessous, situe déjà la personne et dit comment les groupes se forment.
+  #}
+  <p class="statut-parcours">
+    <span class="pastille" aria-hidden="true"></span>
+    <span id="remerciement">Merci ! Vos votes sont enregistrés !</span>
+  </p>
+  <p class="mu discret" id="attente-groupe" hidden></p>
+  <p class="mu discret" id="attente-calcul" hidden></p>
+  <p class="mu discret" id="bilan"></p>
+
+  <div id="invite-compte" hidden>
+    <p>Vos votes sont enregistrés sur cet appareil. <strong>Créer un compte</strong>
+       vous permet de les retrouver ailleurs, et de continuer plus tard.</p>
+    <p class="actions">
+      <a class="bouton bouton-principal" href="/compte/inscription?suivant=/c/{{ conversation.slug }}">Créer un compte</a>
+      <a href="/compte/connexion?suivant=/c/{{ conversation.slug }}" class="mu">J'ai déjà un compte</a>
+    </p>
+  </div>
+</div>
+
+{#
+  La grille à deux colonnes de la maquette (`.grid`), sous la carte de vote : les
+  panneaux de lecture à gauche, la colonne latérale à droite. Une seule colonne en
+  dessous de 800 px, le seuil de la maquette.
+
+  La colonne de droite est encore VIDE (chantier I2, instruction 11) : elle reçoit le
+  formulaire replié à l'instruction 12, et « Débat lié » / « Votre parcours » plus tard.
+#}
+<div class="grille-debat">
+<div class="colonne-panneaux">
+
+{% if group %}
+{#
+  Panneau « La carte des avis » — le premier `.panel` de la maquette.
+
+  Le contenu est celui qui vivait jusqu'ici dans un `.card` juste au-dessus de la carte
+  de vote : même bloc, même mécanique, remonté dans le conteneur de la maquette et
+  descendu SOUS la carte de vote, où la maquette le place.
+#}
+<div class="panneau panneau-carte">
+  <h2>La carte des avis</h2>
+
+  {% if dessin %}
+  {#
+    La phrase ci-dessous est VALIDÉE mot pour mot par le client (4 septembre 2026), au
+    même titre que le mot d'accueil du site. Ne pas la reformuler sans lui demander —
+    et en particulier ne pas la remplacer par le sous-titre plus court de la maquette,
+    qui en dit moins.
+
+    La troisième phrase n'est pas une précaution de style. Le D0 a établi que les
+    signes de la projection sont ARBITRAIRES : sans elle, un lecteur lira « la gauche »
+    et « la droite » sur des axes qui n'en portent aucune.
+
+    Sa deuxième phrase a été remplacée à la demande du client le 16 septembre 2026 ;
+    la première et la troisième restent celles du 4 septembre.
+  #}
+  <p class="sous-titre-panneau">
+    Chaque point est une personne qui a voté&nbsp;; deux points proches ont voté de
+    façon semblable. Des groupes ayant voté de manières similaires sont calculés
+    toutes les 10 min. Les propositions que tous les groupes ont approuvées/désapprouvées
+    sont des consensus.
+    Ni les axes ni le haut et le bas n'ont de sens en eux-mêmes&nbsp;: seules comptent
+    les distances entre les points.
+  </p>
+  {% endif %}
+
+  {#
+    Votre situation personnelle dans ces groupes. La maquette n'a pas d'équivalent —
+    sa carte est une démonstration figée, sans visiteur — mais c'est une vraie donnée
+    du site, et la retirer aurait fait perdre la seule phrase qui relie le dessin à
+    la personne qui le regarde.
+  #}
+  {% if group.name %}
+    <p>Vous êtes dans le <strong>groupe {{ group.name }}</strong>,
+      {% if group.others %}avec {{ group.others }} autre{{ 's' if group.others > 1 else '' }} personne{{ 's' if group.others > 1 else '' }}.
+      {% else %}pour l'instant seul dans ce groupe.{% endif %}</p>
+  {% else %}
+    {#
+      `data-attente` porte la phrase que le SERVEUR écrirait de lui-même une fois le
+      seuil atteint (voir `for_participant` dans `app/services/groups.py`). Le script
+      s'en sert pour remplacer le motif « il vous manque N votes » à l'instant où il
+      cesse d'être vrai — sans quoi la carte se découvrirait sous une phrase qui dit
+      encore qu'elle est verrouillée.
+
+      Elle est écrite ici et non dans le script pour la même raison que partout
+      ailleurs : la fréquence de recalcul est LUE, jamais recopiée à la main.
+    #}
+    <p class="mu" id="motif-groupe"
+       data-attente="Vos votes seront pris en compte au prochain calcul, qui a lieu {{ periode_recalcul }}.">{{ group.reason }}</p>
+  {% endif %}
+
+  {% if dessin %}
+  {#
+    Le mécanisme de flou et de verrou est INCHANGÉ (chantier I) : la carte n'est
+    verrouillée que s'il manque vraiment des votes personnels. `group.seuil_votes`
+    n'est posé QUE dans ce cas précis (voir `app/services/groups.py`) : dans les deux
+    autres — attente du prochain calcul, groupe trop petit pour être nommé — la carte
+    s'affiche sans verrou, parce qu'il n'y aurait rien à débloquer en votant davantage.
+
+    Le seuil écrit est celui de CE débat, jamais le 7 fixe de la maquette.
+  #}
+  {% if group.seuil_votes %}
+  <div class="carte-verrouillee" id="zone-carte">
+    {% include "public/_carte.html" %}
+    <div class="verrou">
+      <strong>Votre position apparaît après {{ group.seuil_votes }} votes</strong>
+      <span>Encore {{ group.seuil_votes - group.votes_emis }}
+        proposition{{ 's' if (group.seuil_votes - group.votes_emis) > 1 else '' }} à trancher.</span>
+    </div>
+  </div>
+  {% else %}
+  {% include "public/_carte.html" %}
+  {% endif %}
+
+  {% endif %}
+</div>
+{% endif %}
+
+{#
+  Panneau « Ce sur quoi nous sommes d'accord » — le second `.panel` de la maquette
+  (chantier I2, instruction 13).
+
+  Ce n'est PAS un bloc neuf : c'est « Ce sur quoi nous sommes d'accord », qui vivait
+  déjà en bas de cette page depuis le chantier L3, remonté dans la colonne de gauche et
+  posé dans le conteneur de la maquette. Le calcul, les données et le moment
+  d'apparition ne changent pas.
+
+  IL N'Y A PAS D'ONGLET « CLIVAGES », et ce n'est pas un oubli : le site n'a
+  délibérément aucun écran qui range des propositions sous un titre annonçant une
+  fracture — décision du client du 6 septembre 2026, consignée en tête de
+  `app/services/resultats.py`. Le clivage continue d'être mesuré et stocké, il sert au
+  tri et à l'étiquette du L4. Construire cet onglet reviendrait sur cette décision, pas
+  sur un manque technique. Voir NOTES-CHANTIER-I2.md.
+
+  Pas d'onglets du tout, donc : une barre à un seul onglet ne choisit rien, et un
+  second onglet inerte promettrait un contenu qui n'existe pas.
+
+  `bloc-fin` est CONSERVÉ : le panneau reste caché jusqu'à la fin du parcours de vote.
+  Ce n'est pas une question de fiabilité des données — elles sont globales au débat et
+  justes à tout moment — mais de ne pas souffler ses réponses à quelqu'un qui vote
+  encore. Montrer quelles propositions rassemblent AVANT qu'il se prononce dessus
+  orienterait ses votes, et c'est précisément la mesure que la page existe pour
+  recueillir.
+#}
+{% if resultats.consensuelles %}
+<section class="panneau bloc-fin" id="consensus" {% if is_open %}hidden{% endif %}
+         aria-labelledby="titre-consensus">
+  {#
+    Ce titre-là porte la décision du client : le site met en avant ce qui rassemble.
+    L'intitulé du panneau, « Ce que le débat révèle déjà », a été retiré à sa demande
+    (16 septembre 2026) : ce titre-ci est désormais le premier du panneau.
+
+    `.titre-sous-section` l'aligne sur la taille du titre de « Ce que chaque groupe a
+    répondu » (un `h2` de `.card`) : ce `h3` vit dans `.panneau`, où `.panneau h3` le
+    réduirait sinon à un petit label de 14 px — correct pour un sous-titre de panneau
+    ordinaire, mais pas pour celui-ci, qui porte une des deux sections de résultats.
+  #}
+  <h3 class="titre-sous-section" id="titre-consensus">Ce sur quoi nous sommes d'accord</h3>
+  <p class="mu">
+    Les propositions sur lesquelles les
+    <span class="chiffre">{{ resultats.n_groupes }}</span> groupes d'opinion se
+    rejoignent le plus, y compris quand ils s'opposent par ailleurs.
+  </p>
+
+  <ol class="resultats">
+    {% for ligne in resultats.consensuelles %}
+    <li class="resultat">
+      <p class="resultat-texte">{{ ligne.texte }}</p>
+      {% if ligne.sens %}
+      <p class="mu">
+        <span class="etiquette etiquette--sens">
+          {{ "Les groupes l'approuvent" if ligne.sens.value == 'accord'
+             else "Les groupes la rejettent" }}
+        </span>
+      </p>
+      {% endif %}
+      {#
+        Une barre PAR GROUPE RÉEL, jamais deux codées en dur : `ligne.groupes` suit le
+        nombre de groupes du débat, et chacun porte sa couleur à vie. La maquette, elle,
+        montre une barre unique côté « Consensus » et exactement deux côté
+        « Clivages » ; ce que le site affiche ici en dit davantage, et depuis le L3.
+      #}
+      <ul class="groupes-reponses">
+        {% for g in ligne.groupes %}
+        <li class="groupe-reponse">
+          <span class="groupe-nom">
+            <span class="pastille" aria-hidden="true"
+                  style="background:{{ couleurs_groupes.get(g.nom, '#9199A6') }}"></span>
+            Groupe {{ g.nom }}
+          </span>
+          {% if g.n_votes %}
+          <span class="barre-reponse" role="img"
+                aria-label="Groupe {{ g.nom }} : {{ g.accord }} % d'accord, {{ g.desaccord }} % pas d'accord, {{ g.passe }} % ont passé, sur {{ g.n_votes }} vote{{ 's' if g.n_votes > 1 else '' }}.">
+            {% if g.accord %}<span class="part part-accord" style="width:{{ g.accord }}%"></span>{% endif %}
+            {% if g.desaccord %}<span class="part part-desaccord" style="width:{{ g.desaccord }}%"></span>{% endif %}
+            {% if g.passe %}<span class="part part-passe" style="width:{{ g.passe }}%"></span>{% endif %}
+          </span>
+          <span class="mu resultat-chiffre">
+            <span class="chiffre">{{ g.accord }}%</span>
+          </span>
+          {% else %}
+          <span class="mu resultat-chiffre">aucun vote de ce groupe</span>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+    </li>
+    {% endfor %}
+  </ol>
+</section>
+{% endif %}
+
+</div>{# /.colonne-panneaux #}
+<div class="colonne-laterale">
+{% if accepts_statements %}
+{#
+  « Ajouter une proposition » — `details.propose` de la maquette (chantier I2,
+  instruction 12).
+
+  Le formulaire N'A PAS ÉTÉ REFAIT : mêmes champs, mêmes noms, mêmes longueurs
+  maximales, même validation côté serveur, même passage en pré-modération, même
+  gestionnaire de soumission (l'identifiant `form-proposition` ne bouge pas). Seuls le
+  conteneur et la disposition changent.
+
+  `open` par défaut : le chantier I avait remonté ce formulaire du bas de page pour
+  qu'il soit visible sans attendre la fin du parcours de vote, et le replier d'office
+  reviendrait dessus. Le repli sert à l'écarter quand on ne s'en sert pas, pas à le
+  cacher — c'est aussi ce que montre la maquette, qui l'ouvre.
+#}
+<details class="panneau proposer" open>
+  <summary>Ajouter une proposition <span class="plus" aria-hidden="true">+</span></summary>
+  <form class="corps-proposer" id="form-proposition">
+    {#
+      Des `<label>` liés aux champs, que ce formulaire n'avait pas : un `placeholder`
+      n'est pas une étiquette — il disparaît à la première frappe, et un lecteur
+      d'écran n'annonçait donc « quoi saisir » nulle part. Le texte n'ajoute aucune
+      contrainte, il nomme ce qui existait déjà.
+    #}
+    <label for="proposition-texte">Votre proposition</label>
+    {#
+      `data-detection` branche la question posée pendant la frappe (MOD-2). L'attribut
+      ne fait rien à lui seul : si `detection.js` ne charge pas, le champ reste un
+      champ ordinaire et le formulaire fonctionne exactement comme avant.
+    #}
+    <textarea id="proposition-texte" name="text" maxlength="500" required data-detection
+              placeholder="Une affirmation claire, sur laquelle on peut être d'accord ou non."></textarea>
+
+    {#
+      La source passe au premier plan : la maquette la montre dès l'ouverture, et le
+      repli qui l'enfermait (chantier I) se justifiait quand le formulaire entier était
+      déplié en permanence — « deux champs vides sous chaque zone de texte donneraient à
+      croire qu'il faut les remplir ». Le mot « facultatif » sur l'étiquette dit
+      maintenant ce que le repli disait, sans un second niveau de repli dans un bloc
+      déjà repliable.
+
+      La SECONDE source reste repliée : `liens.LIENS_MAX` en autorise deux, mais quatre
+      champs vides d'affilée ramèneraient exactement le défaut ci-dessus.
+    #}
+    <label for="proposition-source">Source (facultatif)</label>
+    <input id="proposition-source" type="url" name="source_url" maxlength="2000"
+           placeholder="https://exemple.fr/le-rapport">
+    <input type="text" name="source_label" maxlength="120"
+           placeholder="De quoi s'agit-il ? (facultatif)">
+    {#
+      Le texte d'aide dit la VRAIE règle, vérifiée dans `app/services/liens.py` :
+      `valider_lien` refuse tout ce qui n'est pas `http://` ou `https://` — elle ne
+      complète pas une adresse sans schéma —, et `domaine_de` n'affiche jamais que le
+      nom de domaine. La maquette s'arrête à la première moitié de cette phrase ; celle
+      du site en dit plus et reste exacte, donc elle est conservée telle quelle.
+    #}
+    <p class="aide-saisie">Une adresse en http:// ou https://. Le site affichera le nom
+      de domaine vers lequel elle mène, jamais autre chose.</p>
+
+    <details class="seconde-source">
+      <summary>Ajouter une seconde source</summary>
+      <input type="url" name="source_url" maxlength="2000"
+             placeholder="https://exemple.fr/un-autre-rapport">
+      <input type="text" name="source_label" maxlength="120"
+             placeholder="De quoi s'agit-il ? (facultatif)">
+    </details>
+
+    <p class="actions"><button type="submit">Proposer</button>
+       <span class="mu">relue avant publication</span></p>
+    <p class="msg ok" id="retour-proposition" hidden></p>
+  </form>
+</details>
+{% endif %}
+
+{#
+  « Votre parcours » — le dernier panneau de la colonne de la maquette.
+
+  Les chiffres sont ceux de la personne sur CE débat, et ils sortent de la même requête
+  que le total de la barre de progression (`votes.parcours_de`) : deux comptages du même
+  ensemble de votes auraient fini par afficher deux nombres différents sur le même écran.
+
+  Aucune sous-catégorie inventée : accord, désaccord, passe sont les trois valeurs que
+  `Vote.value` peut prendre, et rien n'est déduit au-delà.
+
+  Le script le met à jour après chaque vote ; le gabarit rend l'état au chargement, de
+  sorte que la page dit vrai même sans JavaScript.
+
+  IL N'Y A PAS D'ENCART « DÉBAT LIÉ », et ce n'est pas un oubli : aucune relation entre
+  débats n'existe côté base. Le chantier I l'avait déjà écarté pour cette raison, rien
+  n'a changé depuis, et le fabriquer demanderait de modéliser cette relation — une
+  fonctionnalité, pas une retouche d'habillage. Voir NOTES-CHANTIER-I2.md.
+#}
+<div class="panneau">
+  <h2>Votre parcours</h2>
+  <p class="sous-titre-panneau" id="recap-parcours"
+     data-accord="{{ parcours.accord }}" data-desaccord="{{ parcours.desaccord }}"
+     data-passe="{{ parcours.passe }}" data-total="{{ parcours.total }}">
+    {%- if parcours.total -%}
+      {{ parcours.total }} vote{{ 's' if parcours.total > 1 else '' }} sur ce débat&nbsp;:
+      {{ parcours.accord }} d'accord, {{ parcours.desaccord }} pas d'accord,
+      {{ parcours.passe }} passé{{ 's' if parcours.passe > 1 else '' }}.
+    {%- else -%}
+      Aucun vote pour l'instant. Trois clics suffisent pour commencer.
+    {%- endif -%}
+  </p>
+</div>
+</div>{# /.colonne-laterale #}
+</div>{# /.grille-debat #}
+
+{#
+  CE QUI CARACTÉRISE CHAQUE GROUPE (chantier L3, question 8 du L0)
+
+  `repness` est calculée à chaque passage d'analyse depuis le chantier C6 et n'était
+  lue par aucun écran : des mois de calcul, zéro pixel. Elle répond à la question que
+  pose l'annonce « vous êtes dans le groupe B » — savoir dans quel groupe on est est
+  abstrait ; voir ce dans quoi ce groupe se reconnaît est parlant.
+
+  Le titre décrit, il n'oppose pas : ces propositions distinguent un groupe des autres,
+  et c'est une description, pas un procès.
+#}
+{% if resultats.representatifs %}
+<section class="card bloc-fin" id="representatifs" {% if is_open %}hidden{% endif %}
+         aria-labelledby="titre-representatifs">
+  <h2 id="titre-representatifs">Ce qui caractérise chaque groupe</h2>
+
+  <ul class="groupes-representatifs">
+    {% for groupe in resultats.representatifs %}
+    <li class="groupe-representatif">
+      {#
+        Le nom généré s'AJOUTE à la lettre, il ne la remplace pas. « Groupe B » reste
+        l'identité que le C6 garantit stable d'un calcul à l'autre, et que la carte,
+        l'accueil et le routage lisent tous ; un nom qui prendrait sa place ferait de
+        chaque renommage une rupture apparente de continuité — le défaut même que le C6
+        existe pour supprimer. Et quand aucun nom n'est validé, il ne manque rien.
+
+        La mention distingue deux cas parce que la base les distingue : un nom validé
+        tel quel n'est pas un nom réécrit par un humain. Approximer serait plus
+        confortable et un peu faux, et sur un outil de dialogue citoyen une mention de
+        transparence approximative vaut moins que pas de mention.
+      #}
+      <h3 class="groupe-nom">
+        <span class="pastille" aria-hidden="true"
+              style="background:{{ couleurs_groupes.get(groupe.nom, '#9199A6') }}"></span>
+        Groupe {{ groupe.nom }}{% if groupe.nom_genere %} — {{ groupe.nom_genere }}{% endif %}
+      </h3>
+      {% if groupe.nom_genere %}
+      <p class="mu nom-genere-mention">
+        {% if groupe.nom_corrige %}
+        Nom proposé par une IA, <strong>corrigé</strong> puis validé par un modérateur.
+        {% else %}
+        Nom proposé par une IA, validé par un modérateur.
+        {% endif %}
+      </p>
+      {% endif %}
+      <ul class="representatives">
+        {% for proposition in groupe.propositions %}
+        <li class="representative">
+          <p class="resultat-texte">{{ proposition.texte }}</p>
+          <p class="mu">
+            {#
+              `--pct` est un NOMBRE, pas une couleur : c'est `styles.css` qui calcule le
+              fond dégradé rouge/neutre/vert à partir de cette seule valeur (voir
+              `.etiquette-repness`) — aucune couleur ne se décide en dehors de la feuille
+              de style (voir la note en tête de `styles.css` et de `app/services/avatar.py`).
+            #}
+            <span class="etiquette etiquette--sens etiquette-repness"
+                  style="--pct:{{ proposition.accord }}">
+              {{ "D'accord plus souvent que les autres groupes"
+                 if proposition.sens.value == 'accord'
+                 else "En désaccord plus souvent que les autres groupes" }}
+            </span>
+            {% if proposition.n_votes %}
+            <span class="representative-chiffre">
+              <span class="chiffre">{{ proposition.accord }}&nbsp;%</span>
+              d'accord dans ce groupe
+            </span>
+            {% endif %}
+          </p>
+        </li>
+        {% endfor %}
+      </ul>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{#
+  Résultats par proposition — ce que chaque groupe a répondu.
+
+  Il vient APRÈS « Merci de votre participation », et c'en est la contrepartie : on ne
+  montre pas à quelqu'un ce que les autres ont répondu avant qu'il ait répondu
+  lui-même, sinon on lui souffle ses réponses. Le bloc est donc rendu par le serveur
+  mais masqué, et le même code JavaScript qui découvre le remerciement le découvre.
+
+  Sur une consultation CLOSE il est visible d'emblée : il n'y a plus rien à voter, donc
+  plus rien à souffler, et c'est alors la seule chose que la page a encore à montrer.
+
+  Les couleurs des pastilles sont celles de la carte, servies par le serveur
+  (`carte_rendu.couleurs_par_groupe`) : le groupe A doit avoir la même couleur ici et
+  sur le dessin quelques centimètres plus haut.
+#}
+{#
+  CE SUR QUOI NOUS SOMMES D'ACCORD (chantier L3)
+
+  Placé AVANT le tableau, et c'est tout le propos : la page d'accueil promet de
+  « dégager des avis consensuels, même sur des sujets très polarisants », et rien sur
+  le site ne tenait cette phrase jusqu'ici. Le tableau complet, lui, reste dessous —
+  il dit tout, mais il ne met rien en avant.
+
+  Il n'y a PAS de bloc symétrique « ce qui vous sépare » : décision du client du
+  6 septembre 2026. Le clivage est mesuré et enregistré (L2), il sert au tri du L4, et
+  aucun écran ne range des propositions sous un titre qui annonce une fracture.
+
+  Les propositions sont rendues avec exactement le même bloc que dans le tableau — ce
+  sont les MÊMES objets, servis deux fois : le chiffre d'un groupe ne peut donc pas
+  différer d'un endroit à l'autre de la page.
+#}
+{% if resultats.calculee %}
+<section class="card bloc-fin" id="resultats" {% if is_open %}hidden{% endif %}
+         aria-labelledby="titre-resultats">
+  <h2 id="titre-resultats">Ce que chaque groupe a répondu</h2>
+
+  {#
+    La légende porte les trois réponses, une seule fois pour tout le tableau. La
+    couleur ne dit jamais seule ce qu'un segment vaut : chaque barre annonce ses trois
+    pourcentages en toutes lettres dans son `aria-label`, et le « % d'accord » est
+    écrit en chiffres à côté.
+  #}
+  <ul class="legende legende-reponses">
+    <li><span class="pastille pastille-accord" aria-hidden="true"></span>
+      <span>D'accord</span></li>
+    <li><span class="pastille pastille-desaccord" aria-hidden="true"></span>
+      <span>Pas d'accord</span></li>
+    <li><span class="pastille pastille-passe" aria-hidden="true"></span>
+      <span>Passé</span></li>
+  </ul>
+
+  <ol class="resultats" id="liste-resultats-groupes">
+    {% for ligne in resultats.lignes %}
+    <li class="resultat">
+      <p class="resultat-texte">{{ ligne.texte }}</p>
+      <p class="mu"><span class="chiffre">{{ ligne.n_votes }}</span>
+         vote{{ 's' if ligne.n_votes > 1 else '' }} des participants classés</p>
+      <ul class="groupes-reponses">
+        {% for g in ligne.groupes %}
+        <li class="groupe-reponse">
+          <span class="groupe-nom">
+            <span class="pastille" aria-hidden="true"
+                  style="background:{{ couleurs_groupes.get(g.nom, '#9199A6') }}"></span>
+            Groupe {{ g.nom }}
+          </span>
+          {% if g.n_votes %}
+          <span class="barre-reponse" role="img"
+                aria-label="Groupe {{ g.nom }} : {{ g.accord }} % d'accord, {{ g.desaccord }} % pas d'accord, {{ g.passe }} % ont passé, sur {{ g.n_votes }} vote{{ 's' if g.n_votes > 1 else '' }}.">
+            {% if g.accord %}<span class="part part-accord" style="width:{{ g.accord }}%"></span>{% endif %}
+            {% if g.desaccord %}<span class="part part-desaccord" style="width:{{ g.desaccord }}%"></span>{% endif %}
+            {% if g.passe %}<span class="part part-passe" style="width:{{ g.passe }}%"></span>{% endif %}
+          </span>
+          <span class="mu resultat-chiffre">
+            <span class="chiffre">{{ g.accord }}%</span>
+          </span>
+          {% else %}
+          {# Zéro vote n'est pas zéro pour cent : une barre vide se lirait « personne
+             n'est d'accord », alors que personne n'a répondu. #}
+          <span class="mu resultat-chiffre">aucun vote de ce groupe</span>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+    </li>
+    {% endfor %}
+  </ol>
+  {#
+    « Afficher plus » — amélioration progressive pure : le gabarit rend TOUJOURS les
+    propositions au complet (rien ne dépend du JavaScript pour exister), et c'est le
+    script en bas de page qui replie tout sauf les deux premières et fait apparaître ce
+    bouton. Sans JavaScript, la liste entière reste visible et ce bouton, resté `hidden`,
+    ne s'affiche jamais — pas de bouton mort.
+  #}
+  <p class="actions">
+    <button type="button" class="bouton" id="bouton-plus-resultats" hidden>Afficher plus</button>
+  </p>
+</section>
+{% endif %}
+
+
+<script>
+(function () {
+  const slug = {{ conversation.slug | tojson }};
+  const ouvert = {{ 'true' if is_open else 'false' }};
+  const connecte = {{ 'true' if account else 'false' }};
+  const zoneVote = document.getElementById('zone-vote');
+  const zoneFin = document.getElementById('zone-fin');
+  const texte = document.getElementById('texte');
+  const zoneProposition = document.getElementById('zone-proposition');
+
+  // --- La boîte à hauteur fixe de la proposition ------------------------------------
+  //
+  // Sa hauteur ne dépend PAS de ce qu'elle contient (voir `.zone-proposition` dans
+  // styles.css) : les deux réponses restent au même endroit d'une proposition à
+  // l'autre. Restent deux choses que le CSS ne peut pas faire seul.
+  //
+  //  1. REMETTRE LA BOÎTE EN HAUT à chaque proposition. Sans ça, quelqu'un qui vient de
+  //     faire défiler une proposition longue verrait la suivante déjà défilée, donc
+  //     amputée de son début.
+  //  2. LA RENDRE ATTEIGNABLE AU CLAVIER, mais seulement quand elle défile vraiment.
+  //     Une zone qui défile sans être focalisable est inatteignable sans souris
+  //     (WCAG 2.1.1) ; focalisable en permanence, elle ajouterait au contraire un arrêt
+  //     de tabulation inutile avant chaque vote. `scrollHeight > clientHeight` tranche.
+  function ajusterZoneProposition() {
+    zoneProposition.scrollTop = 0;
+    if (zoneProposition.scrollHeight - zoneProposition.clientHeight > 1) {
+      zoneProposition.setAttribute('tabindex', '0');
+      zoneProposition.setAttribute('role', 'region');
+      zoneProposition.setAttribute('aria-label', 'Proposition à voter, texte défilant');
+    } else {
+      zoneProposition.removeAttribute('tabindex');
+      zoneProposition.removeAttribute('role');
+      zoneProposition.removeAttribute('aria-label');
+    }
+  }
+
+  // La largeur disponible change le nombre de lignes du texte, donc le débordement :
+  // la bascule est refaite au redimensionnement (et à la rotation d'un téléphone).
+  window.addEventListener('resize', ajusterZoneProposition);
+  const progression = document.getElementById('progression');
+  const chargement = document.getElementById('chargement');
+
+  // Le chargement ne se montre que s'il dure : en dessous, il produirait un
+  // clignotement à chaque vote, ce qui fatigue plus que ça n'informe.
+  const DELAI_CHARGEMENT = 250;
+  let minuterie = null;
+
+  function attendre(actif) {
+    clearTimeout(minuterie);
+    if (actif) {
+      minuterie = setTimeout(() => { chargement.hidden = false; }, DELAI_CHARGEMENT);
+    } else {
+      chargement.hidden = true;
+    }
+  }
+  const total = {{ total_statements }};
+  let courante = null;
+
+  // --- Le temps restant avant le prochain calcul des groupes (chantier G9) ---------
+  //
+  // Le serveur envoie une DATE, pas une durée : la page reste ouverte après le dernier
+  // vote, et « dans 12 minutes » figé au moment de la réponse deviendrait faux au bout
+  // de treize. Le délai est donc recalculé ici, et rafraîchi toutes les trente
+  // secondes tant que la personne reste là.
+  //
+  // « environ » n'est pas une coquetterie : le passage du worker COMMENCE à l'instant
+  // annoncé, et le calcul d'un débat donné tombe quelque part dans les minutes qui
+  // suivent, selon le nombre de débats à recalculer. Annoncer une heure à la seconde
+  // promettrait une précision que le worker ne tient pas.
+  function compteARebours(quand) {
+    const cible = new Date(quand);
+    const zone = document.getElementById('attente-calcul');
+    zone.hidden = false;
+    const peindre = () => {
+      const secondes = Math.round((cible - new Date()) / 1000);
+      if (secondes <= 0) {
+        // L'heure est passée pendant que la page était ouverte : le calcul a lieu en ce
+        // moment même. On ne prétend pas connaître le groupe — la page, elle, date
+        // d'avant le calcul.
+        zone.innerHTML = 'Le calcul des groupes est en cours. ' +
+          '<a href="">Rechargez la page</a> dans un instant pour savoir où vous vous situez.';
+        return false;
+      }
+      let delai;
+      if (secondes < 60) {
+        delai = "moins d'une minute";
+      } else {
+        const minutes = Math.round(secondes / 60);
+        delai = minutes < 60
+          ? `environ ${minutes} minute${minutes > 1 ? 's' : ''}`
+          : `environ ${Math.round(minutes / 60)} heure${Math.round(minutes / 60) > 1 ? 's' : ''}`;
+      }
+      zone.textContent =
+        `Vous saurez dans quel groupe vous vous situez au prochain calcul, dans ${delai}.`;
+      return true;
+    };
+    if (peindre()) {
+      const battement = setInterval(() => {
+        if (!peindre()) { clearInterval(battement); }
+      }, 30000);
+    }
+  }
+
+  async function suivante() {
+    attendre(true);
+    const r = await fetch(`/api/conversations/${slug}/next-statement`);
+    attendre(false);
+    if (!r.ok) { zoneVote.hidden = true; return; }
+    const d = await r.json();
+    if (!d.statement) {
+      courante = null;
+      zoneVote.hidden = true;
+      zoneFin.hidden = false;
+      document.getElementById('bilan').textContent =
+        `Vous avez répondu aux ${total} proposition${total > 1 ? 's' : ''} de cette consultation.`;
+      // Un groupe connu n'est plus annoncé dans le bandeau (voir le commentaire
+      // au-dessus de lui). Tant que la personne n'est pas située, le motif dit combien
+      // de votes il manque ou que le prochain calcul la situera.
+      const annonce = d.groupe || {};
+      const attente = document.getElementById('attente-groupe');
+      if (!annonce.nom && annonce.prochain_calcul) {
+        // La personne a assez voté : il ne lui reste qu'à attendre, et c'est cette
+        // attente-là qu'on chiffre plutôt que de lui redire la fréquence.
+        compteARebours(annonce.prochain_calcul);
+      } else if (!annonce.nom && annonce.raison) {
+        attente.textContent = annonce.raison;
+        attente.hidden = false;
+      }
+      // L'invitation à créer un compte n'apparaît qu'en fin de parcours, et
+      // seulement si la personne n'en a pas déjà un.
+      document.getElementById('invite-compte').hidden = connecte;
+      // Les blocs de fin de parcours se découvrent en même temps que le remerciement :
+      // avant d'avoir répondu, les voir reviendrait à se faire souffler ses réponses.
+      // Ils peuvent être absents — aucun calcul n'a encore abouti, ou aucune
+      // proposition n'a encore de score. Depuis le L3 ils sont trois, et c'est la
+      // classe qui les désigne : un identifiant oublié ici laisserait un bloc caché
+      // pour toujours, sans que rien ne le signale.
+      document.querySelectorAll('.bloc-fin').forEach(function (bloc) {
+        bloc.hidden = false;
+      });
+      return;
+    }
+    courante = d.statement;
+    texte.textContent = courante.text;
+    texte.hidden = false;
+    peindreReformulation(courante);
+    peindreSources(courante.sources);
+    const vues = total - d.remaining + 1;
+    // La ligne de méta : numérotation, attribution, et le repère « Source citée ».
+    //
+    // L'attribution ne se déduit PAS de « ce n'est pas une amorce » : la modération
+    // peut ajouter une proposition en cours de route, qui n'est ni une amorce ni
+    // l'apport d'un participant. Le serveur donne les deux drapeaux, et le troisième
+    // cas ne reçoit aucune attribution plutôt qu'une fausse.
+    let attribution = '';
+    if (courante.par_un_participant) { attribution = ' · proposée par un participant'; }
+    else if (courante.is_seed) { attribution = ' · proposition d\'amorce'; }
+    progression.textContent = `Proposition ${vues} sur ${total}${attribution}`;
+    mentionSource.hidden = !(courante.sources && courante.sources.length);
+    // Le bouton « Signaler » revient à neuf pour la proposition qui arrive : le
+    // remerciement de la précédente ne doit pas rester à côté d'un autre texte.
+    reposerSignalement();
+    metaVote.hidden = false;
+    zoneVote.hidden = false;
+    ajusterZoneProposition();
+  }
+
+  // --- Le résultat immédiat, et la progression -------------------------------------
+  const metaVote = document.getElementById('meta-vote');
+  const mentionSource = document.getElementById('mention-source');
+  const resultat = document.getElementById('resultat');
+  const progressionSitue = document.getElementById('progression-situe');
+  const pastilles = document.getElementById('pastilles');
+  const progressionTexte = document.getElementById('progression-texte');
+
+  function peindreResultat(r) {
+    if (!r) { resultat.hidden = true; return; }
+    // « Proposition précédente », et le mot compte. Le site enchaîne sur la
+    // proposition suivante dès le vote enregistré — c'est un parcours rapide, décidé
+    // avant ce chantier, et le ralentir pour ménager un temps de lecture aurait coûté
+    // à chaque vote d'une visite. Le résultat reste donc affiché à côté de la
+    // proposition SUIVANTE, et doit dire de quoi il parle : sans ces deux mots, il se
+    // lirait comme le score de la proposition qu'on a sous les yeux, qu'on n'a pas
+    // encore votée. Voir NOTES-CHANTIER-I2.md.
+    document.getElementById('resultat-texte').textContent =
+      `Proposition précédente : ${r.part_accord} % d'accord`;
+    document.getElementById('resultat-total').textContent =
+      `${r.total} vote${r.total > 1 ? 's' : ''}`;
+    document.getElementById('part-accord').style.width = `${r.part_accord}%`;
+    document.getElementById('part-desaccord').style.width = `${r.part_desaccord}%`;
+    document.getElementById('part-passe').style.width = `${r.part_passe}%`;
+    document.getElementById('cle-accord').textContent = r.n_accord;
+    document.getElementById('cle-desaccord').textContent = r.n_desaccord;
+    document.getElementById('cle-passe').textContent = r.n_passe;
+    resultat.hidden = false;
+  }
+
+  // Découvre la carte des avis dès qu'il n'y a plus rien à débloquer en votant.
+  //
+  // Le voile est posé par le SERVEUR au chargement, d'après le même seuil ; sans ceci,
+  // quelqu'un qui vote toute la consultation d'une traite garderait une carte floutée
+  // jusqu'au rechargement suivant, alors qu'il a fait sa part.
+  //
+  // Il se lève même quand le prochain calcul n'a pas encore eu lieu : la personne n'est
+  // alors pas ENCORE sur la carte, et c'est le motif juste au-dessus qui le dit — les
+  // points dessous sont de vraies personnes déjà situées, il n'y a aucune raison de les
+  // cacher plus longtemps. C'est exactement ce que le serveur affiche de lui-même au
+  // rechargement suivant.
+  const zoneCarte = document.getElementById('zone-carte');
+  const motifGroupe = document.getElementById('motif-groupe');
+  function decouvrirLaCarte() {
+    if (!zoneCarte || !zoneCarte.classList.contains('carte-verrouillee')) { return; }
+    zoneCarte.classList.remove('carte-verrouillee');
+    if (motifGroupe && motifGroupe.dataset.attente) {
+      motifGroupe.textContent = motifGroupe.dataset.attente;
+    }
+  }
+
+  // Le seuil vient du SERVEUR, jamais d'un nombre écrit ici : il est propre à ce
+  // débat, borné par son nombre de propositions.
+  function peindreProgression(seuil, emis) {
+    if (!seuil || emis >= seuil) {
+      progressionSitue.hidden = true;
+      if (seuil) { decouvrirLaCarte(); }
+      return;
+    }
+    pastilles.replaceChildren();
+    for (let rang = 0; rang < seuil; rang += 1) {
+      const pastille = document.createElement('span');
+      pastille.className = rang < emis ? 'pastille pastille--faite' : 'pastille';
+      pastilles.appendChild(pastille);
+    }
+    const reste = seuil - emis;
+    progressionTexte.textContent =
+      `Encore ${reste} vote${reste > 1 ? 's' : ''} pour être situé sur la carte des avis.`;
+    progressionSitue.hidden = false;
+  }
+
+  peindreProgression(
+    Number(progressionSitue.dataset.seuil), Number(progressionSitue.dataset.emis)
+  );
+
+  // « Votre parcours ». La phrase est ÉCRITE PAR LE SERVEUR au chargement : ce qui
+  // suit ne fait que la refaire après un vote, dans les mêmes termes. Sans JavaScript,
+  // la page dit déjà vrai — elle ne se met simplement à jour qu'au rechargement.
+  const recap = document.getElementById('recap-parcours');
+  function peindreParcours(p) {
+    if (!recap || !p) { return; }
+    recap.textContent = p.total
+      ? `${p.total} vote${p.total > 1 ? 's' : ''} sur ce débat : ${p.accord} d'accord, `
+        + `${p.desaccord} pas d'accord, ${p.passe} passé${p.passe > 1 ? 's' : ''}.`
+      : 'Aucun vote pour l\'instant. Trois clics suffisent pour commencer.';
+  }
+
+  // --- Les sources de la proposition en cours -------------------------------------
+  //
+  // Trois règles, et chacune répond à un risque précis :
+  //
+  //  1. Le texte visible est le DOMAINE fourni par le serveur, jamais l'adresse
+  //     entière ni rien qui vienne du site distant. Le lecteur voit où il va avant de
+  //     cliquer, et le nom montré est celui vers lequel le lien mène.
+  //  2. Tout est posé en `textContent` et par `createElement`. Le libellé est écrit
+  //     par un participant : concaténé dans du `innerHTML`, il ferait entrer du
+  //     balisage arbitraire dans la page la plus visitée du site.
+  //  3. `rel="noopener noreferrer nofollow ugc"`. `ugc` et `nofollow` disent aux
+  //     moteurs que le lien est l'apport d'un utilisateur et non une recommandation
+  //     du site — sur une plateforme de débat politique, c'est une position
+  //     éditoriale autant qu'une question de référencement.
+  // La mention de reformulation (MOD-17). Servie par le serveur ou pas du tout : le
+  // navigateur ne déduit rien, exactement comme pour le domaine d'un lien. Une date
+  // absente veut dire « rien à dire », jamais « on ne sait pas ».
+  //
+  const dateReformulation = document.getElementById('reformulee-le');
+  function peindreReformulation(statement) {
+    if (!statement.reformulee_le) { dateReformulation.hidden = true; return; }
+    dateReformulation.textContent = `Reformulée le ${statement.reformulee_le}`;
+    dateReformulation.hidden = false;
+  }
+
+  const zoneSources = document.getElementById('sources');
+  function peindreSources(sources) {
+    zoneSources.replaceChildren();
+    if (!sources || !sources.length) { zoneSources.hidden = true; return; }
+    sources.forEach((source, rang) => {
+      if (rang) { zoneSources.appendChild(document.createTextNode(' · ')); }
+      const lien = document.createElement('a');
+      lien.href = source.url;
+      lien.target = '_blank';
+      lien.rel = 'noopener noreferrer nofollow ugc';
+      lien.textContent = source.label ? `${source.label} (${source.domaine})` : source.domaine;
+      zoneSources.appendChild(lien);
+      // 4. Le lien signalé injoignable (K3) reste un lien : on informe, on ne retire
+      //    pas. Le lecteur peut vouloir essayer quand même, ou chercher une copie
+      //    archivée — et un faux positif qui aurait effacé la source serait pire que
+      //    la mention. La date vient du serveur, déjà écrite en toutes lettres : rien
+      //    n'est mis en forme ici, et rien n'est posé autrement qu'en `textContent`.
+      if (source.signale_le) {
+        const mort = document.createElement('span');
+        mort.className = 'lien-mort';
+        mort.textContent = ` — lien signalé injoignable depuis le ${source.signale_le}`;
+        zoneSources.appendChild(mort);
+      }
+    });
+    zoneSources.hidden = false;
+  }
+
+  async function voter(valeur) {
+    if (!courante) return;
+    document.querySelectorAll('[data-vote]').forEach(b => b.disabled = true);
+    const reponse = await fetch(`/api/conversations/${slug}/votes`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ statement_id: courante.id, value: valeur })
+    });
+    let carteDeValidation = null;
+    if (reponse.ok) {
+      const enregistre = await reponse.json();
+      carteDeValidation = enregistre.validation || null;
+      peindreResultat(enregistre.resultat);
+      peindreProgression(enregistre.seuil_situe, enregistre.votes_emis);
+      peindreParcours(enregistre.parcours);
+      // Le badge est annoncé au moment où il est obtenu, pas au rechargement suivant.
+      if (enregistre.badge) {
+        document.getElementById('badge-titre').textContent =
+          `Badge obtenu : ${enregistre.badge.label}`;
+        document.getElementById('badge-detail').textContent =
+          enregistre.badge.description || '';
+        document.getElementById('annonce-badge').hidden = false;
+      }
+    }
+    document.querySelectorAll('[data-vote]').forEach(b => b.disabled = false);
+    await suivante();
+    // La carte de validation (MOD-4), quand le serveur en a joint une à ce vote-ci —
+    // une fois sur sept. APRÈS `suivante()`, délibérément : ce qui attend derrière la
+    // fenêtre est alors la proposition à voter ensuite, et écarter la carte rend la
+    // main sur un parcours déjà avancé plutôt que sur celle qu'on vient de trancher.
+    ouvrirValidation(carteDeValidation);
+  }
+
+  document.querySelectorAll('[data-vote]').forEach(bouton => {
+    bouton.addEventListener('click', () => voter(Number(bouton.dataset.vote)));
+  });
+
+  // Raccourcis clavier (chantier I) : A / D / espace, comme les touches affichées
+  // sur les boutons. Ignorés quand la saisie a le focus — sinon taper une
+  // proposition dans le formulaire replié plus bas voterait à chaque « a ».
+  document.addEventListener('keydown', (evenement) => {
+    if (zoneVote.hidden) { return; }
+    // Tant que la fenêtre de signalement est ouverte, A / D / espace ne votent pas.
+    // Le filtre INPUT/TEXTAREA/SELECT plus bas ne suffirait pas : dans cette fenêtre le
+    // focus se pose aussi sur des BOUTONS, et « espace » y est la touche d'activation.
+    // Sans cette ligne, fermer la fenêtre au clavier voterait « Passer ».
+    const fenetreSignalement = document.getElementById('fenetre-signalement');
+    if (fenetreSignalement && fenetreSignalement.open) { return; }
+    // Et la carte de validation (MOD-4), pour la raison exacte : ses boutons prennent
+    // le focus, « espace » y est la touche d'activation, et une carte écartée au clavier
+    // ferait voter « Passer » derrière elle sur une proposition qu'on n'a pas lue.
+    const fenetreValidation = document.getElementById('fenetre-validation');
+    if (fenetreValidation && fenetreValidation.open) { return; }
+    // Et la fenêtre de la vidéo de présentation (`static/video.js`) : « espace » y met
+    // en pause, il ne doit pas voter « Passer » derrière elle.
+    const fenetreVideo = document.querySelector('.fenetre-video');
+    if (fenetreVideo && fenetreVideo.open) { return; }
+    const cible = evenement.target;
+    if (cible && /^(INPUT|TEXTAREA|SELECT)$/.test(cible.tagName)) { return; }
+    if (evenement.metaKey || evenement.ctrlKey || evenement.altKey) { return; }
+    const touche = evenement.key.toLowerCase();
+    if (touche === 'a') { evenement.preventDefault(); voter(1); }
+    else if (touche === 'd') { evenement.preventDefault(); voter(-1); }
+    else if (touche === ' ') { evenement.preventDefault(); voter(0); }
+  });
+
+  // --- Le signalement (MOD-3b) -----------------------------------------------------
+  //
+  // Trois exigences gouvernent ce bloc, et aucune n'est esthétique :
+  //
+  //   1. **L'abandon ne coûte rien.** Fermer sans envoyer laisse la page de vote
+  //      exactement dans l'état où elle était — même proposition, mêmes boutons actifs.
+  //      Rien n'est envoyé, rien n'est réinitialisé, le vote en cours n'est pas perdu.
+  //   2. **Le flux de vote reprend là où il en était.** Après un envoi, on ne passe PAS
+  //      à la proposition suivante : signaler n'est pas voter, et éjecter quelqu'un de
+  //      la boucle à chaque signalement coûterait de la mesure.
+  //   3. **Les raccourcis de vote sont coupés tant que la fenêtre est ouverte.** Sans
+  //      cela, un « a » frappé dans la fenêtre voterait « D'accord » derrière elle : le
+  //      gestionnaire global n'ignore que INPUT/TEXTAREA/SELECT, pas les boutons ni les
+  //      cases à cocher.
+  const fenetre = document.getElementById('fenetre-signalement');
+  const formSignalement = document.getElementById('form-signalement');
+  const ouvrirSignalement = document.getElementById('ouvrir-signalement');
+  const merciSignalement = document.getElementById('merci-signalement');
+  const blocTexteLibre = document.getElementById('bloc-texte-libre');
+  const champTexteLibre = document.getElementById('texte-libre-signalement');
+  const erreurSignalement = document.getElementById('erreur-signalement');
+  const envoyerSignalement = document.getElementById('envoyer-signalement');
+  const titreSignalement = document.getElementById('titre-signalement');
+  const introSignalement = document.getElementById('intro-signalement');
+  // Les deux textes du chemin ordinaire, relevés à l'ouverture de la page : c'est le
+  // gabarit du serveur qui les écrit, et les recopier ici en dur les ferait diverger au
+  // premier changement de formulation.
+  const TITRE_SIGNALEMENT = titreSignalement.textContent;
+  const INTRO_SIGNALEMENT = introSignalement.textContent;
+  const MOTIF_TEXTE_LIBRE = {{ motif_texte_libre | tojson }};
+  const MOTIFS_MAX = {{ motifs_max }};
+  // `<dialog>` est là partout depuis 2022, mais un navigateur plus ancien existe
+  // toujours. Le drapeau est lu par `reposerSignalement`, appelé à chaque proposition :
+  // sans lui, le bouton masqué faute de fenêtre reparaîtrait au vote suivant.
+  const signalementDisponible = !!(fenetre && typeof fenetre.showModal === 'function');
+
+  function casesSignalement() {
+    return [...formSignalement.querySelectorAll('input[name="motif"]')];
+  }
+
+  function cochees() {
+    return casesSignalement().filter(c => c.checked);
+  }
+
+  // Le plafond de deux est tenu ICI par grisage plutôt que par un message d'erreur
+  // après coup : une case qu'on ne peut pas cocher se comprend sans être expliquée.
+  // Il est REVÉRIFIÉ côté serveur, qui refuse en 422 — une contrainte d'interface n'est
+  // pas une contrainte.
+  function ajusterCases() {
+    const choisies = cochees();
+    casesSignalement().forEach(case_ => {
+      case_.disabled = !case_.checked && choisies.length >= MOTIFS_MAX;
+    });
+    const avecAutre = choisies.some(c => c.value === MOTIF_TEXTE_LIBRE);
+    blocTexteLibre.hidden = !avecAutre;
+    // `required` posé et retiré avec l'affichage : un champ caché et requis bloquerait
+    // l'envoi sans que rien ne se voie à l'écran.
+    champTexteLibre.required = avecAutre;
+    envoyerSignalement.disabled = choisies.length === 0;
+  }
+
+  function reinitialiserSignalement() {
+    formSignalement.reset();
+    erreurSignalement.hidden = true;
+    ajusterCases();
+  }
+
+  // Remis à neuf à chaque proposition servie : le bouton revient, le remerciement
+  // disparaît, et les cases d'un signalement précédent ne traînent pas.
+  function reposerSignalement() {
+    ouvrirSignalement.hidden = !signalementDisponible;
+    merciSignalement.hidden = true;
+    reinitialiserSignalement();
+  }
+
+  if (signalementDisponible) {
+    casesSignalement().forEach(case_ => {
+      case_.addEventListener('change', ajusterCases);
+    });
+    ajusterCases();
+
+    ouvrirSignalement.addEventListener('click', () => {
+      if (!courante) { return; }
+      reinitialiserSignalement();
+      // `showModal` et non `show` : c'est lui qui piège le focus, rend le reste de la
+      // page inerte et câble Échap. Rien de tout cela n'est réécrit ici.
+      fenetre.showModal();
+    });
+
+    document.getElementById('annuler-signalement')
+      .addEventListener('click', () => fenetre.close());
+
+    formSignalement.addEventListener('submit', async (evenement) => {
+      evenement.preventDefault();
+      const motifs = cochees().map(c => c.value);
+      // **Deux chemins, une seule fenêtre** (MOD-4). Sans `validationEnCours`, la cible
+      // est la proposition qu'on est en train de voter et c'est un signalement ordinaire ;
+      // avec, c'est la proposition tirée au sort et c'est un « à revoir ». Les cases, le
+      // plafond de deux et la règle du texte libre sont les mêmes des deux côtés — c'est
+      // tout l'intérêt de ne pas avoir écrit une seconde fenêtre.
+      const cible = validationEnCours || courante;
+      if (!motifs.length || !cible) { return; }
+      envoyerSignalement.disabled = true;
+      const corps = { statement_id: cible.statement_id || cible.id, motifs };
+      if (motifs.includes(MOTIF_TEXTE_LIBRE)) {
+        corps.texte_libre = champTexteLibre.value;
+      }
+      if (validationEnCours) { corps.verdict = 'a_revoir'; }
+      let reponse;
+      try {
+        reponse = await fetch(validationEnCours ? '/api/validations' : '/api/signalements', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(corps)
+        });
+      } catch (e) {
+        reponse = null;
+      }
+      envoyerSignalement.disabled = false;
+      if (!reponse || !reponse.ok) {
+        // Le seul cas où l'on dit quelque chose d'autre que « merci » : la requête
+        // était mal formée ou n'est pas partie. Ce n'est pas le sort du signalement,
+        // c'est un échec technique — et le taire laisserait croire que c'est envoyé.
+        let motif = "Votre signalement n'a pas pu être envoyé. Réessayez.";
+        try {
+          const d = await reponse.json();
+          if (d && typeof d.detail === 'string') { motif = d.detail; }
+        } catch (e) { /* réponse sans corps JSON */ }
+        erreurSignalement.textContent = motif;
+        erreurSignalement.hidden = false;
+        return;
+      }
+      fenetre.close();
+      // La même réponse pour tout le monde. Le sort de la proposition n'est JAMAIS dit :
+      // sinon le signalement devient un jeu où l'on compte les points, et il se retourne
+      // contre les gens qu'il doit protéger.
+      if (validationEnCours) {
+        // Chemin « à revoir » : la proposition jugée n'est PAS celle qu'on a sous les
+        // yeux, donc on ne touche ni au bouton « Signaler » ni au remerciement de la
+        // carte de vote — les griser ici ferait croire qu'on vient de signaler la
+        // proposition en cours de vote, ce qui serait faux.
+        fermerValidation();
+        return;
+      }
+      ouvrirSignalement.hidden = true;
+      merciSignalement.hidden = false;
+      // Et c'est tout : `courante` n'a pas bougé, les boutons de vote sont restés
+      // actifs, aucune proposition n'a été demandée. Le parcours reprend où il était.
+    });
+  } else if (ouvrirSignalement) {
+    // Navigateur sans `<dialog>` : plutôt qu'un bouton qui n'ouvre rien, pas de bouton.
+    // Le signalement reste possible — l'API est publique — mais la carte de vote ne
+    // promet pas une fenêtre qu'elle ne sait pas montrer.
+    ouvrirSignalement.hidden = true;
+  }
+
+  // --- La validation aléatoire (MOD-4) ----------------------------------------------
+  //
+  // **Ce que ce bloc doit garantir, et que rien d'autre ne garantit :**
+  //
+  //   1. **Écarter la carte est gratuit.** « Passer », Échap, un clic hors de la
+  //      fenêtre : dans les trois cas rien n'est envoyé, rien n'est enregistré, et le
+  //      parcours de vote reprend exactement où il était. La carte s'est ouverte au
+  //      milieu de quelque chose que personne n'a demandé à interrompre.
+  //   2. **La proposition jugée n'est PAS celle qu'on est en train de voter.** C'est le
+  //      piège de tout ce bloc : `courante` désigne la carte de vote, `validationEnCours`
+  //      la proposition tirée au sort. Les confondre ferait signaler la mauvaise.
+  //   3. **Le parcours de vote ne bouge pas.** Répondre ne fait pas passer à la
+  //      proposition suivante : `suivante()` a déjà été appelée par `voter()`, et la
+  //      carte de vote qui est derrière la fenêtre est celle qu'il faut voter ensuite.
+  //
+  // La fenêtre s'ouvre sur la réponse du vote qui la déclenche, et il n'existe aucune
+  // route pour en demander une : voir `app/routers/validations.py`. Un tirage qu'on peut
+  // redemander n'est plus un tirage.
+  const fenetreValidation = document.getElementById('fenetre-validation');
+  const titreValidation = document.getElementById('titre-validation');
+  const consigneValidation = document.getElementById('consigne-validation');
+  const texteValidation = document.getElementById('texte-validation');
+  const boutonConforme = document.getElementById('valider-conforme');
+  const boutonARevoir = document.getElementById('valider-a-revoir');
+  const validationDisponible =
+    !!(fenetreValidation && typeof fenetreValidation.showModal === 'function');
+  //: La proposition tirée au sort, tant qu'on est en train de la juger. `null` le reste
+  //: du temps — et c'est ce `null` qui fait que la fenêtre de signalement retrouve son
+  //: chemin ordinaire.
+  let validationEnCours = null;
+
+  function fermerValidation() {
+    validationEnCours = null;
+    titreSignalement.textContent = TITRE_SIGNALEMENT;
+    introSignalement.textContent = INTRO_SIGNALEMENT;
+    if (fenetreValidation && fenetreValidation.open) { fenetreValidation.close(); }
+  }
+
+  // Appelée par `voter()` avec ce que le serveur a joint à la réponse du vote, ou rien.
+  // « Rien » est le cas ordinaire — six votes sur sept — et couvre aussi le plafond du
+  // jour et le débat dont tout a déjà été regardé. Le navigateur ne distingue pas ces
+  // cas, et c'est voulu : les distinguer apprendrait quelque chose sur l'état du dossier.
+  function ouvrirValidation(carte) {
+    // `suivante()` a pu cacher `#zone-vote` avant cet appel (parcours terminé) : la
+    // fenêtre est DANS `#zone-vote`, et `showModal()` sur un `<dialog>` dont un ancêtre
+    // est `hidden` l'ouvre invisible tout en rendant le reste de la page inerte — plus
+    // aucun clic ne passe, et seul un rechargement en sort. D'où ce garde : la carte de
+    // validation ne s'ouvre jamais sur un parcours qu'on ne regarde plus.
+    if (!carte || !validationDisponible || zoneVote.hidden) { return; }
+    validationEnCours = carte;
+    titreValidation.textContent = carte.titre;
+    consigneValidation.textContent = carte.consigne;
+    // `textContent` : c'est un texte écrit par un participant.
+    texteValidation.textContent = carte.texte;
+    boutonConforme.textContent = carte.libelle_conforme;
+    boutonARevoir.textContent = carte.libelle_a_revoir;
+    fenetreValidation.showModal();
+  }
+
+  if (validationDisponible) {
+    boutonConforme.addEventListener('click', async () => {
+      if (!validationEnCours) { return; }
+      const cible = validationEnCours.statement_id;
+      // Fermée AVANT l'aller-retour, et la réponse n'est pas attendue pour rendre la
+      // main : il n'y a rien à annoncer — la réponse du serveur est la même quoi qu'il
+      // arrive — et faire patienter quelqu'un devant un « conforme » qu'il a déjà
+      // décidé serait lui faire payer une latence pour rien.
+      fermerValidation();
+      try {
+        await fetch('/api/validations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ statement_id: cible, verdict: 'conforme' })
+        });
+      } catch (e) { /* le parcours de vote ne s'interrompt pas pour si peu */ }
+    });
+
+    // « À revoir » : les MÊMES cases que pour un signalement, dans la même fenêtre.
+    // C'est le cadrage à la lettre — « il est renvoyé vers les mêmes cases que pour un
+    // signalement, et la suite est le chemin habituel ». Une seconde liste de dix motifs
+    // aurait divergé de la première au premier ajout.
+    boutonARevoir.addEventListener('click', () => {
+      if (!validationEnCours || !signalementDisponible) { return; }
+      fenetreValidation.close();
+      reinitialiserSignalement();
+      titreSignalement.textContent = 'Qu\'est-ce qui ne va pas ?';
+      introSignalement.textContent =
+        'Choisissez ce qui ne va pas. ' + MOTIFS_MAX + ' réponses au maximum. '
+        + 'Votre réponse est lue par une personne ; elle ne retire rien toute seule.';
+      fenetre.showModal();
+    });
+
+    document.getElementById('passer-validation')
+      .addEventListener('click', () => fermerValidation());
+    // Échap et le clic hors fenêtre passent par `close` sans toucher aux boutons : sans
+    // ce gestionnaire, `validationEnCours` resterait posé et la fenêtre de signalement
+    // ouverte ensuite depuis la carte de vote enverrait sa plainte sur la proposition
+    // tirée au sort. C'est le défaut que ce bloc est le plus susceptible de produire.
+    fenetreValidation.addEventListener('close', () => {
+      if (!fenetre.open) { fermerValidation(); }
+    });
+  }
+
+
+  const formulaire = document.getElementById('form-proposition');
+  if (formulaire) {
+    formulaire.addEventListener('submit', async (evenement) => {
+      evenement.preventDefault();
+      const champ = formulaire.querySelector('textarea');
+      // Les couples (adresse, libellé) sont relevés dans l'ordre du formulaire ; les
+      // adresses vides ne sont pas envoyées, un libellé seul l'est — c'est le serveur
+      // qui dit que ça n'a pas de sens, et il le dit mieux qu'un silence ici.
+      const adresses = [...formulaire.querySelectorAll('input[name="source_url"]')];
+      const libelles = [...formulaire.querySelectorAll('input[name="source_label"]')];
+      const sources = adresses
+        .map((entree, rang) => ({
+          url: entree.value.trim(),
+          label: (libelles[rang] ? libelles[rang].value.trim() : '') || null,
+        }))
+        .filter(source => source.url || source.label);
+      const r = await fetch(`/api/conversations/${slug}/statements`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: champ.value, sources })
+      });
+      const retour = document.getElementById('retour-proposition');
+      if (r.ok) {
+        const d = await r.json();
+        champ.value = '';
+        // Les champs de source sont désignés par leur NOM et non par le bloc qui les
+        // contient : depuis le chantier I2 la première source est directement dans le
+        // formulaire et seule la seconde reste repliée, mais les deux se vident.
+        formulaire
+          .querySelectorAll('input[name="source_url"], input[name="source_label"]')
+          .forEach(e => { e.value = ''; });
+        const pliant = formulaire.querySelector('.seconde-source');
+        if (pliant) { pliant.open = false; }
+        retour.className = 'msg ok';
+        retour.textContent = d.visible
+          ? 'Merci, votre proposition est publiée.'
+          : 'Merci, votre proposition sera publiée après relecture.';
+      } else {
+        // Le motif vient du serveur quand il en donne un (doublon, plafond de
+        // propositions) : « n'a pas pu être enregistrée » laisserait retenter en
+        // boucle une action qui sera refusée à l'identique.
+        let motif = "Votre proposition n'a pas pu être enregistrée.";
+        try {
+          const d = await r.json();
+          if (d && typeof d.detail === 'string') { motif = d.detail; }
+        } catch (e) { /* réponse sans corps JSON : on garde le message générique */ }
+        retour.className = 'msg err';
+        retour.textContent = motif;
+      }
+      retour.hidden = false;
+    });
+  }
+
+  if (ouvert) { suivante(); }
+
+  // --- « Afficher plus » sur « Ce que chaque groupe a répondu » ---------------------
+  //
+  // Amélioration progressive pure : le gabarit rend déjà TOUTES les propositions (voir
+  // le commentaire au-dessus du bouton). Ce script se contente d'en masquer une partie
+  // et de les révéler par lots de dix — s'il ne s'exécute pas, la liste complète reste
+  // simplement visible d'emblée, ce n'est pas une régression.
+  const PAS_INITIAL_RESULTATS = 2;
+  const PAS_SUIVANT_RESULTATS = 10;
+  const listeResultatsGroupes = document.getElementById('liste-resultats-groupes');
+  const boutonPlusResultats = document.getElementById('bouton-plus-resultats');
+  if (listeResultatsGroupes && boutonPlusResultats) {
+    const propositions = Array.from(listeResultatsGroupes.children);
+    if (propositions.length > PAS_INITIAL_RESULTATS) {
+      let visibles = PAS_INITIAL_RESULTATS;
+      propositions.forEach((li, i) => { li.hidden = i >= visibles; });
+      boutonPlusResultats.hidden = false;
+      boutonPlusResultats.addEventListener('click', () => {
+        const prochaines = Math.min(propositions.length, visibles + PAS_SUIVANT_RESULTATS);
+        for (let i = visibles; i < prochaines; i++) { propositions[i].hidden = false; }
+        visibles = prochaines;
+        if (visibles >= propositions.length) { boutonPlusResultats.hidden = true; }
+      });
+    }
+  }
+})();
+</script>
+{#
+  Chargé en différé et à part : la question posée pendant la frappe est une aide, pas
+  une pièce du formulaire. Si ce fichier ne charge pas, on propose comme avant.
+#}
+<script src="{{ url_statique('detection.js') }}" defer></script>
+{% endblock %}

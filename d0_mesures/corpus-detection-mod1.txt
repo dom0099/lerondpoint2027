@@ -1,0 +1,129 @@
+# Corpus d'épreuve du détecteur de signaux (chantier Modération, MOD-1).
+#
+# Écrit à la main le 12 septembre 2026, parce que la base de production ne contient
+# que 29 propositions, dont une vingtaine de saisies d'essai : elle ne peut pas
+# produire un taux qui veuille dire quelque chose.
+#
+# Ce corpus n'est PAS un échantillon représentatif — il ne prétend pas donner un
+# taux « vrai ». Il est délibérément chargé en cas difficiles, pour éprouver la
+# liste et les motifs. Le taux qu'il produit se lit comme un plafond, pas comme
+# une mesure.
+#
+# Une proposition par ligne. Les lignes vides et celles qui commencent par # sont
+# ignorées. Les propositions sont écrites dans le style réel du site : courtes,
+# affirmatives, sans ponctuation soignée.
+
+# --- Des propositions ordinaires, qui ne devraient RIEN déclencher ---------------
+Il faut rénover les logements anciens avant d'en construire de nouveaux
+La formation professionnelle doit être gratuite
+Il faut développer le train de nuit
+Créer une taxe sur les transactions financières
+L'école devrait commencer plus tard le matin
+Interdire la publicité pour les produits trop sucrés
+Le service public de l'eau doit rester public
+Il faut aider les agriculteurs à sortir des pesticides
+Mieux payer les infirmiers et les aides-soignants
+Rendre le vote obligatoire
+Il faut construire plus de logements sociaux dans les grandes villes
+Baisser la TVA sur les produits de première nécessité
+Garantir un revenu minimum aux étudiants
+La rénovation thermique doit être financée par l'État
+Supprimer les niches fiscales inefficaces
+Il faut plus de médecins dans les campagnes
+Ouvrir les données publiques à tous
+Protéger les zones humides de l'artificialisation
+Il faut réformer le mode de scrutin législatif
+Encourager le vélo en ville par des pistes séparées
+
+# --- cible_personnes : la forme « Les X + verbe » -------------------------------
+Les fonctionnaires travaillent moins que les salariés du privé
+Les riches partent à l'étranger pour ne pas payer l'impôt
+Ces gens-là veulent imposer leur mode de vie à tout le monde
+Les jeunes ne votent plus et s'en moquent
+Les retraités votent contre l'intérêt de leurs petits-enfants
+Les patrons profitent des aides publiques sans embaucher
+Les syndicats bloquent toute réforme du pays
+Les agriculteurs souffrent de la concurrence déloyale
+Beaucoup d'élus mentent à leurs électeurs
+La plupart des locataires paient un loyer trop cher
+Certains propriétaires abusent de la pénurie de logements
+Les musulmans demandent des aménagements partout
+Les catholiques veulent revenir sur la loi de 1905
+Les Parisiens décident pour les ruraux
+Les ruraux refusent toute contrainte écologique
+Les automobilistes paient déjà bien assez
+Les cyclistes prennent toute la place en ville
+Les femmes gagnent moins à travail égal
+Les hommes prennent rarement leur congé parental
+Les immigrés viennent chercher les aides sociales
+Les Français ne veulent plus travailler
+Les médecins refusent les patients au tarif conventionné
+Les journalistes disent tous la même chose
+Les militaires coûtent cher et ne servent à rien
+Les handicapés attendent des années une place adaptée
+Les aidants s'épuisent sans aucune reconnaissance
+
+# Les trois entrées sans contraire, ajoutées sur décision du 12 septembre 2026.
+# Elles n'apparaissaient dans aucun des deux corpus : sans ces trois lignes, rien
+# n'éprouverait la dérogation, et un bogue dessus passerait inaperçu.
+Les islamistes veulent imposer la charia en France
+Les complotistes croient n'importe quoi sur les vaccins
+Les Français de souche sont devenus minoritaires dans certaines villes
+
+# --- cible_personnes : les voisins qui ne doivent PAS se déclencher --------------
+Il faut aider les agriculteurs
+Une aide d'urgence pour les agriculteurs et les éleveurs
+Créer un impôt sur les riches
+Il faut mieux protéger les locataires contre les expulsions
+Donner plus de moyens aux médecins de campagne
+Rendre le logement accessible aux jeunes actifs
+Les subventions agricoles augmentent chaque année sans contrôle
+Les loyers parisiens ont doublé en vingt ans
+Les prix augmentent rapidement depuis deux ans
+Le budget de la défense progresse fortement
+Il faut reconnaître le rôle des aidants familiaux
+Un plan national pour les personnes handicapées
+
+# --- deux_idees -----------------------------------------------------------------
+Les loyers augmentent et les salaires stagnent
+Il faut baisser les impôts ; l'État dépense beaucoup trop
+Les jeunes partent et les villages meurent
+Le train coûte cher ; l'avion est subventionné
+Les impôts montent et les services publics ferment
+
+# --- deux_idees : les voisins ----------------------------------------------------
+Il faut soutenir l'école et l'hôpital public
+Légaliser et encadrer strictement la vente de cannabis
+Un plan pour le logement et pour la santé
+
+# --- affirmation_de_fait ---------------------------------------------------------
+Le tabac tue 75 000 personnes par an en France
+Près de 30 % des jeunes ne votent jamais
+Selon la Cour des comptes, la mesure coûte plus qu'elle ne rapporte
+La France est le premier pays d'Europe pour les prélèvements
+C'est le plus grand chantier public depuis 1945
+La loi date de janvier et personne ne l'applique
+
+# --- affirmation_de_fait : les voisins -------------------------------------------
+Il faut interdire la publicité pour le tabac
+Le logement doit redevenir une priorité nationale
+On doit mieux répartir l'effort demandé
+
+# --- interrogation ---------------------------------------------------------------
+Faut-il vraiment légaliser le cannabis ?
+Pourquoi personne ne parle du coût réel
+Comment financer la transition écologique
+Est-ce que le nucléaire est vraiment une solution
+Qui décide du budget de la commune
+
+# --- longueur --------------------------------------------------------------------
+Oui
+Non
+Pour
+D'accord
+Il faut absolument que cette proposition serve à mesurer ce que le détecteur fait d'un texte très long, écrit d'une seule traite, sans point ni point-virgule, par quelqu'un qui a beaucoup de choses à dire et qui utilise tout l'espace disponible du formulaire jusqu'à s'approcher du plafond de cinq cents caractères que le site impose aujourd'hui, ce qui rend la proposition presque impossible à voter parce qu'on ne sait plus à quoi on répond exactement quand on clique sur d'accord ou sur pas d'accord.
+
+# --- Des cumuls : trois signaux ou plus ------------------------------------------
+Les fonctionnaires coûtent 25 % du budget et ne travaillent pas assez ?
+Selon une étude, les jeunes votent moins et les vieux décident pour eux
+Les immigrés représentent 10 % de la population ; ils coûtent trop cher

@@ -1,0 +1,28 @@
+{% extends "public/base.html" %}
+{% block title %}Créer un compte — Le Rond-Point 2027{% endblock %}
+{% block body %}
+<h1>Créer un compte</h1>
+<p class="lead">Facultatif. Vos votes déjà émis sur cet appareil seront rattachés à
+votre compte.</p>
+{% if error and not champ %}<div class="msg err">{{ error }}</div>{% endif %}
+<form method="post" action="/compte/inscription" class="card">
+  <input type="hidden" name="suivant" value="{{ suivant }}">
+  <label for="username">Adresse e-mail</label>
+  <input type="email" id="username" name="username" required autofocus autocomplete="email"
+         value="{{ username or '' }}"
+         {% if champ == 'username' %}class="invalide" aria-invalid="true"
+         aria-describedby="erreur-username"{% endif %}>
+  {% if champ == 'username' %}<p class="erreur-champ" id="erreur-username">{{ error }}</p>{% endif %}
+  <label for="password">Mot de passe</label>
+  <input type="password" id="password" name="password" required minlength="8"
+         autocomplete="new-password"
+         {% if champ == 'password' %}class="invalide" aria-invalid="true"
+         aria-describedby="erreur-password"{% endif %}>
+  {% if champ == 'password' %}<p class="erreur-champ" id="erreur-password">{{ error }}</p>{% endif %}
+  <p class="mu">8 caractères minimum.</p>
+  <p class="actions"><button type="submit" class="bouton-principal">Créer mon compte</button></p>
+</form>
+<p class="mu">Vous recevrez un e-mail de confirmation. Il n'est pas obligatoire d'y
+répondre pour participer — il sert à pouvoir récupérer votre mot de passe en cas
+d'oubli.</p>
+{% endblock %}

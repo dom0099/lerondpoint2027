@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% block title %}File de modération{% endblock %}
+{#
+  Les liens d'une proposition sont affichés DANS la file, et ce n'est pas cosmétique :
+  un lien approuvé est publié par le site. Un modérateur qui approuve un texte anodin
+  sans voir vers quoi il pointe approuve à l'aveugle. L'adresse est montrée en entier
+  ici — contrairement à la page publique, qui n'en montre que le domaine : c'est
+  précisément l'adresse complète qu'il s'agit de juger.
+
+  Aucun `target="_blank"` ni `rel` de complaisance : le modérateur DOIT pouvoir ouvrir
+  le lien, mais rien de ce qu'il ouvre n'est publié par cette page.
+#}
+{% macro liens_de(s) %}
+  {% if s.sources %}
+  <ul class="mu" style="margin:.2rem 0 .5rem;padding-left:1.1rem">
+    {% for source in s.sources %}
+    <li>
+      {% if source.label %}{{ source.label }} — {% endif %}
+      {#
+        L'adresse reste VISIBLE en entier — c'est ce qui permet au modérateur de juger.
+        Mais elle n'est cliquable que si l'on sait où elle mène : un `javascript:` en
+        base ne doit pas devenir un lien qu'un modérateur peut suivre, fût-ce par
+        curiosité. Voir, oui ; cliquer, seulement quand la destination a un nom.
+      #}
+      {% if source.domaine %}
+      <a href="{{ source.url }}" rel="noopener noreferrer nofollow"
+         target="_blank">{{ source.url }}</a>
+      <span class="tag">{{ source.domaine }}</span>
+      {% else %}
+      <code>{{ source.url }}</code>
+      <span class="tag">adresse illisible — non publiée, non cliquable</span>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+{% endmacro %}
+{% block body %}
+<h1>File de modération</h1>
+
+<h2>Conversations proposées{% if conversations %} ({{ conversations|length }}){% endif %}</h2>
+{% if conversations %}
+  {% for c, statements in conversations %}
+  <div class="card" style="border-left:3px solid var(--ac)">
+    <p class="mu" style="margin:0 0 .2rem">Conversation proposée
+      {% if c.proposed_by_participant_id %}par le participant n°{{ c.proposed_by_participant_id }}{% endif %}
+      le {{ c.created_at.strftime('%d/%m/%Y à %H:%M') }}</p>
+    <p style="margin:.1rem 0 .3rem;font-weight:600">{{ c.title }}</p>
+    {% if c.description %}<p style="margin:.1rem 0 .6rem">{{ c.description }}</p>{% endif %}
+    <p class="mu" style="margin:.4rem 0 .2rem">{{ statements|length }} proposition(s) d'amorce :</p>
+    <ul style="margin:.2rem 0 .8rem;padding-left:1.1rem">
+      {% for s in statements %}<li>{{ s.text }}{{ liens_de(s) }}</li>{% endfor %}
+    </ul>
+    {#
+      Les thèmes sont DANS le formulaire d'approbation : le proposeur a suggéré, le
+      modérateur tranche — au moment où il approuve, et non dans un écran de plus. Le
+      rejet a son propre formulaire, sans cases : il n'y a rien à ranger dans une
+      conversation qui ne sera pas publiée.
+    #}
+    <form method="post" action="/moderation/queue/conversations/{{ c.id }}/approve">
+      <p class="mu" style="margin:.6rem 0 .2rem">Thèmes — de 1 à {{ themes_max }}
+        {% if not c.codes_themes %}(le proposeur n'en a suggéré aucun){% endif %}</p>
+      <ul class="grille-themes">
+        {% for theme in themes %}
+        <li><label title="{{ theme.aide }}">
+          <input type="checkbox" name="themes" value="{{ theme.code }}"
+                 {% if theme.code in c.codes_themes %}checked{% endif %}>
+          {{ theme.libelle }}
+        </label></li>
+        {% endfor %}
+      </ul>
+      <button type="submit">Approuver la conversation et ses amorces</button>
+    </form>
+    <div class="row">
+      <form method="post" action="/moderation/queue/conversations/{{ c.id }}/reject">
+        <button type="submit" class="no">Rejeter</button>
+      </form>
+    </div>
+    <p class="mu" style="margin:.6rem 0 0">Une fois approuvée, vous pourrez retirer
+      des amorces une par une depuis l'éditeur de la conversation.</p>
+  </div>
+  {% endfor %}
+{% else %}
+<p class="empty">Aucune conversation en attente.</p>
+{% endif %}
+
+{#
+  La section « Propositions en attente » a été retirée au MOD-14, avec la
+  pré-modération elle-même : une proposition déposée est publiée d'emblée, plus aucune
+  n'arrivera jamais ici. Ce qui la concerne se décide après coup, sur
+  `/moderation/signalements`. Les deux boutons « approuver / rejeter sans grille » sont
+  partis avec elle — ils n'avaient plus de file à vider.
+#}
+<h2>Noms de groupe proposés{% if noms %} ({{ noms|length }}){% endif %}</h2>
+{#
+  Ce que le modérateur DOIT voir pour trancher, et pourquoi.
+
+  Un nom seul ne se juge pas : « Les opposants à la baisse de l'âge du permis B » peut
+  être juste ou exactement à l'envers, et rien dans la phrase ne le dit. Ce qui le dit,
+  ce sont les déclarations que le groupe approuve et celles qu'il rejette — c'est sur
+  elles que le modèle a travaillé, ce sont elles qu'il faut relire.
+
+  Elles sont donc montrées ici en entier, rangées par sens, exactement comme le modèle
+  les a reçues. Un modérateur qui validerait sur le seul nom validerait à l'aveugle —
+  et le chantier E a mesuré trois fois qu'un résultat bien formé peut être entièrement
+  faux.
+#}
+{% if noms %}
+  {% for n, conv, declarations in noms %}
+  <div class="card">
+    <p class="mu" style="margin:0 0 .2rem">
+      {{ conv.title }} — groupe {{ n.lettre }},
+      {{ n.motif.value if n.motif else '' }},
+      décidé le {{ n.decided_at.strftime('%d/%m/%Y à %H:%M') }}
+    </p>
+    <p style="margin:.1rem 0 .3rem"><strong>{{ n.nom }}</strong></p>
+    {% if n.justification %}
+    <p class="mu" style="margin:0 0 .5rem">{{ n.justification }}</p>
+    {% endif %}
+    <ul class="mu" style="margin:.2rem 0 .6rem;padding-left:1.1rem">
+      {% for texte, sens in declarations %}
+      <li>
+        <span class="tag">{{ 'approuve' if sens == 'pour' else 'rejette' }}</span>
+        {{ texte }}
+      </li>
+      {% endfor %}
+    </ul>
+    <form method="post" action="/moderation/noms/{{ n.id }}/approve">
+      <div class="row">
+        {#
+          Le champ est pré-rempli avec le nom généré : valider sans y toucher est un
+          clic, corriger est une retouche. L'inverse — un champ vide à remplir — ferait
+          d'une validation simple le geste le plus coûteux, et c'est le cas courant.
+        #}
+        <input type="text" name="nom" value="{{ n.nom }}" maxlength="120"
+               style="flex:1;min-width:14rem" aria-label="Nom du groupe">
+        <button type="submit">Valider</button>
+      </div>
+    </form>
+    <form method="post" action="/moderation/noms/{{ n.id }}/reject" style="margin-top:.4rem">
+      <button type="submit" class="no">Refuser</button>
+      <span class="mu">le groupe garde « groupe {{ n.lettre }} » jusqu'au prochain changement</span>
+    </form>
+  </div>
+  {% endfor %}
+{% else %}
+<p class="empty">Aucun nom de groupe en attente.</p>
+{% endif %}
+
+{% if not conversations and not noms %}
+<p class="mu" style="margin-top:1.5rem">Rien à modérer.</p>
+{% endif %}
+{% endblock %}

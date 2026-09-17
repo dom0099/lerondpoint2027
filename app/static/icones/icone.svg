@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  L'anneau, version icône d'application. Même dessin qu'anneau.svg, réduit à 72 %
+  et centré : les masques d'Android (icône adaptative) et d'iOS rognent les bords,
+  et un anneau à fleur de cadre en ressortirait tronqué.
+
+  Sert de source aux PNG de 192, 512 et 1024 px — manifeste et magasins éventuels.
+  Le manifeste PWA lui-même n'est pas de ce chantier ; les fichiers, si, pour ne pas
+  avoir à revenir dessiner le jour où il le sera.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <rect width="32" height="32" fill="#FFFFFF"/>
+  <g transform="translate(16 16) scale(0.72) translate(-16 -16)">
+    <circle cx="16" cy="16" r="11.75" fill="none" stroke="#1F2A44" stroke-width="5.5"/>
+    <circle cx="16" cy="16" r="3.5" fill="#EBE81A"/>
+  </g>
+</svg>

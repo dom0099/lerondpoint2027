@@ -1,0 +1,217 @@
+{% extends "public/base.html" %}
+{% block title %}Proposer un débat — Le Rond-Point 2027{% endblock %}
+{% block body %}
+{#
+  « Débat » et non plus « conversation » dans tout ce que la page affiche (chantier
+  I2, instruction 18) : le bouton qui y mène, sur l'accueil, s'appelle « Proposer un
+  débat ». Le code, lui, garde son vocabulaire (`Conversation`, `/proposer`).
+#}
+<h1>Proposer un débat</h1>
+{% if sent %}
+  <div class="msg ok">Merci. Votre débat sera publié après relecture par un
+  modérateur — vous le verrez apparaître sur la page d'accueil.</div>
+  <p><a href="/">Retour à l'accueil</a></p>
+{% else %}
+  <p class="lead">Un débat part d'une question et de quelques affirmations sur
+  lesquelles chacun se positionne. Il sera relu avant d'être publié.</p>
+  {% if error and not champ %}<div class="msg err">{{ error }}</div>{% endif %}
+
+  <form method="post" action="/proposer" class="card" enctype="multipart/form-data" id="formulaire-proposer">
+    <label for="title">Titre</label>
+    <input type="text" id="title" name="title" maxlength="300" required
+           value="{{ title or '' }}" placeholder="Ex. : les transports en Île-de-France"
+           {% if champ == 'title' %}class="invalide" aria-invalid="true"
+           aria-describedby="erreur-title"{% endif %}>
+    {% if champ == 'title' %}<p class="erreur-champ" id="erreur-title">{{ error }}</p>{% endif %}
+
+    <label for="description">De quoi s'agit-il ? (facultatif)</label>
+    <textarea id="description" name="description">{{ description or '' }}</textarea>
+
+    {#
+      Thèmes. Des cases à cocher et non une liste déroulante : la liste tient sur un
+      écran, et un `select` multiple se manipule mal au doigt comme au clavier.
+
+      C'est une SUGGESTION — le modérateur la voit et la corrige à l'approbation. Le
+      dire évite qu'on la croie définitive, et évite surtout qu'on hésite dix minutes
+      sur un choix qui sera relu.
+    #}
+    <label>Thèmes — jusqu'à {{ themes_max }} (facultatif)</label>
+    <p class="mu">Ils servent à ce que les gens intéressés par le sujet trouvent votre
+      débat. Si vous n'en cochez aucun, un modérateur s'en chargera ; s'il y en a,
+      il pourra les corriger.</p>
+    {% if champ == 'themes' %}<p class="erreur-champ" id="erreur-themes">{{ error }}</p>{% endif %}
+    <ul class="grille-themes"
+        {% if champ == 'themes' %}aria-describedby="erreur-themes"{% endif %}>
+      {% for theme in themes %}
+      <li><label title="{{ theme.aide }}">
+        <input type="checkbox" name="themes" value="{{ theme.code }}"
+               {% if theme.code in (themes_choisis or []) %}checked{% endif %}>
+        {{ theme.libelle }}
+      </label></li>
+      {% endfor %}
+    </ul>
+
+    <label>Propositions de départ — entre {{ minimum }} et {{ maximum }}</label>
+    <p class="mu">Des affirmations sur lesquelles on peut
+      être d'accord ou non. Sans elles, personne n'aurait rien à voter en arrivant.</p>
+    {% if champ == 'statements' %}<p class="erreur-champ" id="erreur-statements">{{ error }}</p>{% endif %}
+    {#
+      Chaque proposition émet TOUJOURS ses {{ liens_max }} couples (adresse, libellé),
+      vides compris : c'est ce qui permet au serveur de rendre à chaque proposition les
+      siens, sans identifiant à porter dans les noms de champs. Le repli au clavier
+      seul reste entier — les champs sont là, simplement repliés.
+    #}
+    <div id="liste" class="champs-empiles">
+      {% for texte, liens in (champs or [('', [('', '')] * liens_max)] * 3) %}
+      <div class="proposition-saisie">
+        <textarea name="statements" maxlength="500" data-detection
+                  placeholder="Proposition {{ loop.index }}"
+                  {% if champ == 'statements' %}aria-describedby="erreur-statements"{% endif %}>{{ texte }}</textarea>
+        <details class="sources-saisie" {% if liens|map('first')|select|list %}open{% endif %}>
+          <summary>Ajouter une source (facultatif)</summary>
+          <p class="mu">Une adresse en http:// ou https://. Le site affichera le nom de
+            domaine vers lequel elle mène.</p>
+          {% for url, label in liens %}
+          <input type="url" name="source_url" maxlength="2000"
+                 placeholder="https://exemple.fr/le-rapport" value="{{ url }}">
+          <input type="text" name="source_label" maxlength="120"
+                 placeholder="De quoi s'agit-il ? (facultatif)" value="{{ label }}">
+          {% endfor %}
+        </details>
+      </div>
+      {% endfor %}
+    </div>
+    <p><button type="button" id="ajouter">Ajouter une proposition</button></p>
+
+    {#
+      Vidéo de présentation (chantier Vidéo, VIDEO-3) — facultative, jointe en même
+      temps que le reste : il n'existe pas de page où revenir ensuite pour l'ajouter,
+      donc c'est ici ou nulle part. La miniature est choisie automatiquement (au
+      milieu du clip) — pas l'écran à trois candidates du modérateur, pensé pour
+      quelqu'un qui prend son temps, pas pour ce formulaire.
+    #}
+    <label for="video">Une courte vidéo pour présenter votre débat ? (facultatif)</label>
+    <p class="mu">{{ video_duree_max|int }} secondes maximum, {{ (video_max_octets / 1000000)|int }} Mo
+      maximum. Elle sera vue par les modérateurs pendant la relecture de votre débat.</p>
+    {% if champ == 'video' %}<p class="erreur-champ" id="erreur-video">{{ error }}</p>{% endif %}
+    <input type="file" id="video" name="video" accept="video/*"
+           data-max-octets="{{ video_max_octets }}"
+           {% if champ == 'video' %}aria-describedby="erreur-video"{% endif %}>
+    {#
+      Raccourci facultatif : le champ ci-dessus ouvre déjà, sur téléphone, un
+      sélecteur natif qui propose de filmer (iOS et Android le font tous les deux
+      sans rien coder). Ce bouton saute directement cet écran intermédiaire et ouvre
+      l'appareil photo — un gain d'un clic, pas une capacité nouvelle. Masqué tant que
+      le script ci-dessous n'a pas confirmé pouvoir le faire fonctionner (`capture`
+      posé juste avant l'ouverture, retiré juste après — voir le script).
+    #}
+    <p class="row" id="video-boutons" hidden>
+      <button type="button" id="video-camera">Prendre une vidéo</button>
+    </p>
+    <p class="mu" id="video-nom-choisi" hidden></p>
+    <p class="mu" id="video-avertissement" hidden></p>
+
+    <p class="actions"><button type="submit" class="bouton-principal">Proposer le débat</button></p>
+  </form>
+
+  <script>
+  (function () {
+    const liste = document.getElementById('liste');
+    const maximum = {{ maximum }};
+    const liensMax = {{ liens_max }};
+    document.getElementById('ajouter').addEventListener('click', function () {
+      const rang = liste.querySelectorAll('textarea').length;
+      if (rang >= maximum) { this.disabled = true; return; }
+
+      // Le bloc ajouté est le MÊME que celui rendu par le serveur, couples de liens
+      // compris. En ajouter un qui n'émettrait que le texte décalerait les liens de
+      // toutes les propositions suivantes d'un cran, en silence.
+      const bloc = document.createElement('div');
+      bloc.className = 'proposition-saisie';
+      const champ = document.createElement('textarea');
+      champ.name = 'statements';
+      champ.maxLength = 500;
+      champ.placeholder = 'Proposition ' + (rang + 1);
+      // Les amorces ajoutées au clic reçoivent la même question pendant la frappe que
+      // celles rendues par le serveur — sans ça, seules les trois premières l'auraient.
+      champ.setAttribute('data-detection', '');
+      bloc.appendChild(champ);
+
+      const pliant = document.createElement('details');
+      pliant.className = 'sources-saisie';
+      const titre = document.createElement('summary');
+      titre.textContent = 'Ajouter une source (facultatif)';
+      pliant.appendChild(titre);
+      for (let i = 0; i < liensMax; i++) {
+        const url = document.createElement('input');
+        url.type = 'url';
+        url.name = 'source_url';
+        url.maxLength = 2000;
+        url.placeholder = 'https://exemple.fr/le-rapport';
+        pliant.appendChild(url);
+        const label = document.createElement('input');
+        label.type = 'text';
+        label.name = 'source_label';
+        label.maxLength = 120;
+        label.placeholder = "De quoi s'agit-il ? (facultatif)";
+        pliant.appendChild(label);
+      }
+      bloc.appendChild(pliant);
+      liste.appendChild(bloc);
+      champ.focus();
+    });
+  })();
+  </script>
+  <script>
+  (function () {
+    // Avertissement AVANT l'envoi, décision du 13/09/2026 (même geste qu'à l'écran
+    // de modération). Confort d'ergonomie, pas un contrôle : le plafond réel est
+    // vérifié pendant l'envoi, côté serveur, quoi qu'il arrive ici.
+    const formulaire = document.getElementById('formulaire-proposer');
+    const champVideo = document.getElementById('video');
+    if (!formulaire || !champVideo) return;
+
+    // Raccourci caméra : n'apparaît qu'ici, avec JS, parce qu'il en dépend entièrement
+    // (basculer `capture` juste avant l'ouverture). Le champ ci-dessus reste utilisable
+    // tel quel sans JS — la plupart des mobiles proposent déjà de filmer dans leur
+    // sélecteur natif, ce bouton ne fait que sauter cet écran intermédiaire.
+    const boutonsVideo = document.getElementById('video-boutons');
+    const boutonCamera = document.getElementById('video-camera');
+    const nomChoisi = document.getElementById('video-nom-choisi');
+    if (boutonsVideo && boutonCamera) {
+      boutonsVideo.hidden = false;
+      boutonCamera.addEventListener('click', function () {
+        champVideo.setAttribute('capture', 'user');
+        champVideo.click();
+        champVideo.removeAttribute('capture');
+      });
+    }
+    if (champVideo && nomChoisi) {
+      champVideo.addEventListener('change', function () {
+        const fichier = champVideo.files[0];
+        nomChoisi.hidden = !fichier;
+        nomChoisi.textContent = fichier ? 'Fichier retenu : ' + fichier.name : '';
+      });
+    }
+
+    formulaire.addEventListener('submit', function (evenement) {
+      const avertissement = document.getElementById('video-avertissement');
+      const fichier = champVideo.files[0];
+      const plafond = parseInt(champVideo.dataset.maxOctets, 10);
+      if (fichier && plafond && fichier.size > plafond) {
+        evenement.preventDefault();
+        avertissement.hidden = false;
+        avertissement.textContent = 'Ce fichier pèse ' + (fichier.size / 1e6).toFixed(1) +
+          ' Mo, au-delà des ' + (plafond / 1e6).toFixed(0) + ' Mo autorisés — envoi ' +
+          'annulé. Vous pouvez retirer la vidéo et proposer votre débat sans elle.';
+      }
+    });
+  })();
+  </script>
+{#
+  Même remarque que sur la page d'un débat : chargé à part, et sans effet sur le
+  formulaire s'il ne charge pas.
+#}
+<script src="{{ url_statique('detection.js') }}" defer></script>
+{% endif %}
+{% endblock %}

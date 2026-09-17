@@ -1,0 +1,462 @@
+{
+  "partie_1_composition": {
+    "points": [
+      {
+        "jeu": "p0.62/20260903",
+        "S": 0.3883,
+        "G": 0.174,
+        "k_avant": 3,
+        "k_apres": 3,
+        "delta_k": 0,
+        "J_froid_chaud": 1.0,
+        "residu_%": 64.0
+      },
+      {
+        "jeu": "p0.62/7",
+        "S": 0.4464,
+        "G": 0.0863,
+        "k_avant": 5,
+        "k_apres": 3,
+        "delta_k": 2,
+        "J_froid_chaud": 0.6605,
+        "residu_%": 50.2
+      },
+      {
+        "jeu": "p0.62/1234",
+        "S": 0.3201,
+        "G": 0.0394,
+        "k_avant": 3,
+        "k_apres": 3,
+        "delta_k": 0,
+        "J_froid_chaud": 0.5426,
+        "residu_%": 53.6
+      },
+      {
+        "jeu": "p0.62/99991",
+        "S": 0.3806,
+        "G": 0.1251,
+        "k_avant": 4,
+        "k_apres": 4,
+        "delta_k": 0,
+        "J_froid_chaud": 0.7752,
+        "residu_%": 73.4
+      },
+      {
+        "jeu": "p0.67/20260903",
+        "S": 0.4384,
+        "G": 0.3748,
+        "k_avant": 5,
+        "k_apres": 2,
+        "delta_k": 3,
+        "J_froid_chaud": 1.0,
+        "residu_%": 40.7
+      },
+      {
+        "jeu": "p0.67/7",
+        "S": 0.3846,
+        "G": 0.1849,
+        "k_avant": 4,
+        "k_apres": 3,
+        "delta_k": 1,
+        "J_froid_chaud": 0.9482,
+        "residu_%": 47.6
+      },
+      {
+        "jeu": "p0.67/1234",
+        "S": 0.434,
+        "G": 0.2307,
+        "k_avant": 3,
+        "k_apres": 2,
+        "delta_k": 1,
+        "J_froid_chaud": 1.0,
+        "residu_%": 47.1
+      },
+      {
+        "jeu": "p0.67/99991",
+        "S": 0.3776,
+        "G": 0.1504,
+        "k_avant": 4,
+        "k_apres": 3,
+        "delta_k": 1,
+        "J_froid_chaud": 1.0,
+        "residu_%": 74.4
+      },
+      {
+        "jeu": "p0.72/20260903",
+        "S": 0.3972,
+        "G": 0.1851,
+        "k_avant": 5,
+        "k_apres": 4,
+        "delta_k": 1,
+        "J_froid_chaud": 0.7787,
+        "residu_%": 42.1
+      },
+      {
+        "jeu": "p0.72/7",
+        "S": 0.4051,
+        "G": 0.1274,
+        "k_avant": 3,
+        "k_apres": 2,
+        "delta_k": 1,
+        "J_froid_chaud": 0.9109,
+        "residu_%": 40.5
+      },
+      {
+        "jeu": "p0.72/1234",
+        "S": 0.4462,
+        "G": 0.2898,
+        "k_avant": 3,
+        "k_apres": 2,
+        "delta_k": 1,
+        "J_froid_chaud": 1.0,
+        "residu_%": 26.3
+      },
+      {
+        "jeu": "p0.72/99991",
+        "S": 0.4304,
+        "G": 0.2552,
+        "k_avant": 4,
+        "k_apres": 4,
+        "delta_k": 0,
+        "J_froid_chaud": 0.6034,
+        "residu_%": 30.8
+      },
+      {
+        "jeu": "p0.77/20260903",
+        "S": 0.5171,
+        "G": 0.3927,
+        "k_avant": 4,
+        "k_apres": 4,
+        "delta_k": 0,
+        "J_froid_chaud": 0.5203,
+        "residu_%": 16.8
+      },
+      {
+        "jeu": "p0.77/7",
+        "S": 0.5148,
+        "G": 0.3287,
+        "k_avant": 5,
+        "k_apres": 4,
+        "delta_k": 1,
+        "J_froid_chaud": 0.9869,
+        "residu_%": 13.0
+      },
+      {
+        "jeu": "p0.77/1234",
+        "S": 0.5001,
+        "G": 0.4714,
+        "k_avant": 3,
+        "k_apres": 3,
+        "delta_k": 0,
+        "J_froid_chaud": 0.9868,
+        "residu_%": 14.6
+      },
+      {
+        "jeu": "p0.77/99991",
+        "S": 0.4637,
+        "G": 0.4384,
+        "k_avant": 2,
+        "k_apres": 3,
+        "delta_k": 1,
+        "J_froid_chaud": 1.0,
+        "residu_%": 17.8
+      },
+      {
+        "jeu": "p0.85/20260903",
+        "S": 0.5895,
+        "G": 0.4223,
+        "k_avant": 3,
+        "k_apres": 4,
+        "delta_k": 1,
+        "J_froid_chaud": 1.0,
+        "residu_%": 7.1
+      },
+      {
+        "jeu": "p0.85/7",
+        "S": 0.6956,
+        "G": 0.4102,
+        "k_avant": 4,
+        "k_apres": 4,
+        "delta_k": 0,
+        "J_froid_chaud": 1.0,
+        "residu_%": 6.4
+      },
+      {
+        "jeu": "p0.85/1234",
+        "S": 0.5986,
+        "G": 0.5009,
+        "k_avant": 4,
+        "k_apres": 4,
+        "delta_k": 0,
+        "J_froid_chaud": 1.0,
+        "residu_%": 7.0
+      },
+      {
+        "jeu": "p0.85/99991",
+        "S": 0.5558,
+        "G": 0.4161,
+        "k_avant": 3,
+        "k_apres": 4,
+        "delta_k": 1,
+        "J_froid_chaud": 0.5674,
+        "residu_%": 5.1
+      },
+      {
+        "jeu": "REEL Pol.is",
+        "S": 0.2996,
+        "G": 0.2195,
+        "k_avant": 2,
+        "k_apres": 4,
+        "delta_k": 2,
+        "J_froid_chaud": 0.3571,
+        "residu_%": 46.8
+      }
+    ],
+    "resume": {
+      "n": 21,
+      "spearman_G_vs_J": 0.352,
+      "spearman_deltak_vs_J": 0.053,
+      "spearman_S_vs_J": 0.311,
+      "spearman_residu_vs_J": -0.126,
+      "separation_G_pour_J>=0.9": {
+        "seuil": 0.1263,
+        "erreurs": 5,
+        "n": 21,
+        "exactitude_%": 76.2
+      },
+      "separation_deltak_pour_J>=0.9": {
+        "seuil": 1.5,
+        "erreurs": 7,
+        "n": 21,
+        "exactitude_%": 66.7
+      },
+      "separation_S_pour_J>=0.9": {
+        "seuil": 0.3488,
+        "erreurs": 6,
+        "n": 21,
+        "exactitude_%": 71.4
+      },
+      "repartition_delta_k": {
+        "delta_k=0": {
+          "n": 8,
+          "J_min": 0.5203,
+          "J_med": 0.881,
+          "J_max": 1.0,
+          "stables_J>=0.9": 4
+        },
+        "delta_k=1": {
+          "n": 10,
+          "J_min": 0.5674,
+          "J_med": 0.9934,
+          "J_max": 1.0,
+          "stables_J>=0.9": 8
+        },
+        "delta_k=2": {
+          "n": 2,
+          "J_min": 0.3571,
+          "J_med": 0.5088,
+          "J_max": 0.6605,
+          "stables_J>=0.9": 0
+        },
+        "delta_k=3": {
+          "n": 1,
+          "J_min": 1.0,
+          "J_med": 1.0,
+          "J_max": 1.0,
+          "stables_J>=0.9": 1
+        }
+      }
+    }
+  },
+  "partie_2_bruit_de_S": [
+    {
+      "jeu": "p0.67/20260903",
+      "S_reference": 0.4384,
+      "k_reference": 5,
+      "mode": "participants",
+      "n": 12,
+      "S_min": 0.4604,
+      "S_median": 0.501,
+      "S_max": 0.565,
+      "etendue": 0.1046,
+      "franchit_0.456": false,
+      "k_observes": [
+        3,
+        4,
+        5
+      ],
+      "valeurs": [
+        0.4771,
+        0.4604,
+        0.477,
+        0.4984,
+        0.5036,
+        0.5091,
+        0.5055,
+        0.5104,
+        0.565,
+        0.4856,
+        0.4765,
+        0.5173
+      ]
+    },
+    {
+      "jeu": "p0.67/20260903",
+      "S_reference": 0.4384,
+      "k_reference": 5,
+      "mode": "retrait10%",
+      "n": 12,
+      "S_min": 0.3935,
+      "S_median": 0.4316,
+      "S_max": 0.4697,
+      "etendue": 0.0762,
+      "franchit_0.456": true,
+      "k_observes": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "valeurs": [
+        0.3988,
+        0.4236,
+        0.4436,
+        0.4336,
+        0.3964,
+        0.4285,
+        0.4297,
+        0.439,
+        0.4516,
+        0.4636,
+        0.3935,
+        0.4697
+      ]
+    },
+    {
+      "jeu": "p0.62/7",
+      "S_reference": 0.4464,
+      "k_reference": 5,
+      "mode": "participants",
+      "n": 12,
+      "S_min": 0.3692,
+      "S_median": 0.4754,
+      "S_max": 0.5272,
+      "etendue": 0.158,
+      "franchit_0.456": true,
+      "k_observes": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "valeurs": [
+        0.4883,
+        0.4321,
+        0.4771,
+        0.5165,
+        0.4414,
+        0.4817,
+        0.419,
+        0.462,
+        0.4867,
+        0.3692,
+        0.4736,
+        0.5272
+      ]
+    },
+    {
+      "jeu": "p0.62/7",
+      "S_reference": 0.4464,
+      "k_reference": 5,
+      "mode": "retrait10%",
+      "n": 12,
+      "S_min": 0.3521,
+      "S_median": 0.4017,
+      "S_max": 0.4559,
+      "etendue": 0.1038,
+      "franchit_0.456": false,
+      "k_observes": [
+        3,
+        4,
+        5
+      ],
+      "valeurs": [
+        0.402,
+        0.4019,
+        0.4392,
+        0.3736,
+        0.4091,
+        0.4559,
+        0.3929,
+        0.4339,
+        0.4016,
+        0.3906,
+        0.3957,
+        0.3521
+      ]
+    },
+    {
+      "jeu": "p0.77/99991",
+      "S_reference": 0.4637,
+      "k_reference": 2,
+      "mode": "participants",
+      "n": 12,
+      "S_min": 0.4459,
+      "S_median": 0.4932,
+      "S_max": 0.5593,
+      "etendue": 0.1134,
+      "franchit_0.456": true,
+      "k_observes": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "valeurs": [
+        0.5043,
+        0.4908,
+        0.4876,
+        0.5593,
+        0.5378,
+        0.5466,
+        0.4546,
+        0.4957,
+        0.4489,
+        0.4554,
+        0.5398,
+        0.4459
+      ]
+    },
+    {
+      "jeu": "p0.77/99991",
+      "S_reference": 0.4637,
+      "k_reference": 2,
+      "mode": "retrait10%",
+      "n": 12,
+      "S_min": 0.3871,
+      "S_median": 0.4475,
+      "S_max": 0.4762,
+      "etendue": 0.0891,
+      "franchit_0.456": true,
+      "k_observes": [
+        2,
+        3,
+        4
+      ],
+      "valeurs": [
+        0.4487,
+        0.4338,
+        0.4063,
+        0.4463,
+        0.3871,
+        0.4556,
+        0.4548,
+        0.4762,
+        0.4257,
+        0.4363,
+        0.4656,
+        0.4617
+      ]
+    }
+  ]
+}

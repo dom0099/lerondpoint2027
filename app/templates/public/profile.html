@@ -1,0 +1,144 @@
+{% extends "public/base.html" %}
+{% import "public/_anneau.html" as forme %}
+{% block title %}Mon compte — Le Rond-Point 2027{% endblock %}
+{% block body %}
+<h1>Mon compte</h1>
+
+{#
+  L'identicon est déterministe (app/services/avatar.py) : calculé à partir de
+  l'identifiant du compte, pas d'un tirage à l'affichage — la même personne voit
+  toujours le même dessin.
+#}
+<div class="profil-identite">
+  {{ identicon_svg(account.id | string, 64) | safe }}
+  <div>
+    <p class="lead">{{ account.display_name or account.email }}</p>
+    {% if account.display_name %}<p class="mu">{{ account.email }}</p>{% endif %}
+  </div>
+</div>
+
+{% if error and not champ %}<div class="msg err">{{ error }}</div>{% endif %}
+
+<h2>Mon profil</h2>
+<div class="card">
+  <form method="post" action="/compte/profil">
+    <label for="display_name">Nom affiché</label>
+    <input type="text" id="display_name" name="display_name" maxlength="40"
+           placeholder="{{ account.email }}"
+           value="{{ display_name_saisi if display_name_saisi is defined else (account.display_name or '') }}"
+           {% if champ == 'display_name' %}class="invalide" aria-invalid="true"
+           aria-describedby="erreur-display_name"{% endif %}>
+    {% if champ == 'display_name' %}<p class="erreur-champ" id="erreur-display_name">{{ error }}</p>{% endif %}
+    <p class="mu">Affiché à la place de votre adresse e-mail. Laissez vide pour garder
+      l'e-mail.</p>
+
+    <label for="bio">Description</label>
+    <textarea id="bio" name="bio" maxlength="280" rows="3"
+              placeholder="Dites un mot de vous — facultatif."
+              {% if champ == 'bio' %}class="invalide" aria-invalid="true"
+              aria-describedby="erreur-bio"{% endif %}>{{ bio_saisie if bio_saisie is defined else (account.bio or '') }}</textarea>
+    {% if champ == 'bio' %}<p class="erreur-champ" id="erreur-bio">{{ error }}</p>{% endif %}
+
+    <p class="actions"><button type="submit" class="bouton-principal">Enregistrer</button></p>
+  </form>
+</div>
+
+<div class="card">
+  {#
+    L'anneau porte le niveau, le texte le dit. La couleur ne porte jamais
+    l'information seule — l'anneau rempli aux trois quarts ne veut rien dire pour
+    qui ne distingue pas le jaune de la piste grise, la phrase à côté si.
+  #}
+  <div class="niveau">
+    {{ forme.anneau(64, 'niveau', part=progress.fraction) }}
+    <div class="niveau-texte">
+      <h2>Niveau {{ progress.level }} — {{ progress.label }}</h2>
+      <p class="mu">{{ progress.points }} point{{ 's' if progress.points > 1 else '' }}
+         ({{ progress.votes }} vote{{ 's' if progress.votes > 1 else '' }},
+          {{ progress.conversations }} conversation{{ 's' if progress.conversations > 1 else '' }} publiée{{ 's' if progress.conversations > 1 else '' }})</p>
+      {% if progress.next_level_at %}
+        <p class="mu">Encore {{ progress.points_to_next }}
+           point{{ 's' if progress.points_to_next > 1 else '' }} pour le niveau {{ progress.level + 1 }}.</p>
+      {% else %}
+        <p class="mu">Vous avez atteint le dernier niveau.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{#
+  Centres d'intérêt. La page ne recopie PAS la grille de cases : elle montre l'état et
+  mène à l'écran de réglage, qui est le même pour un visiteur anonyme et pour un compte.
+  Deux formulaires pour une même préférence auraient fini par ne plus dire la même
+  chose.
+#}
+<h2>Mes centres d'intérêt</h2>
+<div class="card">
+  {% if mes_themes %}
+  <ul class="themes-debat">
+    {% for libelle in mes_themes %}
+    <li><span class="etiquette etiquette--theme">{{ libelle }}</span></li>
+    {% endfor %}
+  </ul>
+  <p class="mu">L'accueil et la page des débats vous proposent un onglet qui ne montre
+    que ces sujets.</p>
+  {% elif themes_reglees %}
+  <p class="mu">Vous avez choisi de n'en retenir aucun : rien n'est filtré.</p>
+  {% else %}
+  <p class="mu">Vous n'en avez pas encore choisi. En choisir fait apparaître un onglet
+    qui ne montre que les débats correspondants.</p>
+  {% endif %}
+  <p class="actions">
+    <a href="/mes-themes?retour=%2Fcompte">{% if mes_themes or themes_reglees %}Modifier{% else %}Choisir mes centres d'intérêt{% endif %}</a>
+  </p>
+</div>
+
+<h2>Badges</h2>
+{% if progress.badges %}
+  {% for badge in progress.badges %}
+  <div class="card badge">
+    <span class="badge-icone">{{ badge.icon }}</span>
+    <span>
+      <strong>{{ badge.label }}</strong>
+      <div class="mu">{{ badge.description }}</div>
+    </span>
+  </div>
+  {% endfor %}
+{% else %}
+<p class="empty">Aucun badge pour l'instant. Votez une première fois pour en obtenir un.</p>
+{% endif %}
+
+<h2>Comment le niveau est calculé</h2>
+<div class="card">
+  <p class="mu">1 point par vote émis, 25 points par
+     conversation publiée. Une conversation proposée mais non encore approuvée ne
+     compte pas.</p>
+  <table>
+    {% for numero, seuil, intitule in levels %}
+    <tr>
+      <td>
+        {% if numero == progress.level %}<strong>Niveau {{ numero }}</strong>
+        {% else %}Niveau {{ numero }}{% endif %}</td>
+      <td class="mu">{{ intitule }}</td>
+      <td class="mu chiffre aligne-droite">{{ seuil }} pts</td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+
+<h2>Cette session</h2>
+<div class="card">
+  <p class="mu">Vous êtes connecté sur cet appareil.</p>
+  <form method="post" action="/compte/deconnexion">
+    <p class="actions"><button>Déconnexion</button></p>
+  </form>
+</div>
+
+<h2>Vos données</h2>
+<div class="card">
+  <p class="mu">Ce que le site enregistre et pour combien de
+    temps : <a href="/confidentialite">politique de confidentialité</a>.</p>
+  <p><a href="/compte/suppression">Supprimer mon compte et mes
+    données</a> — immédiat et définitif.</p>
+</div>
+{% endblock %}

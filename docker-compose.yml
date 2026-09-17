@@ -1,0 +1,199 @@
+# Pile du chantier C — le site lerondpoint2027.fr en entier, frontal HTTPS compris.
+#
+# Pol.is, qui cohabitait sur ce VPS et prêtait son nginx, a été arrêté puis SUPPRIMÉ le
+# 17/09/2026 (conteneurs, volumes, images, ~/polis). Archives dans
+# ~/sauvegardes-manuelles : base (`polis-dev-avant-arret-20260917.dump`) et dossier
+# (`polis-dossier-avant-suppression-20260917.tar.gz`, contient prod.env — secrets).
+#
+# L'API écoute aussi sur 127.0.0.1:8001, pour l'administration locale ; le public passe
+# par le service `nginx`.
+name: chantier-c
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: chantierc
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD manquant dans .env}
+      POSTGRES_DB: chantierc
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    # Port décalé : 5432 est déjà pris dans le réseau de Pol.is.
+    ports:
+      - "127.0.0.1:5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U chantierc -d chantierc"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+
+  api:
+    build: .
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://chantierc:${POSTGRES_PASSWORD}@db:5432/chantierc
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8001:8000"
+    # `default` reste le réseau de la pile (db, worker) ; `frontal` est celui que l'API
+    # partage avec nginx, et lui seul (`proxy_pass http://api:8000`). Jusqu'au
+    # 17/09/2026, c'était `polis-net`, le réseau de la pile Pol.is, à qui nginx
+    # appartenait.
+    networks:
+      default: {}
+      frontal: {}
+    volumes:
+      # Montage du source : le code se recharge sans reconstruire l'image.
+      - ./app:/app/app
+      - ./migrations:/app/migrations
+      - ./tests:/app/tests
+      - ./alembic.ini:/app/alembic.ini:ro
+      # Les vidéos envoyées (chantier Vidéo) : sur le disque du serveur, PAS dans la
+      # couche du conteneur. Sans ce montage, elles vivaient dans `/app/media` du
+      # conteneur et disparaissaient à sa recréation (`up --build`, changement de ce
+      # fichier…) — la base, elle, gardait leur chemin, et la page cherchait un fichier
+      # perdu. Relevé et corrigé le 17/09/2026. Ignoré par git (voir .gitignore).
+      - ./media:/app/media
+    # --proxy-headers + --forwarded-allow-ips : sans eux, `request.client.host` vaut
+    # l'adresse du proxy pour TOUT LE MONDE une fois derrière nginx, et les plafonds
+    # par IP deviennent un plafond global. Le réseau déclaré est celui de nginx
+    # (`frontal`, 172.30.0.0/24, sous-réseau FIXÉ plus bas pour que cette ligne reste
+    # vraie) : uvicorn n'accepte l'en-tête que de cette source, donc personne ne peut
+    # se choisir une adresse en l'envoyant lui-même.
+    # `--reload` retiré : rechargement à chaud et exposition publique ne vont pas
+    # ensemble (une écriture de fichier à moitié faite redémarre l'application).
+    command: >
+      uvicorn app.main:app --host 0.0.0.0 --port 8000
+      --proxy-headers --forwarded-allow-ips=172.30.0.0/24
+    # Journaux bornés : sans cela, le pilote json-file grossit sans fin. Ils
+    # contiennent des adresses IP, donc leur durée de vie doit être finie et
+    # annonçable dans la politique de confidentialité.
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+    restart: unless-stopped
+
+  # Analyse red-dwarf. Même image que l'API mais processus séparé : pandas et
+  # scikit-learn bloquent le CPU et n'ont rien à faire dans le processus qui sert
+  # les participants. Aucun port : le worker ne reçoit rien, il lit la base.
+  # Nommage des groupes d'opinion par modèle de langue (chantier E4/E5).
+  #
+  # **Pourquoi un service de la pile, et non un processus de l'hôte.** L'API et le worker
+  # tournent en conteneur : pour eux, `127.0.0.1` est leur propre conteneur, pas la
+  # machine. Joindre un serveur d'inférence lancé sur l'hôte aurait demandé de le faire
+  # écouter sur une interface partagée — donc de l'exposer à tout ce qui tourne ici, y
+  # compris la pile Pol.is. En service de la pile, il n'est joignable que par `default`,
+  # sous le nom `nommage`, et ne publie aucun port.
+  #
+  # Aucune image à construire : le binaire llama.cpp est autonome (avec sa `libgomp`
+  # copiée à côté), monté en lecture seule depuis l'hôte. Une image Debian nue suffit à
+  # fournir la glibc et OpenSSL. Mettre le binaire dans une image l'aurait figé dans un artefact à
+  # reconstruire à chaque mise à jour, pour ne rien gagner.
+  nommage:
+    image: ubuntu:24.04
+    environment:
+      LD_LIBRARY_PATH: /opt/llama
+    volumes:
+      - /home/ubuntu/nommage/bin/llama-b10825:/opt/llama:ro
+      - /home/ubuntu/nommage/modeles:/modeles:ro
+    # Six fils sur huit cœurs, en priorité basse : la production passe d'abord. Mesuré
+    # au E2, l'accueil répondait en 0,14 s pendant que le banc tournait à cette charge.
+    # `--no-webui` ferme l'interface de démonstration : ce service n'a qu'un client,
+    # c'est notre worker, et une page servie est une surface de plus.
+    command: >
+      nice -n 10 /opt/llama/llama-server
+      -m /modeles/mistral-7b-instruct-v0.3-Q4_K_M.gguf
+      --host 0.0.0.0 --port 8081
+      -t 6 -c 8192 -np 2 --no-webui
+    # Bornes dures, pour qu'un modèle qui dérape ne puisse pas emporter la base ni
+    # l'API avec lui. Le modèle quantifié tient dans ~5 Go ; 8 en laisse pour le
+    # contexte sans permettre de manger les 22 de la machine.
+    cpus: 6.0
+    mem_limit: 8g
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    restart: unless-stopped
+
+  # Le frontal HTTPS : TLS, redirections des anciennes adresses, proxy vers l'API.
+  # Rattaché à cette pile le 17/09/2026 — il appartenait jusque-là à celle de Pol.is
+  # (~/polis, conteneur polis-dev-nginx-proxy-1), arrêtée le même jour.
+  #
+  # Image officielle, version épinglée : une mise à jour de nginx est une décision, pas
+  # un effet de bord d'un `pull`.
+  nginx:
+    image: nginx:1.28-alpine
+    depends_on:
+      - api
+    networks:
+      - frontal
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # Le RÉPERTOIRE, pas les fichiers un à un : un fichier monté seul reste figé sur
+      # sa version du démarrage quand git le remplace (voir deploy/nginx/00-defaut.conf).
+      # Il remplace entièrement le conf.d de l'image, `default.conf` compris.
+      - ./deploy/nginx:/etc/nginx/conf.d:ro
+      - letsencrypt:/etc/letsencrypt:ro
+      - certbot-webroot:/var/www/certbot:ro
+    # Mêmes bornes que l'API : les journaux d'accès contiennent des adresses IP.
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+    restart: unless-stopped
+
+  # Client ACME, lancé à la demande seulement (profil `tls`, jamais par `up`) : création
+  # d'un certificat, et renouvellement par bin/certbot-renouveler.sh, que déclenche le
+  # timer systemd chantier-c-certbot (deploy/systemd/).
+  certbot:
+    image: certbot/certbot:latest
+    volumes:
+      - letsencrypt:/etc/letsencrypt
+      - certbot-webroot:/var/www/certbot
+    profiles:
+      - tls
+
+  worker:
+    build: .
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://chantierc:${POSTGRES_PASSWORD}@db:5432/chantierc
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./app:/app/app
+    command: python -m app.worker
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+    restart: unless-stopped
+
+networks:
+  # nginx ↔ API, et rien d'autre : ni la base ni le worker n'y sont. Sous-réseau fixé,
+  # parce que `--forwarded-allow-ips` de l'API le nomme (172.30.0.0/24 : libre sur ce
+  # VPS, vérifié le 17/09/2026 — les réseaux Docker existants sont en 172.17 à 172.20).
+  frontal:
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24
+
+volumes:
+  db-data:
+  # Certificats Let's Encrypt (comptes, lignées, configuration de renouvellement). Copiés
+  # le 17/09/2026 depuis `polis-dev_letsencrypt_certs`, supprimé avec Pol.is le même jour :
+  # ce volume est désormais la SEULE copie.
+  letsencrypt:
+  certbot-webroot:

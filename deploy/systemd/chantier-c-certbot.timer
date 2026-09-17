@@ -1,0 +1,11 @@
+[Unit]
+Description=Renouvellement des certificats du chantier C, deux fois par semaine
+
+[Timer]
+# Mêmes jours et heure que l'ancien polis-certbot-renew : la sauvegarde de 03:30 a été
+# placée après lui pour ne pas se marcher dessus.
+OnCalendar=Mon,Thu 03:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

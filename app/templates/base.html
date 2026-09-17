@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Modération{% endblock %} — Le Rond-Point 2027</title>
+<style>
+  :root { --bd:#d8d8d4; --mu:#6b6b66; --ac:#1f5f4f; --bg:#faf9f7; }
+  body { margin:0; font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;
+         color:#1c1c1a; background:var(--bg); }
+  header { background:#fff; border-bottom:1px solid var(--bd); padding:.7rem 1.2rem;
+           display:flex; gap:1.2rem; align-items:baseline; flex-wrap:wrap; }
+  header a { color:var(--ac); text-decoration:none; }
+  header .sp { margin-left:auto; color:var(--mu); font-size:.85rem; }
+  main { max-width:52rem; margin:1.6rem auto; padding:0 1.2rem; }
+  h1 { font-size:1.4rem; margin:0 0 1rem; }
+  h2 { font-size:1.05rem; margin:1.8rem 0 .6rem; }
+  .card { background:#fff; border:1px solid var(--bd); border-radius:6px;
+          padding:1rem 1.1rem; margin-bottom:.8rem; }
+  label { display:block; font-size:.85rem; color:var(--mu); margin:.7rem 0 .2rem; }
+  input[type=text], input[type=email], input[type=password], textarea, select {
+    width:100%; padding:.5rem .6rem; border:1px solid var(--bd); border-radius:4px;
+    font:inherit; box-sizing:border-box; background:#fff; }
+  textarea { min-height:4.5rem; resize:vertical; }
+  button { font:inherit; padding:.45rem .9rem; border-radius:4px; cursor:pointer;
+           border:1px solid var(--ac); background:var(--ac); color:#fff; }
+  button.sec { background:#fff; color:#1c1c1a; border-color:var(--bd); }
+  button.no  { background:#fff; color:#a11; border-color:#e0c0c0; }
+  .row { display:flex; gap:.5rem; align-items:center; flex-wrap:wrap; }
+  .mu { color:var(--mu); font-size:.85rem; }
+  .tag { display:inline-block; font-size:.72rem; padding:.1rem .45rem; border-radius:10px;
+         border:1px solid var(--bd); color:var(--mu); background:#fff; }
+  .empty { color:var(--mu); font-style:italic; }
+  .flash { background:#eef6f2; border:1px solid #bcd9cd; padding:.6rem .8rem;
+           border-radius:4px; margin-bottom:1rem; }
+  table { border-collapse:collapse; width:100%; }
+  td, th { text-align:left; padding:.4rem .5rem; border-bottom:1px solid var(--bd);
+           vertical-align:top; }
+</style>
+</head>
+<body>
+{% if moderator %}
+<header>
+  <a href="/moderation/">Conversations</a>
+  <a href="/moderation/queue">File de modération{% if pending_total %} ({{ pending_total }}){% endif %}</a>
+  {# Les liens morts sont dans la barre et non dans un recoin : personne n'irait
+     chercher un écran qu'aucun chiffre n'appelle. #}
+  <a href="/moderation/liens">Liens signalés{% if liens_total %} ({{ liens_total }}){% endif %}</a>
+  {# Même raison que les liens morts : un écran qu'aucun chiffre n'appelle ne se
+     visite pas. Le compteur est celui des signalements NON TRAITÉS, qui est aussi
+     l'un des deux repères de la tête de l'écran — le même nombre, calculé par la
+     même fonction, pour que la barre ne puisse pas annoncer autre chose que la page. #}
+  <a href="/moderation/signalements">Signalements{% if signalements_total %} ({{ signalements_total }}){% endif %}</a>
+  {# Pas de compteur ici, contrairement aux deux voisins : un chiffre dans la barre
+     annoncerait « il y a des alertes » à quiconque regarde l'écran par-dessus une
+     épaule, et le fait même qu'un débat soit surveillé ne se montre pas. #}
+  <a href="/moderation/reformulations">Reformulations{% if reformulations_total %} ({{ reformulations_total }}){% endif %}</a>
+  <a href="/moderation/independance">Indépendance</a>
+  <a href="/admin">Admin</a>
+  <span class="sp">{{ moderator.email }} —
+    <form method="post" action="/moderation/logout" style="display:inline">
+      <button class="sec" style="padding:.15rem .5rem;font-size:.8rem">Déconnexion</button>
+    </form>
+  </span>
+</header>
+{% endif %}
+<main>
+{% if flash %}<div class="flash">{{ flash }}</div>{% endif %}
+{% block body %}{% endblock %}
+</main>
+</body>
+</html>

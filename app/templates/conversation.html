@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+{% block title %}{{ conversation.title }}{% endblock %}
+{% block body %}
+<h1>{{ conversation.title }}</h1>
+<p class="mu">/{{ conversation.slug }} — créée le {{ conversation.created_at.strftime('%d/%m/%Y') }}</p>
+
+<form method="post" action="/moderation/conversations/{{ conversation.id }}" class="card">
+  <label for="title">Titre</label>
+  <input type="text" id="title" name="title" value="{{ conversation.title }}" required>
+  <label for="description">Description</label>
+  <textarea id="description" name="description">{{ conversation.description or '' }}</textarea>
+  <div class="row">
+    <span>
+      <label for="state">État</label>
+      <select id="state" name="state">
+        {% for s in states %}
+        <option value="{{ s }}" {% if conversation.state.value == s %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </span>
+  </div>
+  <label for="force_group_count">Nombre de groupes d'opinion</label>
+  <select id="force_group_count" name="force_group_count">
+    <option value="" {% if conversation.force_group_count is none %}selected{% endif %}>
+      Automatique — laisser l'analyse décider</option>
+    {% for n in [2, 3, 4, 5] %}
+    <option value="{{ n }}" {% if conversation.force_group_count == n %}selected{% endif %}>
+      Figer à {{ n }} groupes</option>
+    {% endfor %}
+  </select>
+  <p class="mu" style="margin:.2rem 0 0">Le nombre automatique peut varier d'un
+    recalcul à l'autre. Le figer stabilise l'affichage quand la conversation est mûre.
+    La modification est prise en compte au prochain recalcul.</p>
+
+  <label for="min_user_votes">Votes exigés pour être situé dans un groupe</label>
+  <input type="number" id="min_user_votes" name="min_user_votes" min="1" max="50"
+         value="{{ conversation.min_user_votes if conversation.min_user_votes is not none else '' }}"
+         placeholder="Automatique — {{ auto_min_user_votes }} vote(s) pour {{ approved_statements }} proposition(s) approuvée(s)">
+  <p class="mu" style="margin:.2rem 0 0">Laissé vide, le seuil suit la taille de la
+    conversation — « avoir voté sur la majorité des propositions », plafonné à 7. Une
+    valeur supérieure au nombre de propositions rendrait l'analyse impossible :
+    personne ne pourrait l'atteindre.</p>
+
+  {#
+    Thèmes. Exigés dès que l'état n'est plus « draft » : un débat publié sans thème est
+    invisible au filtre, et le devient d'autant plus qu'on attend pour l'étiqueter.
+  #}
+  <label>Thèmes — de 1 à {{ themes_max }}, exigés dès la publication</label>
+  <ul class="grille-themes">
+    {% for theme in themes %}
+    <li><label title="{{ theme.aide }}">
+      <input type="checkbox" name="themes" value="{{ theme.code }}"
+             {% if theme.code in themes_choisis %}checked{% endif %}>
+      {{ theme.libelle }}
+    </label></li>
+    {% endfor %}
+  </ul>
+
+  <label><input type="checkbox" name="allow_participant_statements" value="1"
+    {% if conversation.allow_participant_statements %}checked{% endif %}>
+    Les participants peuvent ajouter des propositions</label>
+  <p><button type="submit">Enregistrer</button></p>
+</form>
+
+<h2>Propositions ({{ statements|length }})</h2>
+{% if statements %}
+<table>
+  {% for s in statements %}
+  <tr>
+    <td>{{ s.text }}
+      {% if s.sources %}
+      <ul class="mu" style="margin:.2rem 0 0;padding-left:1.1rem">
+        {% for source in s.sources %}
+        {# Même règle que la file : visible toujours, cliquable seulement si la
+           destination a un nom. #}
+        <li>{% if source.label %}{{ source.label }} — {% endif %}
+          {%- if source.domaine %}<a href="{{ source.url }}"
+            rel="noopener noreferrer nofollow" target="_blank">{{ source.url }}</a>
+          {%- else %}<code>{{ source.url }}</code>
+            <span class="tag">non cliquable</span>{% endif %}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </td>
+    <td style="white-space:nowrap">
+      <span class="tag">{{ s.moderation_status.value }}</span>
+      {% if s.is_seed %}<span class="tag">amorce</span>{% endif %}
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+<p class="empty">Aucune proposition. Ajoutez-en ci-dessous pour amorcer la conversation.</p>
+{% endif %}
+
+{#
+  Les chiffres publics du débat (chantier J4).
+
+  Écran volontairement SEC : un tableau de formulaires et un formulaire d'ajout, pas
+  d'éditeur. C'est l'outil d'une personne, pas un produit — et chaque commodité ajoutée
+  ici serait à tester et à maintenir pour un usage qui se compte en lignes par débat.
+
+  Chaque ligne est SON PROPRE formulaire. Un formulaire unique pour tout le tableau
+  aurait imposé de renvoyer toutes les lignes à chaque correction d'une virgule, et un
+  échec de validation sur l'une aurait fait perdre les autres.
+#}
+<h2>Chiffres publics ({{ chiffres|length }})</h2>
+<p class="mu">Recopiés à la main, avec leur source. Rien n'est récupéré
+  automatiquement — voir la page publique <a href="/c/{{ conversation.slug }}/chiffres"
+  target="_blank">Les chiffres du débat</a>.</p>
+
+{% for c in chiffres %}
+<form method="post" action="/moderation/conversations/{{ conversation.id }}/chiffres/{{ c.id }}"
+      class="card">
+  <label>Intitulé</label>
+  <input type="text" name="titre" maxlength="300" required value="{{ c.titre }}">
+  <label>Chiffre <span class="mu">tel qu'il se lit : « 12,4 % », « 3 200 communes »</span></label>
+  <input type="text" name="valeur" maxlength="120" required value="{{ c.valeur }}">
+  <label>Source (adresse)</label>
+  <input type="url" name="url" maxlength="2000" required value="{{ c.url }}">
+  {#
+    DEUX dates, et deux libellés qui disent ce qu'elles veulent dire. « Mis à jour »
+    tout court ne dirait pas si la donnée est de cette année ou d'il y a sept ans, et
+    c'est précisément la confusion que cette page existe pour empêcher.
+  #}
+  <label>Date de la donnée <span class="mu">à quand se rapporte le chiffre</span></label>
+  <input type="date" name="date_donnees" value="{{ c.date_donnees.isoformat() if c.date_donnees else '' }}">
+  <label>Date de vérification <span class="mu">quand vous l'avez regardé</span></label>
+  <input type="date" name="date_verification" value="{{ c.date_verification.isoformat() if c.date_verification else '' }}">
+  <label>Rang d'affichage</label>
+  <input type="number" name="position" min="0" max="999" value="{{ c.position }}">
+  <p><button type="submit">Enregistrer</button></p>
+</form>
+{#
+  La suppression est un formulaire À PART, et en POST. Un bouton de suppression dans le
+  formulaire d'édition aurait été un second bouton de soumission à côté d'« Enregistrer »
+  — la touche Entrée en aurait choisi un des deux. Et en GET, un préchargement de
+  navigateur viderait la page sans que personne ait cliqué.
+#}
+<form method="post"
+      action="/moderation/conversations/{{ conversation.id }}/chiffres/{{ c.id }}/supprimer"
+      style="margin:-.6rem 0 1rem">
+  <button type="submit" class="no">Supprimer ce chiffre</button>
+</form>
+{% else %}
+<p class="empty">Aucun chiffre pour ce débat. Le lien vers la page publique n'apparaît
+  pas tant qu'il n'y en a pas.</p>
+{% endfor %}
+
+<h3>Ajouter un chiffre</h3>
+<form method="post" action="/moderation/conversations/{{ conversation.id }}/chiffres"
+      class="card">
+  <label>Intitulé</label>
+  <input type="text" name="titre" maxlength="300" required
+         placeholder="Ex. : communes de moins de 500 habitants">
+  <label>Chiffre</label>
+  <input type="text" name="valeur" maxlength="120" required placeholder="3 200 communes">
+  <label>Source (adresse)</label>
+  <input type="url" name="url" maxlength="2000" required placeholder="https://www.insee.fr/…">
+  <label>Date de la donnée</label>
+  <input type="date" name="date_donnees">
+  <label>Date de vérification</label>
+  <input type="date" name="date_verification">
+  <label>Rang d'affichage</label>
+  <input type="number" name="position" min="0" max="999" value="0">
+  <p><button type="submit">Ajouter</button></p>
+</form>
+
+{#
+  Vidéo de présentation (chantier Vidéo, VIDEO-2). Écran de modération, pas de
+  formulaire participant : c'est ici, et nulle part ailleurs, que « viennent les
+  envois » — la question que le journal VIDEO-1 avait laissée ouverte.
+#}
+<h2>Vidéo de présentation</h2>
+<p class="mu">25 s maximum, un seul fichier à la fois — l'envoyer en remplace un
+  éventuel précédent, qui n'est pas conservé. Jusqu'à
+  {{ (video_max_octets / 1000000)|int }} Mo.</p>
+
+{#
+  VIDEO-3 : un débat encore `pending` peut déjà porter la vidéo que son auteur a
+  jointe À LA PROPOSITION (miniature choisie automatiquement, pas d'écran à trois
+  candidates côté participant). Lecture seule ici tant que la relecture n'a pas
+  tranché — voir `_refuser_si_en_attente` dans `app/routers/moderation.py`.
+#}
+{% set en_attente = conversation.moderation_status.value == 'pending' %}
+
+{% if conversation.video_chemin %}
+<p>
+  <video controls preload="metadata" style="max-width:280px;display:block"
+    src="/moderation/conversations/{{ conversation.id }}/video/fichier"></video>
+</p>
+<p class="mu">{{ '%.1f'|format(conversation.video_duree_secondes) }} s —
+  profil {{ conversation.video_profil }}
+  {% if conversation.proposed_by_participant_id %}— jointe par l'auteur du débat{% endif %}</p>
+
+{% if conversation.video_miniature_chemin %}
+<p><img src="/moderation/conversations/{{ conversation.id }}/video/couverture"
+  alt="Couverture retenue" style="max-width:160px;display:block"></p>
+{% elif not en_attente %}
+<form method="post" action="/moderation/conversations/{{ conversation.id }}/video/miniature"
+      class="card">
+  <label>Miniature à choisir — elle servira de couverture</label>
+  <div class="row">
+    {% for i in video_miniature_positions %}
+    <label style="text-align:center">
+      <img src="/moderation/conversations/{{ conversation.id }}/video/miniature/{{ i }}"
+        alt="Candidate {{ i + 1 }}" style="max-width:120px;display:block;margin-bottom:.3rem">
+      <input type="radio" name="indice" value="{{ i }}" required> choisir
+    </label>
+    {% endfor %}
+  </div>
+  <p><button type="submit">Retenir cette miniature</button></p>
+</form>
+{% endif %}
+
+{% if not en_attente %}
+<form method="post" action="/moderation/conversations/{{ conversation.id }}/video/supprimer"
+      style="margin:-.6rem 0 1rem">
+  <button type="submit" class="no">Retirer la vidéo</button>
+</form>
+{% endif %}
+{% else %}
+<p class="empty">Aucune vidéo pour ce débat.</p>
+{% endif %}
+
+{% if en_attente %}
+<p class="mu">Ce débat est en attente de relecture : la vidéo de l'auteur (s'il en a
+  joint une) ne peut être remplacée ou retirée qu'après votre décision — approbation
+  ou rejet, dans la file de modération.</p>
+{% else %}
+<form method="post" action="/moderation/conversations/{{ conversation.id }}/video"
+      enctype="multipart/form-data" class="card" id="video-envoi">
+  <label for="video-fichier">
+    {{ 'Remplacer la vidéo' if conversation.video_chemin else 'Ajouter une vidéo' }}
+  </label>
+  <input type="file" id="video-fichier" name="fichier" accept="video/*" required
+    data-max-octets="{{ video_max_octets }}">
+  {#
+    Avertissement AVANT l'envoi, décision du 13/09/2026. Un confort d'ergonomie, pas un
+    contrôle : le plafond réel est vérifié pendant l'envoi, côté serveur, quoi qu'il
+    arrive ici — voir `app/routers/moderation.py`.
+  #}
+  <p class="mu" id="video-avertissement" hidden></p>
+  <p><button type="submit">Envoyer</button></p>
+</form>
+<script>
+(function () {
+  var form = document.getElementById('video-envoi');
+  if (!form) return;
+  form.addEventListener('submit', function (evenement) {
+    var champ = document.getElementById('video-fichier');
+    var avertissement = document.getElementById('video-avertissement');
+    var fichier = champ.files[0];
+    var plafond = parseInt(champ.dataset.maxOctets, 10);
+    if (fichier && plafond && fichier.size > plafond) {
+      evenement.preventDefault();
+      avertissement.hidden = false;
+      avertissement.textContent = 'Ce fichier pèse ' + (fichier.size / 1e6).toFixed(1) +
+        ' Mo, au-delà des ' + (plafond / 1e6).toFixed(0) + ' Mo autorisés — envoi annulé.';
+    }
+  });
+})();
+</script>
+{% endif %}
+
+<h2>Ajouter une proposition d'amorce</h2>
+<form method="post" action="/moderation/conversations/{{ conversation.id }}/statements" class="card">
+  <textarea name="text" required maxlength="500"
+            placeholder="Une affirmation claire, sur laquelle on peut être d'accord ou non."></textarea>
+  {#
+    Mêmes champs que le chemin participant, et c'est la réponse à la question 3 : une
+    amorce donne le ton du débat et sera la première votée, donc c'est souvent là qu'un
+    chiffre a le plus de valeur.
+  #}
+  <input type="url" name="source_url" maxlength="2000" placeholder="Source (facultatif) — https://…">
+  <input type="text" name="source_label" maxlength="120" placeholder="De quoi s'agit-il ?">
+  <input type="url" name="source_url" maxlength="2000" placeholder="Seconde source (facultatif)">
+  <input type="text" name="source_label" maxlength="120" placeholder="De quoi s'agit-il ?">
+  <p><button type="submit">Ajouter</button> <span class="mu">approuvée d'emblée</span></p>
+</form>
+{% endblock %}

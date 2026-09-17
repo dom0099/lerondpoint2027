@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Reformulations{% endblock %}
+{#
+  Le registre des reformulations (MOD-16).
+
+  **Pourquoi cet écran existe.** Celui des signalements montre ce qu'il y a À FAIRE : une
+  reformulation acceptée en sort avec la plainte qu'elle a close, et il ne reste alors
+  rien de visible de ce qui a été proposé ni de ce que l'auteur a répondu. Le journal
+  d'audit le porte, mais il n'est pas un écran de lecture.
+
+  **Aucun bouton, nulle part.** Les deux seuls gestes possibles sur une reformulation —
+  accepter, refuser — appartiennent à l'auteur. Les proposer ici reviendrait à laisser le
+  responsable répondre à sa place.
+
+  **Les refusées sont montrées comme les autres.** Un registre qui ne garderait que les
+  succès donnerait à lire une suite de réussites, c'est-à-dire le contraire de ce qu'un
+  registre sert à faire — et le refus est une réponse de l'auteur, souvent la seule trace
+  qu'il ait laissée.
+#}
+{% block body %}
+<h1>Reformulations{% if lignes %} ({{ lignes|length }}){% endif %}</h1>
+
+<p class="mu">Ce que le responsable a proposé aux auteurs de propositions signalées, et ce
+  qu'ils en ont fait. Écran de lecture : les deux réponses possibles appartiennent à
+  l'auteur, et rien ici ne permet de répondre à sa place.</p>
+
+{% if not lignes %}
+<p class="mu">Aucune reformulation n'a encore été proposée.</p>
+{% endif %}
+
+{% for etat, titre, explication in [
+     ('proposee', 'En attente de la réponse de l’auteur',
+      'Elles disparaissent d’elles-mêmes si l’auteur ne répond pas dans le délai. Tant qu’une reformulation attend, aucune autre ne peut être proposée sur la même proposition.'),
+     ('acceptee', 'Acceptées par l’auteur',
+      'Le texte de la proposition a été remplacé, et ses votes ont été conservés. Le texte d’origine est ci-dessous, et le journal d’audit le porte aussi.'),
+     ('refusee', 'Refusées par l’auteur',
+      'Rien n’a changé. Le signalement qui avait motivé la reformulation est resté ouvert : c’est au responsable de le reprendre.')
+   ] %}
+{% set groupe = lignes | selectattr('reformulation.statut.value', 'equalto', etat) | list %}
+{% if groupe %}
+<h2>{{ titre }} ({{ groupe|length }})</h2>
+<p class="mu" style="margin:0 0 .8rem">{{ explication }}</p>
+
+{% for ligne in groupe %}
+<div class="carte" style="margin:0 0 .9rem;padding:.7rem .8rem;border:1px solid var(--bd);border-radius:4px">
+  <p class="mu" style="margin:0 0 .4rem">
+    Proposition n° {{ ligne.statement.id }} ·
+    <a href="/c/{{ ligne.conversation_slug }}">{{ ligne.conversation_titre }}</a> ·
+    proposée le {{ ligne.reformulation.propose_le.strftime('%d/%m/%Y à %H:%M') }}
+    {%- if ligne.reformulation.repondu_le %} · réponse le
+    {{ ligne.reformulation.repondu_le.strftime('%d/%m/%Y à %H:%M') }}{% endif %}
+  </p>
+
+  {#
+    Les deux textes en regard et étiquetés, comme sur l'écran de l'auteur. Pour une
+    reformulation acceptée, « le texte d'origine » est la seule trace lisible de ce sur
+    quoi les votes conservés ont réellement porté.
+  #}
+  <p class="mu" style="margin:0 0 .2rem">Texte d’origine :</p>
+  <blockquote class="mu" style="margin:0 0 .5rem;padding-left:.8rem;border-left:3px solid var(--bd)">
+    {{ ligne.reformulation.texte_origine }}</blockquote>
+  <p class="mu" style="margin:0 0 .2rem">Texte proposé :</p>
+  <blockquote style="margin:0 0 .5rem;padding-left:.8rem;border-left:3px solid var(--or-brule)">
+    {{ ligne.reformulation.texte_propose }}</blockquote>
+
+  {% if etat == 'proposee' %}
+  {#
+    Le temps qu'il reste, et non l'âge : ce qu'on veut savoir d'un échange en attente est
+    quand il va disparaître, pas depuis quand il dure. `restants` est calculé par le
+    routeur — une propriété qui interrogerait l'horloge à chaque accès donnerait deux
+    valeurs différentes dans la même page.
+  #}
+  {% set restant = restants.get(ligne.reformulation.id) %}
+  <p class="mu" style="margin:0">
+    {% if restant %}Disparaît dans {{ restant }} sans réponse de l’auteur.
+    {% else %}<strong>Le délai de {{ delai_jours }} jours est écoulé</strong> : elle sera
+      supprimée au prochain passage du worker.{% endif %}
+  </p>
+  {% elif etat == 'acceptee' %}
+  <p class="mu" style="margin:0">La proposition porte désormais le texte proposé, et ses
+    votes antérieurs ont été conservés.</p>
+  {% endif %}
+</div>
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Liens signalés{% endblock %}
+{#
+  L'écran de correction du chantier K. Trois principes le gouvernent, et chacun répond
+  à une décision prise plus tôt :
+
+    1. **Rien n'est supprimé ici, et rien ne peut l'être.** Cette page ne porte aucun
+       bouton d'action : elle dit où aller. La correction se fait dans l'écran du débat,
+       là où le modérateur voit le chiffre entier et son contexte — un bouton
+       « supprimer » posé à côté d'un signalement faillible ferait effacer d'un geste
+       une source que personne ne pourrait plus retrouver.
+    2. **Aucun bouton « vérifier maintenant ».** Ce serait une requête sortante
+       déclenchée à la demande vers une adresse fournie par un tiers, c'est-à-dire
+       exactement ce que le J0 a refusé. C'était la question 6 posée au client.
+    3. **Le lien est cliquable.** C'est la seule vérification qui vaille sur un
+       signalement faillible : un humain qui ouvre la page. Un site qui répond 404 à un
+       robot et 200 à un navigateur existe, et aucun `HEAD` ne le dira jamais.
+#}
+{% block body %}
+<h1>Liens signalés injoignables{% if signalements %} ({{ signalements|length }}){% endif %}</h1>
+
+<p class="mu">Un lien n'arrive ici qu'après <strong>{{ echecs_pour_signaler }} constats
+  d'absence</strong> (404 ou 410), séparés d'au moins <strong>{{ jours_pour_signaler }}
+  jours</strong>. Un refus de robot, une panne ou un délai dépassé ne comptent pas : ils
+  ne disent pas que la page est morte. Le signalement est déjà visible du public, à côté
+  du lien, qui reste cliquable — rien n'a été retiré.</p>
+
+{% if signalements %}
+{% for s in signalements %}
+<div class="card">
+  <p style="margin:0 0 .3rem">
+    {#
+      L'adresse en entier, comme dans la file de modération : c'est elle qu'il s'agit de
+      juger, et un domaine seul ne dit pas quelle page a disparu. Elle est cliquable —
+      voir le principe 3 en tête de page.
+    #}
+    <a href="{{ s.lien.url }}" rel="noopener noreferrer nofollow"
+       target="_blank">{{ s.lien.url }}</a>
+    <span class="tag">{{ s.lien.domaine }}</span>
+  </p>
+  <p class="mu" style="margin:0 0 .6rem">
+    Introuvable depuis le {{ s.lien.premier_echec.strftime('%d/%m/%Y') }} ·
+    {{ s.lien.echecs_consecutifs }} constat(s) ·
+    dernier essai le {{ s.lien.dernier_essai.strftime('%d/%m/%Y à %H:%M') }}
+    {%- if s.lien.code_http %} (code {{ s.lien.code_http }}){% endif %}
+    {%- if s.lien.dernier_succes %} · répondait encore le
+    {{ s.lien.dernier_succes.strftime('%d/%m/%Y') }}{% endif %}
+  </p>
+
+  {#
+    Le chemin de retour, sans lequel l'écran dirait « quelque chose est mort quelque
+    part ». La table est indexée par adresse ; un modérateur, lui, corrige un chiffre
+    dans un débat. Une même adresse citée à plusieurs endroits les liste tous — et
+    c'est le cas en production, où deux chiffres du même bilan citent la même page.
+  #}
+  <p class="mu" style="margin:0 0 .2rem">Publié {{ s.citations|length }} fois :</p>
+  <ul style="margin:.2rem 0 0;padding-left:1.1rem">
+    {% for citation in s.citations %}
+    <li>
+      {% if citation.genre == 'chiffre' %}
+      <span class="tag">chiffre</span>
+      {% else %}
+      <span class="tag">apport d'un participant</span>
+      {% endif %}
+      {% if citation.libelle %}{{ citation.libelle }} — {% endif %}
+      <a href="/moderation/conversations/{{ citation.conversation_id }}">{{ citation.titre_debat }}</a>
+      {#
+        Et la page publique, pour voir ce que le lecteur voit. Deux liens plutôt qu'un :
+        celui de gauche corrige, celui de droite montre.
+      #}
+      <a class="mu" href="/c/{{ citation.slug }}{% if citation.genre == 'chiffre' %}/chiffres{% endif %}"
+         target="_blank">(voir la page publique)</a>
+    </li>
+    {% endfor %}
+  </ul>
+</div>
+{% endfor %}
+{% else %}
+{#
+  L'état vide dit la règle plutôt que « rien à signaler » : sur un écran qu'on ouvre
+  deux fois par an, « aucun lien » sans explication laisse croire que rien n'est
+  vérifié.
+#}
+<p class="empty">Aucun lien signalé. Les adresses publiées sont revérifiées
+  régulièrement ; celles qui ne répondent plus apparaîtront ici une fois la règle des
+  {{ echecs_pour_signaler }} constats à {{ jours_pour_signaler }} jours d'écart
+  satisfaite.</p>
+{% endif %}
+{% endblock %}

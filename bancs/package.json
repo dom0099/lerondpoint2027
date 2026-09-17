@@ -1,0 +1,7 @@
+{
+  "name": "bancs-chantier-moderation",
+  "private": true,
+  "description": "Bancs d'essai JavaScript. Hors production : rien de ceci n'est servi ni déployé.",
+  "scripts": { "banc": "node detection.banc.mjs" },
+  "dependencies": { "jsdom": "^24.0.0" }
+}

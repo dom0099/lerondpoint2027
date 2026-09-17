@@ -1,0 +1,321 @@
+{
+  "A_donnees_reelles": {
+    "source": "export Pol.is du 2026-09-01 (blog.lerondpoint2027.fr), déjà présent dans ~/red-dwarf-test",
+    "votes_total": 112,
+    "participants_total": 14,
+    "declarations": 8,
+    "coupe_2_tiers": {
+      "votes": 74,
+      "participants": 10
+    },
+    "communs": 10,
+    "temoin_bit_a_bit": true,
+    "k_avant": 2,
+    "k_apres": 4,
+    "k_chaud": 5,
+    "deplacement_%": {
+      "sans correction": 113.2,
+      "flip_x": 178.0,
+      "flip_x+flip_y (defaut biblio)": 138.4,
+      "ALIGNEMENT AUTO": 46.8
+    },
+    "alignement": {
+      "reflexion": true,
+      "echelle": 0.784,
+      "axe_ou_angle_deg": 16.389
+    },
+    "jaccard_froid_vs_chaud": 0.3571,
+    "jaccard_avant_vs_froid_communs": 0.4074,
+    "jaccard_avant_vs_chaud_communs": 0.5972,
+    "identite_froid": {
+      "0": 0,
+      "1": 1
+    },
+    "identite_chaud": {
+      "0": 2,
+      "1": 1
+    }
+  },
+  "B1_origine_du_residu": [
+    {
+      "corpus": "net",
+      "graine": 20260903,
+      "residu_%_pipeline_complet": 7.1,
+      "residu_%_pca_nue_imputation_moyenne": 7.1,
+      "residu_%_pca_nue_remplissage_zero": 7.1,
+      "angles_principaux_deg": [
+        12.3,
+        17.0
+      ]
+    },
+    {
+      "corpus": "net",
+      "graine": 7,
+      "residu_%_pipeline_complet": 6.4,
+      "residu_%_pca_nue_imputation_moyenne": 6.4,
+      "residu_%_pca_nue_remplissage_zero": 6.4,
+      "angles_principaux_deg": [
+        8.2,
+        14.1
+      ]
+    },
+    {
+      "corpus": "net",
+      "graine": 1234,
+      "residu_%_pipeline_complet": 7.0,
+      "residu_%_pca_nue_imputation_moyenne": 7.0,
+      "residu_%_pca_nue_remplissage_zero": 7.2,
+      "angles_principaux_deg": [
+        10.3,
+        16.6
+      ]
+    },
+    {
+      "corpus": "flou",
+      "graine": 20260903,
+      "residu_%_pipeline_complet": 64.0,
+      "residu_%_pca_nue_imputation_moyenne": 62.4,
+      "residu_%_pca_nue_remplissage_zero": 68.7,
+      "angles_principaux_deg": [
+        38.2,
+        62.7
+      ]
+    },
+    {
+      "corpus": "flou",
+      "graine": 7,
+      "residu_%_pipeline_complet": 50.2,
+      "residu_%_pca_nue_imputation_moyenne": 49.5,
+      "residu_%_pca_nue_remplissage_zero": 50.6,
+      "angles_principaux_deg": [
+        32.0,
+        52.8
+      ]
+    },
+    {
+      "corpus": "flou",
+      "graine": 1234,
+      "residu_%_pipeline_complet": 53.6,
+      "residu_%_pca_nue_imputation_moyenne": 54.3,
+      "residu_%_pca_nue_remplissage_zero": 63.7,
+      "angles_principaux_deg": [
+        23.5,
+        63.0
+      ]
+    }
+  ],
+  "B2_balayages": {
+    "couverture": [
+      {
+        "corpus": "flou",
+        "couverture": 0.5,
+        "residus": [
+          50.3,
+          57.5,
+          79.4
+        ],
+        "median": 57.5
+      },
+      {
+        "corpus": "net",
+        "couverture": 0.5,
+        "residus": [
+          12.8,
+          19.3,
+          15.9
+        ],
+        "median": 15.9
+      },
+      {
+        "corpus": "flou",
+        "couverture": 0.6,
+        "residus": [
+          59.5,
+          59.4,
+          59.0
+        ],
+        "median": 59.4
+      },
+      {
+        "corpus": "net",
+        "couverture": 0.6,
+        "residus": [
+          16.3,
+          14.2,
+          19.3
+        ],
+        "median": 16.3
+      },
+      {
+        "corpus": "flou",
+        "couverture": 0.7,
+        "residus": [
+          64.0,
+          50.2,
+          53.6
+        ],
+        "median": 53.6
+      },
+      {
+        "corpus": "net",
+        "couverture": 0.7,
+        "residus": [
+          11.3,
+          12.0,
+          10.6
+        ],
+        "median": 11.3
+      },
+      {
+        "corpus": "flou",
+        "couverture": 0.8,
+        "residus": [
+          48.4,
+          71.6,
+          74.6
+        ],
+        "median": 71.6
+      },
+      {
+        "corpus": "net",
+        "couverture": 0.8,
+        "residus": [
+          9.2,
+          12.9,
+          7.9
+        ],
+        "median": 9.2
+      },
+      {
+        "corpus": "flou",
+        "couverture": 0.9,
+        "residus": [
+          50.2,
+          32.7,
+          72.5
+        ],
+        "median": 50.2
+      },
+      {
+        "corpus": "net",
+        "couverture": 0.9,
+        "residus": [
+          7.1,
+          6.4,
+          7.0
+        ],
+        "median": 7.0
+      },
+      {
+        "corpus": "flou",
+        "couverture": 1.0,
+        "residus": [
+          49.7,
+          88.8,
+          67.1
+        ],
+        "median": 67.1
+      },
+      {
+        "corpus": "net",
+        "couverture": 1.0,
+        "residus": [
+          6.7,
+          7.3,
+          5.3
+        ],
+        "median": 6.7
+      }
+    ],
+    "taille": [
+      {
+        "corpus": "flou",
+        "nouveaux": 50,
+        "total": 100,
+        "residus": [
+          67.9,
+          52.8,
+          49.3
+        ],
+        "median": 52.8
+      },
+      {
+        "corpus": "net",
+        "nouveaux": 50,
+        "total": 100,
+        "residus": [
+          6.1,
+          6.1,
+          7.4
+        ],
+        "median": 6.1
+      },
+      {
+        "corpus": "flou",
+        "nouveaux": 100,
+        "total": 150,
+        "residus": [
+          64.0,
+          50.2,
+          53.6
+        ],
+        "median": 53.6
+      },
+      {
+        "corpus": "net",
+        "nouveaux": 100,
+        "total": 150,
+        "residus": [
+          7.1,
+          6.4,
+          7.0
+        ],
+        "median": 7.0
+      },
+      {
+        "corpus": "flou",
+        "nouveaux": 200,
+        "total": 250,
+        "residus": [
+          73.3,
+          59.0,
+          54.1
+        ],
+        "median": 59.0
+      },
+      {
+        "corpus": "net",
+        "nouveaux": 200,
+        "total": 250,
+        "residus": [
+          6.7,
+          7.4,
+          7.2
+        ],
+        "median": 7.2
+      },
+      {
+        "corpus": "flou",
+        "nouveaux": 400,
+        "total": 450,
+        "residus": [
+          63.3,
+          70.8,
+          70.2
+        ],
+        "median": 70.2
+      },
+      {
+        "corpus": "net",
+        "nouveaux": 400,
+        "total": 450,
+        "residus": [
+          6.6,
+          7.8,
+          7.7
+        ],
+        "median": 7.7
+      }
+    ]
+  }
+}

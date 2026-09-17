@@ -1,0 +1,9 @@
+{% extends "public/base.html" %}
+{% block title %}Service momentanément indisponible — Le Rond-Point 2027{% endblock %}
+{% block body %}
+<h1>Service momentanément indisponible</h1>
+<div class="msg err">{{ message }}</div>
+<p class="mu">Cette page ne signale pas une erreur de votre part. Si elle persiste
+  au-delà de quelques minutes, c'est que la panne est plus longue que prévu.</p>
+<p><a href="/">Réessayer</a></p>
+{% endblock %}

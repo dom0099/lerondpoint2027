@@ -1,0 +1,18 @@
+{% extends "public/base.html" %}
+{% block title %}Mot de passe oublié — Le Rond-Point 2027{% endblock %}
+{% block body %}
+<h1>Mot de passe oublié</h1>
+{% if sent %}
+  <div class="msg ok">Si un compte existe avec cette adresse, un lien de
+  réinitialisation vient d'y être envoyé. Le lien est valable une heure.</div>
+  <p class="mu"><a href="/compte/connexion">Retour à la connexion</a></p>
+{% else %}
+  <p class="lead">Indiquez votre adresse : nous vous enverrons un lien pour choisir un
+  nouveau mot de passe.</p>
+  <form method="post" action="/compte/mot-de-passe-oublie" class="card">
+    <label for="username">Adresse e-mail</label>
+    <input type="email" id="username" name="username" required autofocus autocomplete="email">
+    <p class="actions"><button type="submit" class="bouton-principal">Envoyer le lien</button></p>
+  </form>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "public/base.html" %}
+{% block title %}Nouveau mot de passe — Le Rond-Point 2027{% endblock %}
+{% block body %}
+<h1>Choisir un nouveau mot de passe</h1>
+{% if done %}
+  <div class="msg ok">Votre mot de passe a été changé.</div>
+  <p><a class="bouton bouton-principal" href="/compte/connexion">Se connecter</a></p>
+{% else %}
+  {% if error and not champ %}<div class="msg err">{{ error }}</div>{% endif %}
+  {% if token %}
+  <form method="post" action="/compte/reinitialisation" class="card">
+    <input type="hidden" name="token" value="{{ token }}">
+    <label for="password">Nouveau mot de passe</label>
+    <input type="password" id="password" name="password" required minlength="8"
+           autofocus autocomplete="new-password"
+           {% if champ == 'password' %}class="invalide" aria-invalid="true"
+           aria-describedby="erreur-password"{% endif %}>
+    {% if champ == 'password' %}<p class="erreur-champ" id="erreur-password">{{ error }}</p>{% endif %}
+    <label for="confirmation">Confirmation</label>
+    <input type="password" id="confirmation" name="confirmation" required minlength="8"
+           autocomplete="new-password"
+           {% if champ == 'confirmation' %}class="invalide" aria-invalid="true"
+           aria-describedby="erreur-confirmation"{% endif %}>
+    {% if champ == 'confirmation' %}<p class="erreur-champ" id="erreur-confirmation">{{ error }}</p>{% endif %}
+    <p class="actions"><button type="submit" class="bouton-principal">Enregistrer</button></p>
+  </form>
+  {% else %}
+  <p><a href="/compte/mot-de-passe-oublie">Demander un nouveau lien</a></p>
+  {% endif %}
+{% endif %}
+{% endblock %}

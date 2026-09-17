@@ -1,0 +1,126 @@
+{% import "public/_anneau.html" as forme %}<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Le Rond-Point 2027{% endblock %}</title>
+{#
+  `og:image` (chantier Vidéo, VIDEO-4) : seule balise Open Graph pour l'instant — le
+  client a tranché pour une première passe simple, sans `og:video` (ses contraintes de
+  format sont plus strictes et l'usage annoncé, une vignette dans un aperçu de lien,
+  n'en a pas besoin). Vide par défaut : la page débat le remplit uniquement quand le
+  débat porte une vidéo, les autres pages n'en montrent aucune plutôt qu'une image
+  générique qui ne représenterait rien.
+#}
+{% block meta %}{% endblock %}
+{#
+  Feuille de style unique, servie par l'application elle-même (voir app/main.py).
+  Aucune ressource n'est chargée depuis un tiers : ni police, ni script, ni feuille.
+  Les polices sont préchargées parce qu'elles sont découvertes tard — le navigateur
+  ne les demande qu'après avoir lu la feuille de style, ce qui ajoute un aller-retour
+  sur le texte le plus visible de la page.
+#}
+{#
+  Favicon : le SVG d'abord, que tout navigateur récent préfère et qui reste net à
+  n'importe quelle taille ; les deux PNG derrière pour les autres. Ce sont trois
+  déclinaisons du MÊME dessin que l'anneau de l'en-tête — c'est tout l'intérêt
+  d'avoir une seule forme.
+#}
+<link rel="icon" href="/static/icones/anneau.svg" type="image/svg+xml">
+<link rel="icon" href="/static/icones/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="/static/icones/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="/static/icones/icone-192.png">
+<link rel="stylesheet" href="{{ url_statique('styles.css') }}">
+{# La fenêtre de lecture des vidéos de présentation : ne fait rien sur une page sans
+   `.lancer-video`, et crée sa fenêtre à la première lecture seulement. #}
+<script src="{{ url_statique('video.js') }}" defer></script>
+</head>
+{#
+  `classe_corps` permet à une page de se déclarer particulière sans que la feuille
+  ait à deviner sur quelle URL elle se trouve. Une seule page s'en sert pour l'instant
+  (l'accueil, qui est la seule à deux colonnes) ; c'est un point d'accroche, pas un
+  système.
+#}
+<body class="{% block classe_corps %}{% endblock %}">
+<header class="entete">
+  {#
+    L'anneau seul, pas le mot-logo : la piste du logo complet (avec les branches)
+    n'est pas tranchée, et l'anneau seul est déjà la règle du document d'identité en
+    dessous de 24 px. Rien de ce qui est posé ici ne sera perdu quand elle le sera.
+  #}
+  <a class="marque avatar" href="/">
+    {{ forme.anneau(24, 'logo') }}
+    <span class="avatar-nom">Le Rond-Point 2027</span>
+  </a>
+  {#
+    Navigation principale, reprise de la maquette. Elle vit dans l'en-tête à TOUTES
+    les tailles depuis que la barre d'onglets est abandonnée : sur téléphone elle
+    passe simplement sur une seconde ligne.
+
+    « Débats » mène désormais à une VRAIE page (chantier G10). Le G4 en avait décidé
+    autrement — l'ancre `/#debats` de l'accueil — et l'argument tenait tant que
+    l'accueil portait la liste entière : deux pages auraient obligé à choisir laquelle
+    est la vraie. L'accueil n'en montre plus que cinq, donc la question ne se pose plus
+    dans ces termes : sans page à part, les autres débats seraient inatteignables.
+
+    « Proposer une conversation » quitte l'en-tête : l'accueil porte déjà ce bouton
+    (« Proposer un débat », dans le bandeau depuis le chantier I2), et « Accueil » y
+    ramène en un geste. Un lien de plus dans un en-tête qui
+    doit tenir sur 390 px se paie sur toutes les pages pour servir sur une seule.
+  #}
+  <nav class="nav-site" aria-label="Navigation principale">
+    <a href="/" {% if request.url.path == '/' %}aria-current="page"{% endif %}>Accueil</a>
+    <a href="/debats"
+       {% if request.url.path == '/debats' %}aria-current="page"{% endif %}>Débats</a>
+    {# Onglet ajouté au chantier I. Sa pastille « nouveau » est retirée au chantier I2
+       (instruction 3) ; le lien, lui, ne bouge pas. #}
+    <a href="/manifeste"
+       {% if request.url.path == '/manifeste' %}aria-current="page"{% endif %}>Manifeste</a>
+    <a href="/comment-ca-marche"
+       {% if request.url.path == '/comment-ca-marche' %}aria-current="page"{% endif %}>Comment ça marche</a>
+  </nav>
+  <span class="droite">
+    {% if account %}
+      {#
+        L'avatar est l'anneau de niveau : la même forme que la marque, remplie au
+        prorata du palier en cours. Le niveau reste écrit à côté — la couleur ne
+        porte jamais l'information seule.
+      #}
+      <a class="avatar" href="/compte">
+        {% if progression %}
+          {{ forme.anneau(24, 'niveau', part=progression.fraction,
+                          titre='Niveau ' ~ progression.level) }}
+        {% else %}
+          {{ forme.anneau(24, 'logo') }}
+        {% endif %}
+        <span class="avatar-nom">{{ account.display_name or account.email }}{% if level %} — niveau {{ level }}{% endif %}</span>
+      </a>
+      {% if account.is_superuser %}<a href="/moderation/">Modération</a>{% endif %}
+    {% else %}
+      <a href="/compte/connexion">Connexion</a>
+      <a class="nav-large" href="/compte/inscription">Créer un compte</a>
+    {% endif %}
+  </span>
+</header>
+{#
+  Un bloc HORS de `<main>`, juste sous l'en-tête (chantier I2, instruction 1).
+  Une page qui l'emploie pose un aplat pleine largeur au contact immédiat de
+  l'en-tête — ce que `<main>` ne permet pas : il est plafonné en largeur et
+  décollé du haut par sa marge. Vide partout sauf sur l'accueil ; ne rien
+  changer d'autre à l'ossature.
+#}
+{% block bandeau %}{% endblock %}
+<main>
+{% block body %}{% endblock %}
+</main>
+
+<footer class="pied">
+  <p class="mu">
+    <a href="/regles-de-moderation">Règles de modération</a> ·
+    <a href="/mentions-legales">Mentions légales</a> ·
+    <a href="/confidentialite">Confidentialité</a> ·
+    <a href="/compte/suppression">Supprimer mes données</a>
+  </p>
+</footer>
+</body>
+</html>

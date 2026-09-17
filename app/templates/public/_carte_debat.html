@@ -1,0 +1,196 @@
+{#
+  La carte d'un débat dans une liste — accueil, page « Débats », et fournées chargées
+  au défilement. Sortie de `home.html` au chantier G10, quand un deuxième écran s'est
+  mis à la rendre : recopiée, elle aurait divergé, et le même débat n'aurait pas eu la
+  même allure d'une page à l'autre.
+
+  Chantier I2 (instruction 2) : la carte prend la forme de `.debate` dans la maquette
+  accueil.html — une pile verticale (rangée de badges, titre en Fraunces, mini-barre,
+  chiffres, lien « Voter » en pied) au lieu de l'ancienne mise en page horizontale
+  (mini-barre à gauche, texte à droite). Aucune donnée nouvelle n'est affichée et
+  aucune ne disparaît : c'est le MÊME contenu réordonné.
+
+  Ce que la maquette fait et qu'on ne reprend pas : sa carte est un `<a>` unique qui
+  enveloppe tout. Impossible ici, et pas seulement par principe — les étiquettes de
+  thème sont de VRAIS liens de filtre (J6), et un lien dans un lien est invalide.
+  La carte reste donc un `<div>` qui porte deux cibles distinctes (le titre, le lien
+  « Voter »), comme avant. Le survol de la maquette est reproduit malgré tout, mais
+  déclenché par `:has()` depuis les liens réels : la carte ne s'éclaire que quand on
+  survole quelque chose de cliquable, sans jamais promettre un clic qu'elle n'offre
+  pas.
+
+  `depuis_ouverture` est passée en argument plutôt que lue dans le contexte : une macro qui
+  puise dans les variables de la page qui l'appelle ne peut plus être appelée depuis
+  une autre. Même raison pour `base` et pour `niveau`, le niveau de titre : la carte
+  est rendue sous un `<h2>` sur l'accueil et sous le `<h1>` de la page « Débats », et
+  une macro ne peut pas deviner sous lequel elle se trouve.
+#}
+{% macro carte(c, r, depuis_ouverture, base="/debats", niveau=3, themes=true, clivant=true) %}
+  {# Une seule fois : la fonction lit l'heure courante, deux appels pourraient tomber
+     de part et d'autre d'un changement de jour. #}
+  {% set ouverture = depuis_ouverture(c) %}
+  <div class="card carte-debat">
+    {#
+      La rangée de badges, en tête de carte (`.badges` de la maquette). Elle réunit ce
+      qui était jusqu'ici réparti entre le titre (l'ancienneté, « Clivant ») et la ligne
+      en dessous (les thèmes) : ce sont trois choses de même nature — des étiquettes qui
+      qualifient le débat — et elles se lisent mieux ensemble qu'encadrant le titre.
+
+      Sortir ces étiquettes du `<h2>` corrige au passage un titre qui contenait des mots
+      ne faisant pas partie du titre du débat.
+
+      La première étiquette DIT DEPUIS QUAND le débat est ouvert (« Ouvert hier »,
+      « Ouvert il y a 4 jours ») au lieu du « Nouveau » d'avant le chantier I2 : le mot
+      ne disait pas à quel point, et deux débats ouverts à six jours d'écart le
+      portaient à l'identique. La fenêtre, elle, ne change pas — sept jours, la règle
+      d'`est_nouvelle`, sur laquelle `depuis_ouverture` s'appuie.
+
+      L'étiquette « Clivant » ne paraît qu'après deux calculs consécutifs comptant au
+      moins une proposition clivante — `r.clivant` porte cette règle, elle n'est pas
+      relue ici : une étiquette qui clignote entre deux visites est pire qu'une
+      étiquette absente. Elle est toujours accompagnée du compte, dans les chiffres
+      plus bas. C'est la règle laissée par le L3 : aucun mot de cette page ne doit
+      pouvoir être démenti par le chiffre imprimé à côté de lui.
+
+      « Clivant » non plus, depuis le chantier I2 (instruction 17) : l'appelant peut
+      le retirer (`clivant`), et l'accueil le fait — Julien ne le veut pas à côté de
+      l'ancienneté sur les cartes de la vitrine. La règle des deux calculs et le
+      compte « N propositions divisent les groupes » ne changent pas, et la page
+      « Débats » garde l'étiquette.
+
+      Les thèmes n'y figurent QUE si l'appelant les demande (`themes`). L'accueil les
+      met à `false` depuis le chantier I2 (instruction 4) : la maquette ne montre qu'un
+      ou deux badges de contexte par carte, jamais une liste de thèmes, et un débat qui
+      en porte trois faisait une rangée plus haute que son titre. Ils restent sur la
+      page « Débats », où l'on vient justement chercher un débat précis et où le filtre
+      par thème est l'outil principal.
+
+      Aucune de ces trois étiquettes n'est en aplat jaune : celle d'ancienneté a perdu
+      le sien au chantier I2 (instruction 8), et plus aucune carte ne porte de surface
+      jaune. Les thèmes emportent le thème SEUL,
+      sans le tri courant (J6) : cliquer « Santé » demande les débats de santé, pas de
+      conserver un classement qu'on n'a peut-être jamais choisi.
+    #}
+    {% set montre_clivant = clivant and r.clivant %}
+    {#
+      La vidéo de présentation (chantier Vidéo, VIDEO-4) — coin en haut à droite de la
+      carte, dans la continuité du titre (choix du client). FLOTTANTE : il faut un bloc
+      de FLUX NORMAL autour d'elle et du titre (`.entete-carte-debat`) pour qu'ils
+      s'enchaînent — `float` n'a aucun effet sur un enfant direct de `.carte-debat`,
+      qui est flex. Voir `display: flow-root` dans styles.css.
+
+      Depuis le 17/09/2026 (demande du client), la miniature est agrandie et LANCE la
+      vidéo dans une fenêtre en grand (`static/video.js`, commun avec la page du
+      débat). C'est donc un troisième lien sur la carte, là où le VIDEO-4 s'y refusait
+      — mais il ne double plus le titre : il mène à la vidéo, pas à la page. Sans
+      script, il ouvre le fichier lui-même.
+
+      Gardée sur `video_miniature_chemin`, pas `video_chemin` : un débat dont le
+      modérateur vient d'attacher une vidéo (VIDEO-2) peut ne pas encore avoir de
+      miniature choisie parmi les trois candidates.
+    #}
+    <div class="entete-carte-debat">
+      {% if c.video_miniature_chemin %}
+      <a class="lancer-video miniature-video-carte" href="/c/{{ c.slug }}/video"
+         aria-label="Regarder la vidéo de présentation : {{ c.title }}"
+         data-titre="{{ c.title }}" data-partage="/c/{{ c.slug }}">
+        <img src="/c/{{ c.slug }}/video/couverture" alt="" loading="lazy">
+        <span class="icone-lecture" aria-hidden="true"></span>
+      </a>
+      {% endif %}
+      {% if ouverture or montre_clivant or (themes and c.libelles_themes) %}
+      <div class="badges-debat">
+        {% if ouverture %}<span class="etiquette etiquette--ouverture">{{ ouverture }}</span>{% endif %}
+        {% if montre_clivant %}<span class="etiquette etiquette--clivant">Clivant</span>{% endif %}
+        {% if themes %}
+        {% for code in c.codes_themes %}
+        <a class="etiquette etiquette--theme"
+           href="{{ base }}?theme={{ code }}">{{ c.libelles_themes[loop.index0] }}</a>
+        {% endfor %}
+        {% endif %}
+      </div>
+      {% endif %}
+
+      <h{{ niveau }} class="titre-debat"><a href="/c/{{ c.slug }}">{{ c.title }}</a></h{{ niveau }}>
+    </div>
+
+    {% if c.description %}<p class="mu description-debat">{{ c.description }}</p>{% endif %}
+
+    {#
+      Mini-barre de répartition des groupes d'opinion — le `.spark` de la maquette,
+      branché sur les vraies données comme il l'était déjà.
+
+      Tant qu'aucun calcul n'a abouti, elle est GRISE et le dit — quatre participants
+      ayant chacun assez voté sont nécessaires avant qu'un groupe existe. Une barre
+      vide se lirait « personne », ce qui est faux : il y a peut-être des votes, il
+      n'y a pas encore de groupes.
+
+      L'ordre des segments suit l'IDENTITÉ des groupes (A, B, C…) et non leur taille :
+      c'est la règle du chantier D transposée ici, pour que la barre ne se réordonne
+      pas d'un recalcul à l'autre.
+    #}
+    <div class="repartition">
+      <div class="barre-groupes" role="img"
+           aria-label="{% if r.calculee %}Répartition des {{ r.n_groupes }} groupe{{ 's' if r.n_groupes > 1 else '' }} d'opinion{% else %}Groupes pas encore calculés{% endif %}">
+        {% if r.calculee %}
+          {% for s in r.segments %}
+          <span class="segment" style="width:{{ s.part }}%;background:{{ s.couleur }}"></span>
+          {% endfor %}
+        {% else %}
+          <span class="segment segment--attente"></span>
+        {% endif %}
+      </div>
+    </div>
+
+    {#
+      Les chiffres (`.stats` de la maquette). Le nombre de groupes rejoint ici la ligne
+      des votes : il était jusqu'à présent sous la mini-barre, où il faisait doublon
+      avec le même chiffre déjà écrit à droite.
+
+      « Clôture dans N jours » de la maquette n'y figure toujours pas : il n'existe
+      aucune date de clôture au modèle de données (décision du client de ne pas
+      l'ajouter pour l'instant).
+    #}
+    <p class="mu meta-debat">
+      <span><span class="chiffre">{{ r.n_votes }}</span> vote{{ 's' if r.n_votes > 1 else '' }}</span>
+      {%- if r.calculee %}
+      <span><span class="chiffre">{{ r.n_groupes }}</span>
+        groupe{{ 's' if r.n_groupes > 1 else '' }} d'opinion</span>
+      {%- else %}
+      <span>groupes en attente</span>
+      {%- endif %}
+      {#
+        Le compte, et jamais le score continu (règle du L0). Une PHRASE plutôt que le
+        mot « clivantes » : le mot reste à l'onglet et à l'étiquette, l'affichage dit
+        ce qu'il mesure — décision du client du 6 septembre 2026.
+
+        Rien quand le compte est nul ou absent. « 0 proposition ne divise les groupes »
+        serait une affirmation sur un débat qu'on vient peut-être de mesurer pour la
+        première fois, et le silence est ici la seule chose vraie dans les deux cas.
+      #}
+      {%- if r.n_clivantes %}
+      <span><span class="chiffre">{{ r.n_clivantes }}</span>
+        proposition{{ 's' if r.n_clivantes > 1 else '' }}
+        divise{{ 'nt' if r.n_clivantes > 1 else '' }} les groupes</span>
+      {%- endif %}
+    </p>
+
+    {#
+      Le pied de carte — le `.go` de la maquette. Il remplace le bouton « Participer » :
+      le titre et lui mènent toujours au même endroit, et restent deux cibles distinctes
+      pour un pouce, mais ce pied porte mieux l'invitation que ne le faisait un bouton
+      neutre de plus dans une grille qui en aurait compté quatre.
+
+      « Voter sur ce débat » sur un débat ouvert (le libellé demandé, et le geste réel
+      du site), « Consulter ce débat » sur un débat clos — un débat clos ne se vote
+      plus, et l'écrire est la seule chose vraie.
+    #}
+    <p class="actions aller-debat">
+      <a href="/c/{{ c.slug }}">
+        <span class="aller-mot">{% if c.state.value == 'open' %}Voter sur ce débat{% else %}Consulter ce débat{% endif %}</span>
+        <span class="fleche" aria-hidden="true">→</span>
+      </a>
+      {% if c.state.value != 'open' %}<span class="mu">consultation close</span>{% endif %}
+    </p>
+  </div>
+{% endmacro %}

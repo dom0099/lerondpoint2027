@@ -1,0 +1,151 @@
+{% extends "public/base.html" %}
+{% import "public/_carte_debat.html" as debat %}
+{% import "public/_barre_liste.html" as liste %}
+{% import "public/_liste_accords.html" as consensus %}
+{% block title %}Les débats — Le Rond-Point 2027{% endblock %}
+{% block body %}
+{# Le rappel à l'auteur (MOD-6). Inclus ICI et pas dans
+   `public/conversation.html` : le flux de vote reste intouchable. #}
+{% include "public/_rappel.html" %}
+<h1>Les débats</h1>
+
+{#
+  La page que « Débats » de la navigation ouvrait jusqu'ici sur l'ancre de l'accueil.
+  Elle existe pour de bon depuis le chantier G10, parce que l'accueil ne montre plus
+  que cinq débats : sans elle, les autres seraient devenus inatteignables.
+
+  Les MÊMES deux onglets que l'accueil, et le même service de tri : deux classements
+  portant le même nom sur deux pages finiraient par ne plus classer pareil.
+#}
+{{ liste.barre(base, tri, tris, filtre, adresse, libelle_theme, mes_themes_reglees,
+               propositions_ouvertes, tri_mesure) }}
+
+{% if liste_de_propositions %}{{ consensus.chapeau() }}{% endif %}
+
+{#
+  Le même conteneur, le même défilement, quel que soit l'objet de la liste : le script
+  colle du HTML rendu par le serveur et n'a jamais su ce qu'il collait. C'est ce qui
+  permet au quatrième onglet de se dérouler comme les trois autres sans une ligne de
+  JavaScript de plus — et ce qui aurait été impossible si la fournée renvoyait des
+  données à mettre en forme dans le navigateur.
+
+  `data-suite` porte l'adresse de la fournée, filtre compris, plutôt que le seul tri :
+  le script n'a ainsi aucune règle d'URL à connaître, et il ne peut pas oublier le
+  filtre en la reconstruisant de son côté.
+#}
+{% if liste_de_propositions and accords %}
+<ul class="accords" id="liste-debats"
+    data-suite="{{ adresse('/debats/suite', tri=tri, filtre=filtre) }}"
+    data-page="{{ adresse('/debats', tri=tri, filtre=filtre) }}"
+    data-charges="{{ accords|length }}">
+  {% for a in accords %}{{ consensus.accord(a) }}{% endfor %}
+</ul>
+{% elif liste_de_propositions %}
+{{ consensus.vide(filtre) }}
+{% elif conversations %}
+<div id="liste-debats"
+     data-suite="{{ adresse('/debats/suite', tri=tri, filtre=filtre) }}"
+     data-page="{{ adresse('/debats', tri=tri, filtre=filtre) }}"
+     data-charges="{{ conversations|length }}">
+  {% for c in conversations %}
+  {# `niveau=2` : ici les cartes sont sous le `<h1>` de la page, pas sous un `<h2>`
+     de section comme sur l'accueil. #}
+  {{ debat.carte(c, repartitions[c.id], depuis_ouverture, base, niveau=2) }}
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if conversations or accords %}
+
+{#
+  La suite.
+
+  C'est un VRAI LIEN, et le JavaScript ne fait que s'y substituer. Sans lui — connexion
+  coupée en route, script bloqué, navigateur ancien — la page reste entièrement
+  parcourable. C'est la règle du G2 sur la barre de tri, appliquée au défilement : ce
+  qui décide de ce qu'on voit doit s'écrire dans une adresse.
+
+  L'adresse dit « montre-m'en tant », et non « montre-moi la page trois » : c'est
+  exactement ce que fait le défilement, donc les deux chemins donnent le même écran. Un
+  numéro de page aurait donné, sans script, une liste où les premiers débats
+  disparaissent — pas la même chose du tout.
+#}
+<p class="actions" id="zone-suite" {% if not encore %}hidden{% endif %}>
+  <a class="bouton" id="charger-plus"
+     href="{{ adresse('/debats', tri=tri, filtre=filtre, nombre=(accords or conversations)|length + par_fournee) }}">Voir plus</a>
+</p>
+<p class="mu" id="fin-de-liste" {% if encore %}hidden{% endif %}>
+  {% if liste_de_propositions %}Vous avez vu tous les accords relevés.{% else %}Vous avez vu tous les débats.{% endif %}
+</p>
+{% elif liste_de_propositions %}
+{# L'état vide des propositions est rendu plus haut : rien à ajouter ici. #}
+{% elif filtre.actif %}
+<p class="empty">Aucun débat sur
+  {% if filtre.sur_mes_themes %}vos thèmes{% else %}ce thème{% endif %} pour l'instant.
+  <a href="{{ adresse(base, tri=tri, theme=None, mes_themes=None) }}">Voir tous les débats</a>,
+  ou <a href="/proposer">en proposer un</a>.</p>
+{% else %}
+<p class="empty">Aucune consultation ouverte pour le moment.</p>
+{% endif %}
+
+<script>
+  // Chargement au défilement (chantier G10).
+  //
+  // Le serveur rend une fournée de HTML déjà mise en forme par la MÊME macro que la
+  // page : le navigateur n'assemble aucun gabarit, il colle ce qu'on lui donne. C'est
+  // ce qui évite d'avoir une seconde écriture de la carte d'un débat en JavaScript,
+  // qui divergerait de celle du serveur à la première retouche.
+  //
+  // `IntersectionObserver` plutôt qu'un écouteur de défilement : il ne réveille la page
+  // que lorsque le bas de la liste entre à l'écran, là où un écouteur se déclenche à
+  // chaque pixel parcouru.
+  (function () {
+    const liste = document.getElementById('liste-debats');
+    const zone = document.getElementById('zone-suite');
+    const bouton = document.getElementById('charger-plus');
+    const fin = document.getElementById('fin-de-liste');
+    if (!liste || !bouton) { return; }
+
+    // Les deux adresses viennent du SERVEUR, filtre compris. Les reconstruire ici
+    // aurait demandé au script de connaître la règle d'URL, et il aurait perdu le
+    // filtre à la première fournée — le défaut ne se voyant qu'après dix débats.
+    const adresseSuite = liste.dataset.suite;
+    const adressePage = liste.dataset.page;
+    let charges = parseInt(liste.dataset.charges, 10);
+    let enCours = false;
+    let reste = !zone.hidden;
+
+    async function suite() {
+      // Le garde-fou compte : l'observateur peut déclencher deux fois avant que la
+      // première fournée ne soit arrivée, ce qui afficherait deux fois les mêmes débats.
+      if (enCours || !reste) { return; }
+      enCours = true;
+      bouton.textContent = 'Chargement…';
+      try {
+        const r = await fetch(`${adresseSuite}&decalage=${charges}`);
+        if (!r.ok) { throw new Error(r.status); }
+        const d = await r.json();
+        liste.insertAdjacentHTML('beforeend', d.html);
+        charges += d.nombre;
+        reste = d.encore;
+        bouton.href = `${adressePage}&nombre=${charges + d.par_fournee}`;
+        bouton.textContent = 'Voir plus';
+        if (!reste) { zone.hidden = true; fin.hidden = false; observateur.disconnect(); }
+      } catch (e) {
+        // On rend la main au lien : il fait exactement la même chose, en rechargeant.
+        bouton.textContent = 'Voir plus';
+        observateur.disconnect();
+      } finally {
+        enCours = false;
+      }
+    }
+
+    const observateur = new IntersectionObserver((entrees) => {
+      if (entrees.some((e) => e.isIntersecting)) { suite(); }
+    }, { rootMargin: '200px' });
+
+    bouton.addEventListener('click', (e) => { e.preventDefault(); suite(); });
+    observateur.observe(zone);
+  })();
+</script>
+{% endblock %}

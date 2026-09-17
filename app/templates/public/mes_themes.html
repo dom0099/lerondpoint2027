@@ -1,0 +1,42 @@
+{% extends "public/base.html" %}
+{% block title %}Mes centres d'intérêt — Le Rond-Point 2027{% endblock %}
+{% block body %}
+<h1>Mes centres d'intérêt</h1>
+<p class="lead">Choisissez les sujets qui vous intéressent. L'accueil et la page des
+débats vous proposeront alors un onglet qui ne montre que ceux-là.</p>
+
+{#
+  Réserve dite ICI plutôt que laissée à découvrir : la préférence vit dans le
+  navigateur, comme les votes d'un visiteur sans compte. La dire sur l'écran est le
+  minimum ; la taire ferait passer une limite connue pour une panne.
+#}
+{% if not account %}
+<p class="mu">Vous n'avez pas de compte : ce choix est enregistré dans ce navigateur,
+  comme vos votes. Il vous suivra si vous créez un compte plus tard.</p>
+{% endif %}
+
+{% if error %}<div class="msg err">{{ error }}</div>{% endif %}
+
+<form method="post" action="/mes-themes" class="card">
+  <input type="hidden" name="retour" value="{{ retour }}">
+  <p class="mu">Aucun n'est obligatoire, et il n'y a pas de maximum.</p>
+  <ul class="grille-themes">
+    {% for theme in themes %}
+    <li><label title="{{ theme.aide }}">
+      <input type="checkbox" name="themes" value="{{ theme.code }}"
+             {% if theme.code in choisis %}checked{% endif %}>
+      {{ theme.libelle }}
+    </label></li>
+    {% endfor %}
+  </ul>
+  <p class="actions">
+    <button type="submit" class="bouton-principal">Enregistrer</button>
+    {#
+      « Passer » est un LIEN et non un second bouton : ce n'est pas une seconde action
+      de même rang, c'est un refus de répondre. Même geste que « Passer » sous les deux
+      réponses de la page de vote.
+    #}
+    <a class="lien-action" href="{{ retour }}">{% if choisis %}Revenir sans changer{% else %}Passer{% endif %}</a>
+  </p>
+</form>
+{% endblock %}

@@ -1,0 +1,343 @@
+{
+  "corpus": {
+    "votes_avant": 1343,
+    "votes_apres": 4615,
+    "ptpt_avant": 50,
+    "ptpt_apres": 150,
+    "decl_avant": 30,
+    "decl_apres": 36,
+    "graine": 20260903,
+    "random_state": 42
+  },
+  "mesure_1": {
+    "memes_participants": true,
+    "identique_bit_a_bit": true,
+    "ecart_max_absolu": 0.0,
+    "k_run_a": 3,
+    "k_run_b": 3,
+    "partitions_identiques": true,
+    "apres_identique_bit_a_bit": true,
+    "apres_ecart_max_absolu": 0.0
+  },
+  "mesure_2": {
+    "n_participants_communs": 50,
+    "k_avant": 3,
+    "k_apres": 4,
+    "variantes": {
+      "sans correction": {
+        "moyenne": 4.884110792089692,
+        "mediane": 5.019790181432928,
+        "p95": 7.2608469442854116,
+        "max": 7.971906606662831,
+        "rayon_nuage_apres": 3.282216715795625,
+        "moyenne_relative_%": 148.80525007946528
+      },
+      "flip_x": {
+        "moyenne": 0.7466790418042716,
+        "mediane": 0.7495735934600247,
+        "p95": 1.1133440543307886,
+        "max": 1.2904162606869574,
+        "rayon_nuage_apres": 3.282216715795625,
+        "moyenne_relative_%": 22.7492303665047
+      },
+      "flip_y": {
+        "moyenne": 6.2710144691076195,
+        "mediane": 6.593095347593652,
+        "p95": 8.028982291931406,
+        "max": 9.253672382325396,
+        "rayon_nuage_apres": 3.282216715795625,
+        "moyenne_relative_%": 191.06034159561872
+      },
+      "flip_x+flip_y (défaut de get_corrected_centroid_guesses)": {
+        "moyenne": 3.6313315352266966,
+        "mediane": 3.754400923721897,
+        "p95": 6.154636744203203,
+        "max": 6.749733884462666,
+        "rayon_nuage_apres": 3.282216715795625,
+        "moyenne_relative_%": 110.63655601261675
+      }
+    },
+    "alignement_optimal": {
+      "angle_deg": -167.23129790682833,
+      "reflexion": true,
+      "echelle": 1.0221111240440384,
+      "residu_moyen": 0.23229018748671926,
+      "residu_moyen_relatif_%": 7.077234917756216
+    }
+  },
+  "mesure_3": {
+    "centres_avant": [
+      [
+        -1.812279,
+        -2.504706
+      ],
+      [
+        -2.880488,
+        1.416707
+      ],
+      [
+        2.393602,
+        0.460665
+      ]
+    ],
+    "centres_transmis_flip": [
+      [
+        1.812279,
+        2.504706
+      ],
+      [
+        2.880488,
+        -1.416707
+      ],
+      [
+        -2.393602,
+        -0.460665
+      ]
+    ],
+    "k_froid": 4,
+    "k_chaud_flip": 4,
+    "k_chaud_brut": 3,
+    "k_chaud_flipx": 4,
+    "correspondance_identifiants": {
+      "froid": {
+        "appariement": {
+          "0": 2,
+          "1": 3,
+          "2": 0
+        },
+        "identite_preservee": false
+      },
+      "chaud_flip(defaut)": {
+        "appariement": {
+          "0": 1,
+          "1": 0,
+          "2": 3
+        },
+        "identite_preservee": false
+      },
+      "chaud_flipx": {
+        "appariement": {
+          "0": 0,
+          "1": 1,
+          "2": 2
+        },
+        "identite_preservee": true
+      }
+    },
+    "init_centers_reellement_utilises_flip": [
+      [
+        1.812279,
+        2.504706
+      ],
+      [
+        2.880488,
+        -1.416707
+      ],
+      [
+        -2.393602,
+        -0.460665
+      ],
+      [
+        -4.167084,
+        0.01675
+      ]
+    ],
+    "labels_froid_vs_chaud_flip_identiques": false,
+    "jaccard": [
+      {
+        "comparaison": "froid(après) vs chaud-flip(après) — tous participants",
+        "k_gauche": 4,
+        "k_droite": 4,
+        "jaccard_moyen_pondere": 1.0,
+        "paires": [
+          {
+            "groupe_gauche": 0,
+            "groupe_droit": 3,
+            "jaccard": 1.0,
+            "taille_gauche": 39
+          },
+          {
+            "groupe_gauche": 1,
+            "groupe_droit": 2,
+            "jaccard": 1.0,
+            "taille_gauche": 36
+          },
+          {
+            "groupe_gauche": 2,
+            "groupe_droit": 1,
+            "jaccard": 1.0,
+            "taille_gauche": 36
+          },
+          {
+            "groupe_gauche": 3,
+            "groupe_droit": 0,
+            "jaccard": 1.0,
+            "taille_gauche": 39
+          }
+        ]
+      },
+      {
+        "comparaison": "froid(après) vs chaud-brut(après) — tous participants",
+        "k_gauche": 4,
+        "k_droite": 3,
+        "jaccard_moyen_pondere": 0.8358,
+        "paires": [
+          {
+            "groupe_gauche": 0,
+            "groupe_droit": 1,
+            "jaccard": 1.0,
+            "taille_gauche": 39
+          },
+          {
+            "groupe_gauche": 1,
+            "groupe_droit": 0,
+            "jaccard": 1.0,
+            "taille_gauche": 36
+          },
+          {
+            "groupe_gauche": 3,
+            "groupe_droit": 2,
+            "jaccard": 0.52,
+            "taille_gauche": 39
+          }
+        ]
+      },
+      {
+        "comparaison": "avant vs froid(après) — sur les 50 communs",
+        "k_gauche": 3,
+        "k_droite": 4,
+        "jaccard_moyen_pondere": 0.76,
+        "paires": [
+          {
+            "groupe_gauche": 0,
+            "groupe_droit": 2,
+            "jaccard": 1.0,
+            "taille_gauche": 12
+          },
+          {
+            "groupe_gauche": 1,
+            "groupe_droit": 3,
+            "jaccard": 1.0,
+            "taille_gauche": 13
+          },
+          {
+            "groupe_gauche": 2,
+            "groupe_droit": 0,
+            "jaccard": 0.52,
+            "taille_gauche": 25
+          }
+        ]
+      },
+      {
+        "comparaison": "avant vs chaud-flip(après) — sur les 50 communs",
+        "k_gauche": 3,
+        "k_droite": 4,
+        "jaccard_moyen_pondere": 0.76,
+        "paires": [
+          {
+            "groupe_gauche": 0,
+            "groupe_droit": 1,
+            "jaccard": 1.0,
+            "taille_gauche": 12
+          },
+          {
+            "groupe_gauche": 1,
+            "groupe_droit": 0,
+            "jaccard": 1.0,
+            "taille_gauche": 13
+          },
+          {
+            "groupe_gauche": 2,
+            "groupe_droit": 3,
+            "jaccard": 0.52,
+            "taille_gauche": 25
+          }
+        ]
+      },
+      {
+        "comparaison": "avant vs chaud-brut(après) — sur les 50 communs",
+        "k_gauche": 3,
+        "k_droite": 3,
+        "jaccard_moyen_pondere": 0.3952,
+        "paires": [
+          {
+            "groupe_gauche": 0,
+            "groupe_droit": 0,
+            "jaccard": 0.0,
+            "taille_gauche": 12
+          },
+          {
+            "groupe_gauche": 1,
+            "groupe_droit": 2,
+            "jaccard": 0.52,
+            "taille_gauche": 13
+          },
+          {
+            "groupe_gauche": 2,
+            "groupe_droit": 1,
+            "jaccard": 0.52,
+            "taille_gauche": 25
+          }
+        ]
+      },
+      {
+        "comparaison": "froid(après) vs chaud-flipx(après) — tous participants",
+        "k_gauche": 4,
+        "k_droite": 4,
+        "jaccard_moyen_pondere": 1.0,
+        "paires": [
+          {
+            "groupe_gauche": 0,
+            "groupe_droit": 2,
+            "jaccard": 1.0,
+            "taille_gauche": 39
+          },
+          {
+            "groupe_gauche": 1,
+            "groupe_droit": 3,
+            "jaccard": 1.0,
+            "taille_gauche": 36
+          },
+          {
+            "groupe_gauche": 2,
+            "groupe_droit": 0,
+            "jaccard": 1.0,
+            "taille_gauche": 36
+          },
+          {
+            "groupe_gauche": 3,
+            "groupe_droit": 1,
+            "jaccard": 1.0,
+            "taille_gauche": 39
+          }
+        ]
+      },
+      {
+        "comparaison": "avant vs chaud-flipx(après) — sur les 50 communs",
+        "k_gauche": 3,
+        "k_droite": 4,
+        "jaccard_moyen_pondere": 0.76,
+        "paires": [
+          {
+            "groupe_gauche": 0,
+            "groupe_droit": 0,
+            "jaccard": 1.0,
+            "taille_gauche": 12
+          },
+          {
+            "groupe_gauche": 1,
+            "groupe_droit": 1,
+            "jaccard": 1.0,
+            "taille_gauche": 13
+          },
+          {
+            "groupe_gauche": 2,
+            "groupe_droit": 2,
+            "jaccard": 0.52,
+            "taille_gauche": 25
+          }
+        ]
+      }
+    ]
+  }
+}

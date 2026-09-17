@@ -1,0 +1,113 @@
+{#
+  Le rappel à l'auteur (MOD-6 ; seconde forme au MOD-15 ; troisième au MOD-10).
+
+  **Pourquoi il existe** : 164 des 167 participants du site n'ont pas de compte, donc pas
+  d'adresse. Les messages écrits pour l'auteur — l'exposé des motifs d'un retrait, dû au
+  titre du DSA, et le « voici ce qui aide » d'un signalement rattrapable — n'avaient
+  jusqu'ici aucun moyen d'atteindre leur destinataire. Ce bloc est ce moyen : l'auteur le
+  voit à sa prochaine visite, identifié par le jeton qui porte déjà ses votes.
+
+  **Trois formes, un seul bloc.** Ce qui les distingue tient en trois choses : la phrase
+  de tête, le geste proposé, et l'adresse où poste « ne plus afficher ». Tout le reste —
+  l'exposé, la mise en page, la discrétion — est commun, et doit le rester : trois blocs
+  dessinés séparément finiraient par ne plus se ressembler.
+
+  **La forme « navette » (MOD-10) est la seule qui DEMANDE quelque chose**, et la seule
+  sans « ne plus afficher » : refuser est la façon de la faire disparaître. Un bouton qui
+  l'écarterait sans répondre laisserait le responsable attendre une réponse qui ne
+  viendrait jamais.
+
+  **Quatre choses qu'il ne fait pas**, et chacune est une décision :
+
+    - il n'apparaît **jamais sur la page d'un débat** : le flux de vote est intouchable
+      depuis le MOD-3b, et ce n'est pas un rappel didactique qui va l'entamer. Il est
+      inclus par l'accueil et la liste des débats, pas par `public/conversation.html` ;
+    - il ne **bloque rien** : pas de fenêtre modale, pas de superposition, pas de geste
+      exigé pour continuer. Un encart qui pousse le contenu se remarque autant qu'une
+      boîte qui le recouvre, sans rien demander ;
+    - il ne **revient pas** une fois fermé ;
+    - il ne montre **aucun signalant, aucun décompte**. Il s'adresse à l'auteur, sur sa
+      propre proposition. Le sort des plaintes ne se raconte à personne.
+#}
+{% if rappels %}
+{% for rappel in rappels %}
+<div class="msg" style="border-left:3px solid var(--or-brule)">
+  {% if rappel.forme == 'navette' %}
+  <p style="margin:0 0 .4rem"><strong>Une version plus claire de votre proposition vous est proposée.</strong></p>
+  {% elif rappel.forme == 'reformulation' %}
+  {#
+    La phrase de tête ne dit pas « votre proposition a été signalée » tout court : elle
+    dit aussi qu'elle reste en ligne. Sans cette moitié, un auteur lit « signalée » et
+    comprend « retirée » — c'est exactement le contresens que le MOD-3b a fait réécrire
+    dans les gabarits de message.
+  #}
+  <p style="margin:0 0 .4rem"><strong>Une de vos propositions est signalée, et reste en ligne.</strong></p>
+  {% else %}
+  <p style="margin:0 0 .4rem"><strong>Une de vos propositions a été retirée.</strong></p>
+  {% endif %}
+
+  {% if rappel.forme == 'navette' %}
+  {#
+    Les deux textes EN REGARD, et étiquetés. Montrer la reformulation seule demanderait à
+    l'auteur d'accepter de mémoire ; les mettre côte à côte sans les nommer laisserait
+    deviner lequel est lequel. C'est la seule chose que cet écran doit réussir.
+  #}
+  <p class="mu" style="margin:0 0 .2rem">Votre texte actuel :</p>
+  <p class="mu" style="margin:0 0 .6rem"><em>{{ rappel.statement.text }}</em></p>
+  <p class="mu" style="margin:0 0 .2rem">La version proposée :</p>
+  <p style="margin:0 0 .6rem"><strong><em>{{ rappel.texte_propose }}</em></strong></p>
+  <p class="mu" style="margin:0 0 .6rem">Si vous acceptez, votre proposition portera ce
+    texte. Les votes qu'elle a déjà reçus sont conservés. Si vous refusez, rien ne change.</p>
+  {% else %}
+  <p class="mu" style="margin:0 0 .4rem"><em>{{ rappel.statement.text }}</em></p>
+  {% endif %}
+
+  {# L'exposé des motifs, tel qu'il partirait dans un message — et non un résumé écrit
+     ici : deux textes pour la même décision finiraient par ne plus dire la même chose. #}
+  {% if rappel.expose %}
+  <p style="margin:0 0 .6rem;white-space:pre-line">{{ rappel.expose }}</p>
+  {% endif %}
+
+  <div class="row" style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap">
+    {% if rappel.lien_contestation %}
+    <a class="bouton" href="{{ rappel.lien_contestation }}">Demander un réexamen</a>
+    {% endif %}
+    {#
+      Le geste de la forme « reformulation ». Il ne remplace rien et ne promet rien : il
+      ramène l'auteur au débat, où le formulaire de proposition est ouvert à tous. La
+      navette du MOD-10 — proposer un texte, recueillir un accord, substituer — n'existe
+      pas, et ce lien ne fait pas semblant qu'elle existe.
+    #}
+    {% if rappel.forme == 'navette' %}
+    {#
+      Deux POST distincts et non un formulaire à deux boutons nommés : l'adresse dit ce
+      qu'elle fait, et un clic mal interprété par un navigateur ancien remplacerait le
+      texte de quelqu'un.
+    #}
+    <form method="post" action="/reformulations/{{ rappel.reformulation_id }}/accepter"
+          style="display:inline">
+      <button type="submit" class="bouton">Accepter cette version</button>
+    </form>
+    <form method="post" action="/reformulations/{{ rappel.reformulation_id }}/refuser"
+          style="display:inline">
+      <button type="submit" class="lien-action">Refuser, garder mon texte</button>
+    </form>
+    {% elif rappel.lien_reprise %}
+    <a class="bouton" href="{{ rappel.lien_reprise }}">Proposer une version plus claire</a>
+    {% endif %}
+    {#
+      Fermer est un POST et non un lien : cela écrit en base, et un GET qui écrit se
+      déclenche tout seul au premier passage d'un aspirateur de pages.
+
+      L'adresse vient du service et non du gabarit : les deux formes ne ferment pas la
+      même chose — l'une la proposition, l'autre les signalements qui l'ont provoquée.
+    #}
+    {% if rappel.forme != 'navette' %}
+    <form method="post" action="{{ rappel.chemin_fermeture }}" style="display:inline">
+      <button type="submit" class="lien-action">Ne plus afficher</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+{% endfor %}
+{% endif %}

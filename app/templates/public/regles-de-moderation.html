@@ -1,0 +1,116 @@
+{% extends "public/base.html" %}
+{% block title %}Règles de modération — Le Rond-Point 2027{% endblock %}
+{#
+  Les seuils du régime dégradé, publiés (MOD-18).
+
+  **Pourquoi cette page porte d'abord des seuils et pas une charte.** Le plan v2 du
+  chantier Modération (§9) le demande en toutes lettres : « Écris ces seuils publiquement
+  dès la première version. C'est ce qui transforme "je garde ces privilèges pour
+  l'instant" en une promesse vérifiable par n'importe qui — et c'est aussi ce qui te
+  protège le jour où on te le reprochera. »
+
+  **Ce qui est écrit ici décrit ce que le site FAIT**, pas ce que le plan prévoyait. C'est
+  la règle arrêtée au MOD-3b et qui vaut pour toute phrase publique du chantier : aucun
+  texte n'annonce un effet que le code ne produit pas. Deux lignes du plan ont donc été
+  réécrites ici pour dire l'état réel — la reformulation, et la publication immédiate.
+
+  **Aucun chiffre de population n'est publié.** Les seuils disent à partir de QUAND un
+  mécanisme s'allume ; dire combien de comptes vérifiés existent aujourd'hui renseignerait
+  surtout qui voudrait profiter de leur petit nombre. Le plan demande les seuils, pas
+  l'état des effectifs.
+#}
+{% block body %}
+<h1>Règles de modération</h1>
+<p class="lead">Ce qui est publié, ce qui ne l'est pas, et qui en décide — aujourd'hui.</p>
+
+<h2>Une proposition déposée est publiée tout de suite</h2>
+<p>Il n'y a pas de relecture avant publication. Une proposition déposée apparaît
+  immédiatement dans le débat et peut être votée. Le contrôle vient <strong>après</strong>,
+  et il repose sur le signalement.</p>
+
+<h2>Signaler est ouvert à tout le monde</h2>
+<p>Avec ou sans compte, n'importe quel lecteur peut signaler une proposition, en cochant
+  un ou deux motifs. C'est une obligation du règlement européen sur les services
+  numériques, et c'est aussi le seul mécanisme de contrôle qui fonctionne dès le premier
+  jour.</p>
+<p>Ce que devient un signalement dépend du motif retenu&nbsp;: les motifs les plus graves
+  — propos haineux, incitation à la violence, discrimination, données personnelles d'un
+  tiers — entraînent le <strong>retrait immédiat</strong> de la proposition, le temps de
+  l'examen. Les autres n'entraînent aucun retrait&nbsp;: la proposition reste en ligne
+  pendant que la demande est examinée.</p>
+<p>L'auteur d'une proposition signalée en est averti à sa visite suivante, et une
+  proposition retirée ouvre toujours un <strong>droit de réexamen</strong>.</p>
+
+<h2>Ce qui n'est pas encore automatique, et à partir de quand</h2>
+<p>Ce site est jeune. Plusieurs mécanismes prévus — jurys tirés au sort, validation
+  collective, seuils calculés — <strong>ne fonctionnent pas à petite échelle</strong>&nbsp;:
+  un jury de quatre personnes tiré parmi six n'est pas un jury. En attendant, c'est le
+  responsable de la publication qui tranche, et le tableau ci-dessous dit exactement
+  jusqu'à quand.</p>
+
+<table>
+  <thead>
+    <tr><th>Mécanisme</th><th>Il ne s'allume qu'à partir de</th><th>En attendant</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Signalement</td>
+      <td><strong>Tout de suite</strong></td>
+      <td>Déjà en service&nbsp;: les signalements arrivent dans la file du responsable,
+        sans seuil ni relecteur</td>
+    </tr>
+    <tr>
+      <td>Seuils calculés sur les signalements</td>
+      <td>30 expositions par proposition</td>
+      <td>Tous les signalements suivent la même procédure, sans pondération</td>
+    </tr>
+    <tr>
+      <td>Reformulation d'une proposition</td>
+      <td>environ 20 comptes vérifiés actifs</td>
+      <td>Le responsable propose une reformulation&nbsp;; <strong>l'auteur seul décide</strong>
+        de l'accepter ou de la refuser, et son texte ne change pas sans son accord</td>
+    </tr>
+    <tr>
+      <td>Validation d'un débat par trois relecteurs</td>
+      <td>environ 15 relecteurs habilités</td>
+      <td>Le responsable, seul</td>
+    </tr>
+    <tr>
+      <td>Classement des reformulations par cinq relecteurs</td>
+      <td>environ 12 relecteurs habilités</td>
+      <td>Une seule reformulation est proposée à la fois&nbsp;: il n'y a rien à classer</td>
+    </tr>
+    <tr>
+      <td>Pondération entre groupes d'opinion</td>
+      <td>au moins 2 groupes stables sur le débat (environ 50 votants)</td>
+      <td>Aucune pondération</td>
+    </tr>
+    <tr>
+      <td>Appel jugé par des arbitres tirés au sort</td>
+      <td>environ 8 arbitres habilités</td>
+      <td>Le responsable, seul</td>
+    </tr>
+    <tr>
+      <td>Synthèse des consensus</td>
+      <td>300 participants sur le débat</td>
+      <td>Rien</td>
+    </tr>
+  </tbody>
+</table>
+
+<p class="mu">Quand un appel sera jugé par des arbitres, ils seront <strong>quatre, tirés
+  au sort</strong>, et la décision sera acquise à trois voix sur quatre — avec une seule
+  réserve&nbsp;: un appel ne peut pas remettre en ligne un contenu retiré pour propos
+  haineux, incitation à la violence, discrimination ou données personnelles d'un tiers.
+  Là, les arbitres instruisent et le responsable signe, parce que c'est lui qui en
+  répond.</p>
+
+<h2>Ce qui ne changera pas avec la taille du site</h2>
+<ul>
+  <li><strong>Le vote n'est jamais restreint.</strong> Même pendant un durcissement
+    temporaire des règles de dépôt, voter reste ouvert à tous&nbsp;: c'est la mesure de ce
+    site, et la fausser coûterait plus cher que ce qu'elle protégerait.</li>
+  <li><strong>Signaler reste ouvert sans compte.</strong></li>
+  <li><strong>Une proposition n'est jamais réécrite sans l'accord de son auteur.</strong></li>
+</ul>
+{% endblock %}

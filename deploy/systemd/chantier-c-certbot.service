@@ -1,0 +1,10 @@
+[Unit]
+Description=Renouvellement des certificats Let's Encrypt du chantier C (certbot + reload nginx)
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+User=ubuntu
+WorkingDirectory=/home/ubuntu/chantier-c
+ExecStart=/home/ubuntu/chantier-c/bin/certbot-renouveler.sh

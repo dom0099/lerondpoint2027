@@ -1,0 +1,3588 @@
+/* Le Rond-Point 2027 — feuille de style unique.
+ *
+ * Chantier I (V2) : nouvelle direction visuelle, inspirée de trois maquettes
+ * d'exploration (design-reference/*.html — voir NOTES-CHANTIER-I.md). Les valeurs
+ * ci-dessous ne sont pas des préférences : chaque couleur de texte est vérifiée au
+ * seuil WCAG qui s'applique à son usage (4,5:1 pour du texte, 3:1 pour le contour
+ * d'une commande), avec le calcul refait pour CE fond-ci — un jeton qui passait sur
+ * l'ancien blanc pur ne passe pas forcément sur le nouveau papier crème.
+ *
+ * Ce qui N'EST PAS ici : les couleurs des groupes d'opinion. Elles sont décidées
+ * côté serveur (`app/services/carte_rendu.py`, chantier D) parce qu'une couleur y
+ * est attachée à l'identité d'un groupe dans le temps — ça ne se règle pas dans une
+ * feuille de style. Ne pas les redéclarer ici, sous aucun prétexte : deux sources
+ * pour la même décision, c'est la garantie qu'elles divergeront. Pour la même
+ * raison, l'accord/désaccord/passe des résultats de vote GARDENT le vert et le rouge
+ * choisis le 5 septembre 2026 (testés en simulation de deutéranopie) plutôt que le
+ * brun/bleu des maquettes — ces deux teintes-là, dans les maquettes, servent à
+ * distinguer des GROUPES d'opinion, pas des réponses ; les reprendre ici aurait
+ * mélangé deux grammaires de couleur différentes. Voir NOTES-CHANTIER-I.md.
+ */
+
+/* --- Polices ------------------------------------------------------------------
+ *
+ * Fraunces (titres, chiffres en grand) et Archivo (texte, interface) remplacent IBM
+ * Plex Sans/Mono — c'est la typographie que les trois maquettes emploient partout.
+ * Auto-hébergées, comme avant, et pour la même raison : une requête vers
+ * fonts.gstatic.com transmettrait l'adresse IP de chaque visiteur à un tiers, ce que
+ * la politique de confidentialité du site ne permet pas. Les maquettes elles-mêmes
+ * appellent Google Fonts directement — ce n'est pas reproduit ici.
+ *
+ * Un seul fichier par famille, et non un jeu de graisses statiques comme l'ancien :
+ * ce sont des polices VARIABLES (l'axe `wght` complet, plus `opsz` pour Fraunces),
+ * ce qui couvre plus de graisses que les quatre fichiers IBM Plex pour un poids
+ * comparable (~102 ko contre 77 ko). `font-optical-sizing: auto` laisse Fraunces
+ * basculer vers son dessin « display » aux grandes tailles (les titres) et son
+ * dessin « texte » aux petites — c'est tout l'intérêt de son axe optique, que les
+ * maquettes activent aussi.
+ *
+ * Sous-ensemble latin seulement, comme avant : il couvre le français, « œ » et les
+ * guillemets compris.
+ */
+@font-face {
+  font-family: "Fraunces";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/static/polices/fraunces-latin-variable.woff2") format("woff2-variations");
+}
+@font-face {
+  font-family: "Archivo";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/static/polices/archivo-latin-variable.woff2") format("woff2-variations");
+}
+
+/* Carlito, auto-hébergée pour la même raison que Fraunces et Archivo ci-dessus (pas de
+ * requête vers fonts.gstatic.com). Ne sert QU'aux schémas de la page « Comment ça
+ * marche » (chantier CCM), qui la déclarent eux-mêmes en `font-family` — rien d'autre
+ * sur le site ne nomme « Carlito », donc cette déclaration ne bascule la typographie de
+ * personne d'autre. Deux graisses statiques seulement (400, 700), Carlito n'existant pas
+ * en variable ; sous-ensemble latin, comme les deux polices au-dessus. */
+@font-face {
+  font-family: "Carlito";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/static/polices/carlito-latin-regular.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Carlito";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/static/polices/carlito-latin-bold.woff2") format("woff2");
+}
+
+/* --- Jetons -------------------------------------------------------------------- */
+
+:root {
+  /* Couleurs, mode clair — reprises des maquettes, contrastes revérifiés sur les
+   * deux fonds réels du site (le papier crème de la page, le panneau blanc des
+   * cartes). Le détail du calcul est dans NOTES-CHANTIER-I.md, pas ici : cette
+   * feuille documente le résultat, pas la méthode. */
+  --papier: #FBF9F3;         /* fond de PAGE. */
+  --panneau: #FFFFFF;        /* fond des cartes, panneaux, champs. */
+  --panneau-2: #F5F0E4;      /* panneau teinté : survol neutre, fond d'étiquette. */
+  --encre: #211D15;          /* 15,9:1 sur le papier, 16,8:1 sur un panneau. */
+  --secondaire: #75705F;     /*  4,7:1 sur le papier — le plus clair permis en texte. */
+  --gris-icone: #8C8577;     /*  3,5:1 — icônes et CONTOURS DE COMMANDE seulement,
+                                 jamais de texte : sous le seuil de 4,5:1 mais au-dessus
+                                 des 3:1 que WCAG 1.4.11 demande à un contour. */
+  --trait: #E6DED0;          /* séparateur décoratif. 1,3:1 sur les deux fonds : ça ne
+                                 porte aucune information seul, donc aucun seuil ne
+                                 s'applique — comme avant. */
+  --jaune: #F6C945;          /* 1,5:1 — aplats et repères SEULEMENT. Jamais de texte,
+                                 jamais un contour de commande (sous les 3:1 requis). */
+  --jaune-tendre: #FBEAB4;   /* le même jaune, très dilué : fond d'étiquette, survol
+                                 neutre des cartes « pourquoi ». */
+  --or-brule: #7A5C00;       /* 5,9:1 sur le papier, 6,25:1 sur un panneau — inchangé
+                                 depuis le document d'identité d'avant ce chantier : la
+                                 valeur passait déjà, aucune raison d'en choisir une
+                                 autre. C'est la voix lisible du jaune. */
+  --erreur: #B5502F;         /* 4,8:1 sur le papier, 5,1:1 sur un panneau (terracotta
+                                 des maquettes — proche de l'ancien #B33F26, à peine
+                                 réchauffé pour rester dans la nouvelle palette). */
+  --focus: #2F5FD0;          /* 5,4:1 sur le papier, 5,7:1 sur un panneau — largement
+                                 au-dessus des 3:1 qu'un anneau de focus doit tenir. */
+
+  /* L'APLAT SOMBRE de l'accueil — l'en-tête de cette page et le bandeau d'accroche
+   * qui le suit, qui n'en font qu'un (chantier I2, instruction 1). C'est le seul
+   * endroit du site où l'on écrit clair sur sombre, donc le seul qui ait besoin de
+   * ses propres jetons : `--encre`/`--secondaire` sont calibrés pour le papier crème
+   * et ne tiennent pas ici (`--secondaire` n'y ferait que 3,4:1). Valeurs reprises
+   * des maquettes (`--band*`), sauf les deux dernières, voir ci-dessous. */
+  --bandeau-fond: #211D15;   /* l'aplat lui-même — la même encre que le texte du site. */
+  --bandeau-encre: #FBF9F3;  /* 15,9:1 sur l'aplat. */
+  --bandeau-gris: #B7AD95;   /*  7,5:1 — le second paragraphe et la note. */
+  --bandeau-filet: #3A3327;  /*  1,3:1 : le filet d'1 px entre l'en-tête et le bandeau.
+                                 Décoratif au sens strict — il ne SÉPARE rien qu'on ait
+                                 besoin de voir, il évite seulement que deux aplats de
+                                 la même couleur se touchent sans transition. Aucun
+                                 seuil ne s'y applique, comme `--trait`. */
+  --bandeau-contour: #8C8577;/*  4,6:1 — le contour du bouton fantôme. Le `--band-line`
+                                 des maquettes (1,3:1) y servait aussi de contour de
+                                 COMMANDE, ce que WCAG 1.4.11 interdit sous 3:1 ; on
+                                 refait ici la distinction `--trait`/`--trait-controle`
+                                 déjà posée pour le reste du site. */
+  --bandeau-focus: #7EA2F5;  /*  6,7:1 — `--focus` (#2F5FD0) tombe à 2,93:1 sur l'aplat,
+                                 juste sous les 3:1 d'un anneau de focus. Le bleu clair
+                                 du mode sombre le repasse largement. */
+  --schema-carte-fond: #12100C;/* Le fond des cartes du schéma, APLATI : c'est
+                                 `rgba(0, 0, 0, .44)` composé sur `--bandeau-fond`.
+                                 La pointe de bulle est évidée par un second triangle
+                                 de cette couleur, et un triangle ne se fait pas en
+                                 translucide — il faut la valeur opaque. Déclarée une
+                                 fois plutôt qu'écrite deux fois : elle suit l'aplat
+                                 en mode sombre, où celui-ci descend d'un cran. */
+
+  /* Les étapes du schéma « Problème / Ce qu'on a / Solution » de l'aplat (chantier
+   * I2, instruction 15 bis) — le troisième, « Ce qu'on a », prend `--jaune`.
+   * DÉCORATIVES, et SANS RAPPORT avec `--vert-accord` / `--rouge-desaccord` juste en
+   * dessous : ceux-là disent un résultat de vote, ceux-ci colorent une étape de
+   * schéma. Même séparation que celle déjà faite entre les couleurs de groupe et
+   * celles du vote : ne jamais réemployer l'un pour l'autre.
+   * Valeurs de la maquette. Elles ne vivent que sur l'aplat, sombre dans les deux
+   * modes, d'où l'absence de variante sombre. Contrastes : sous le texte d'aplat
+   * de l'étiquette, 5,3:1 / 7,7:1 en clair, 6,1:1 / 8,9:1 en sombre. */
+  --rouge: #E0705A;
+  --vert: #96BB63;
+
+  /* Les deux réponses d'un résultat de vote — même grammaire de couleur que le
+   * 5 septembre 2026 (voir la note en tête de fichier : vert et rouge, jamais le
+   * brun/bleu des groupes), éclaircies le 16 septembre à la demande du client
+   * (« trop foncées/saturées »), d'environ 30 % chacune (luminance relative).
+   *
+   * Les deux seuils qui bornaient déjà le premier choix continuent de borner
+   * celui-ci, voir `tests/test_resultats.py` :
+   *   - 3:1 contre `--panneau` ET contre `--trait` (WCAG 1.4.11, objets porteurs de
+   *     sens sans texte dessus) — c'est LE plafond de clarté des deux jetons, plus
+   *     contraignant ici que le seuil contre le blanc ;
+   *   - 1,5:1 entre les deux teintes, 1,8:1 la même paire vue en simulation de
+   *     daltonisme rouge-vert (Viénot-Brettel-Mollon) — c'est ce qui force à garder
+   *     le vert plus sombre que le rouge, pas un choix arbitraire.
+   * Voir aussi `.etiquette-repness` plus bas, qui réutilise ces deux jetons pour son
+   * dégradé de fond.
+   *
+   * Le vert repassé le même jour à `#5FE86E` exact, sur demande explicite du client
+   * et malgré l'avis contraire : CE VERT NE TIENT PLUS les seuils ci-dessus (loin
+   * en dessous de 3:1 contre `--panneau`/`--trait`, et de 1,5:1 / 1,8:1 contre le
+   * rouge). `tests/test_resultats.py` casse tant que ce choix n'est pas révisé —
+   * ce n'est pas un oubli, la priorité donnée était la teinte exacte demandée. */
+  --vert-accord: #5FE86E;
+  --rouge-desaccord: #FA0000;/* 4,1:1 sur un panneau blanc, 3,1:1 contre --trait —
+                                 décoratif (remplissage de barre, jamais de texte),
+                                 voir `.part-accord` / `.part-desaccord` plus bas. */
+
+  /* États du bouton jaune : la même valeur assombrie, plus le gris de l'inactif. */
+  --jaune-survol: #E6B926;
+  --jaune-actif: #D4A916;
+  --jaune-inactif: var(--panneau-2);
+
+  /* Espacement : échelle de 4 px, inchangée — ce n'est pas une question de style. */
+  --esp-4: 4px;
+  --esp-8: 8px;
+  --esp-12: 12px;
+  --esp-16: 16px;
+  --esp-24: 24px;
+  --esp-32: 32px;
+  --esp-48: 48px;
+
+  /* Cible tactile minimale, inchangée. 44 px, la plus basse des deux recommandations
+   * (Apple/Google), appliquée sans exception. */
+  --cible: 44px;
+
+  /* Largeur à partir de laquelle l'en-tête tient sur une ligne. Inchangée : ce n'est
+   * pas la taille d'un appareil, c'est la largeur que réclame ce contenu précis. */
+  --seuil-large: 720px;
+
+  /* Trois largeurs de page. La courante suffit à une colonne de texte ; l'accueil et
+   * une conversation sont plus larges parce qu'ils portent une colonne latérale.
+   * `--largeur-debat` est nouvelle au chantier I : la page de vote gagne la grille à
+   * deux colonnes des maquettes (carte de vote + carte 2D d'un côté, proposer une
+   * déclaration et parcours de l'autre), qui ne tient pas dans 720 px. Le texte reste
+   * plafonné à 66 caractères dans tous les cas — c'est la mesure de lecture qui
+   * tient, pas la largeur du cadre. */
+  --largeur-page: 720px;
+  --largeur-accueil: 1040px;
+  --largeur-debat: 1000px;
+  --largeur-laterale: 280px;
+
+  /* Rayons : deux, et ce sont EXACTEMENT ceux des maquettes (chantier I2,
+   * instruction 3 du lot de corrections). Le chantier I les avait agrandis à 7 et
+   * 14 px, en lisant les maquettes comme « des coins nettement plus ronds » — c'est
+   * l'ombre douce qui détache leurs cartes, pas l'arrondi, et leurs valeurs réelles
+   * sont bien plus sobres : `.debate`, `.band-viz`, `.card` y sont à 4 px, `.badge`,
+   * `.btn-primary`, `.btn-big`, `.tab` à 3 px.
+   *
+   * Aucun élément du site n'est en forme de pilule : la charte des maquettes n'en
+   * comporte aucun, et les trois `border-radius: 999px` que le chantier I avait posés
+   * sur les étiquettes sont revenus à `--rayon-objet`. */
+  --rayon-objet: 3px;        /* boutons, champs, étiquettes, pastilles */
+  --rayon-bloc: 4px;         /* cartes, panneaux, encarts */
+
+  /* Bordure de séparation, décorative — inchangée dans son rôle, sa couleur suit la
+   * nouvelle palette. */
+  --trait-sep: 1px solid var(--trait);
+  /* Contour d'une COMMANDE — champ, bouton, tag — qui doit tenir 3:1 (WCAG 1.4.11).
+   * `--trait` (1,3:1) ne le peut pas ; `--gris-icone` (3,5:1) le peut. Même
+   * distinction que l'ancien document d'identité, sous des noms plus courts. */
+  --trait-controle: 1px solid var(--gris-icone);
+
+  /* Ombre douce, nouvelle au chantier I : les maquettes détachent leurs cartes par
+   * une ombre plutôt que la seule bordure. Les deux se cumulent — la bordure garde
+   * un bord net pour qui ne voit pas l'ombre (impression, contraste élevé forcé). */
+  --ombre: 0 1px 2px rgba(33, 29, 21, .05), 0 6px 18px rgba(33, 29, 21, .06);
+
+  --police-texte: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --police-titres: "Fraunces", "Iowan Old Style", "Palatino Linotype", serif;
+
+  /* Largeur de lecture, inchangée. */
+  --mesure: 66ch;
+}
+
+/* --- Mode sombre -----------------------------------------------------------------
+ *
+ * Prévu par les trois maquettes (`prefers-color-scheme` ET `[data-theme]`), jamais
+ * exposé sur le site actuel. Reproduit à l'identique : suit le réglage du système par
+ * défaut, et `[data-theme="dark"]`/`[data-theme="light"]` permettrait un bouton de
+ * bascule manuelle si on en ajoute un un jour — aucune des trois maquettes n'en
+ * montre, donc aucun n'est ajouté ici (voir NOTES-CHANTIER-I.md).
+ *
+ * Mêmes seuils revérifiés : tous les jetons de texte tiennent 4,5:1 ou mieux sur les
+ * deux fonds sombres, `--focus` et `--gris-icone` tiennent 3:1.
+ */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --papier: #171410;
+    --panneau: #1F1B14;
+    --panneau-2: #262017;
+    --encre: #F1EBDA;         /* 15,4:1 sur le papier, 14,4:1 sur un panneau. */
+    --secondaire: #A89E88;    /*  6,9:1 sur le papier, 6,5:1 sur un panneau. */
+    --gris-icone: #8F8672;    /*  ~3,3:1 — contours de commande seulement. */
+    --trait: #342D22;
+    --jaune: #E8BD3E;
+    --jaune-tendre: #463916;
+    --or-brule: #F0CF6B;      /* 12,1:1 sur le papier, 11,3:1 sur un panneau. */
+    --erreur: #D97A58;        /*  5,6:1 sur un panneau. */
+    --focus: #7EA2F5;         /*  7,3:1 sur le papier, 6,8:1 sur un panneau. */
+    --jaune-survol: #DDB136;
+    --jaune-actif: #CFA52C;
+    /* L'aplat de l'accueil descend d'un cran, comme dans les maquettes. */
+    --bandeau-fond: #0F0D0A;
+    --bandeau-encre: #F1EBDA;  /* 16,3:1 */
+    --bandeau-gris: #A89E88;   /*  7,3:1 */
+    --bandeau-filet: #2C261D;  /*  1,3:1, décoratif */
+    --bandeau-contour: #8F8672;/*  5,4:1 */
+    --bandeau-focus: #7EA2F5;  /*  7,7:1 */
+    --schema-carte-fond: #080706;/* le même aplati, sur #0F0D0A */
+  }
+}
+:root[data-theme="dark"] {
+  --papier: #171410;
+  --panneau: #1F1B14;
+  --panneau-2: #262017;
+  --encre: #F1EBDA;
+  --secondaire: #A89E88;
+  --gris-icone: #8F8672;
+  --trait: #342D22;
+  --jaune: #E8BD3E;
+  --jaune-tendre: #463916;
+  --or-brule: #F0CF6B;
+  --erreur: #D97A58;
+  --focus: #7EA2F5;
+  --jaune-survol: #DDB136;
+  --jaune-actif: #CFA52C;
+  --bandeau-fond: #0F0D0A;
+  --bandeau-encre: #F1EBDA;
+  --bandeau-gris: #A89E88;
+  --bandeau-filet: #2C261D;
+  --bandeau-contour: #8F8672;
+  --bandeau-focus: #7EA2F5;
+  --schema-carte-fond: #080706;
+}
+
+/* --- Réinitialisation ----------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: light dark;
+  scroll-padding-top: var(--esp-24);
+}
+
+[hidden] {
+  display: none !important;
+}
+
+body {
+  margin: 0;
+  background: var(--papier);
+  color: var(--encre);
+  font-family: var(--police-texte);
+  font-optical-sizing: auto;
+  font-size: 15px;
+  line-height: 24px;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* --- Échelle typographique ------------------------------------------------------
+ *
+ * Les titres passent en Fraunces (serif) — c'est le changement le plus visible des
+ * maquettes. `text-wrap: balance` évite un titre à un seul mot orphelin sur sa
+ * dernière ligne, ce que la graisse plus lourde de Fraunces rend plus voyant qu'avec
+ * Archivo. */
+h1, h2, h3 {
+  font-family: var(--police-titres);
+  font-weight: 600;
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: 32px;
+  line-height: 1.1;
+  margin: 0 0 var(--esp-8);
+  letter-spacing: -0.01em;
+}
+
+h2 {
+  font-size: 22px;
+  line-height: 1.2;
+  margin: var(--esp-32) 0 var(--esp-12);
+}
+
+h3 {
+  font-size: 17px;
+  line-height: 1.3;
+  margin: 0 0 var(--esp-8);
+}
+
+p {
+  margin: 0 0 var(--esp-16);
+  max-width: var(--mesure);
+}
+
+p:last-child {
+  margin-bottom: 0;
+}
+
+/* Titre de débat : Fraunces, mais toujours à la taille du texte courant dans une
+ * liste dense — c'est la graisse et la police qui hiérarchisent, pas le corps. */
+.titre-debat {
+  font-family: var(--police-titres);
+  font-size: 17px;
+  line-height: 1.25;
+  font-weight: 600;
+  /* Aucune marge : dans la carte, c'est le `gap` de la pile qui espace. */
+  margin: 0;
+}
+
+/* Le bloc badges + titre d'une carte de débat, EN FLUX NORMAL (chantier Vidéo,
+ * VIDEO-4) : `.carte-debat` est flex, où `float` n'a aucun effet sur ses enfants
+ * directs — c'est ce bloc-ci qui fait flotter la miniature et enchaîner le texte
+ * autour d'elle. `flow-root` (et non `overflow: hidden`) contient le flottant sans
+ * jamais rogner un contour de focus qui déborderait légèrement. */
+.entete-carte-debat {
+  display: flow-root;
+}
+
+/* Le titre, à côté de la miniature agrandie et non sous elle : son lien est un
+ * `inline-flex`, une boîte d'un seul tenant qui ne se coupe pas autour d'un flottant —
+ * plus large que la place restante, il passait tout entier SOUS la miniature. En
+ * `flow-root`, le titre devient une colonne qui se range à côté du flottant, et son
+ * lien s'y ajuste. */
+.entete-carte-debat .titre-debat {
+  display: flow-root;
+}
+
+/* La miniature de la vidéo, en haut à droite de la carte. Agrandie le 17/09/2026 (demande
+ * du client) : à 44 px, on ne voyait pas qu'il s'agissait d'une vidéo. Elle LANCE la
+ * vidéo (`static/video.js`) — l'icône de lecture le dit. Carrée, comme avant : le cadre
+ * réel varie d'une vidéo à l'autre (portrait, paysage), et une vignette qui changerait
+ * de forme d'une carte à l'autre romprait l'alignement de la grille. */
+.miniature-video-carte {
+  float: right;
+  width: 6rem;
+  height: 6rem;
+  margin: 0 0 var(--esp-8) var(--esp-12);
+}
+
+/* Commun aux deux miniatures (carte et page du débat) : l'image remplit la boîte, et
+ * l'icône de lecture — un rond translucide et un triangle blanc — se pose au centre. */
+.lancer-video {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border-radius: var(--rayon-bloc);
+  background: var(--panneau-2);
+}
+
+.lancer-video img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.icone-lecture {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2.75rem;
+  height: 2.75rem;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: rgb(0 0 0 / .4);
+  border: 2px solid rgb(255 255 255 / .85);
+  transition: background .15s;
+}
+
+/* Le triangle, dessiné en bordures, décalé d'un poil vers la droite : centré
+ * géométriquement, un triangle paraît trop à gauche. */
+.icone-lecture::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 54%;
+  transform: translate(-50%, -50%);
+  border-top: .5rem solid transparent;
+  border-bottom: .5rem solid transparent;
+  border-left: .8rem solid #FFFFFF;
+}
+
+.lancer-video:hover .icone-lecture,
+.lancer-video:focus-visible .icone-lecture {
+  background: rgb(0 0 0 / .6);
+}
+
+/* Chapeau de page : même corps que le texte, en secondaire. */
+.lead {
+  color: var(--secondaire);
+  margin: 0 0 var(--esp-24);
+}
+
+/* Secondaire : métadonnées, légendes. Le gris le plus clair autorisé en texte. */
+.mu,
+small {
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--secondaire);
+}
+
+/* Libellé : capitales, tracking ouvert. Nomme une zone (« LES CHIFFRES »,
+ * « PROPOSITION ») sans consommer un titre.
+ *
+ * En Archivo et non plus en police à chasse fixe : aucune des trois maquettes
+ * n'emploie de police mono, et leur équivalent (`.eyebrow`) est un simple Archivo
+ * gras tracé. Le mono disparaît du site avec ce chantier — voir NOTES-CHANTIER-I.md. */
+.libelle {
+  font-family: var(--police-texte);
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--or-brule);
+}
+
+/* Chiffre : tabulaire, pour qu'un compteur qui s'incrémente ne fasse pas danser ce
+ * qui l'entoure. Reste en Archivo (police de texte) — les GRANDS nombres d'affichage
+ * (une page de chiffres, le total du site) passent en Fraunces via `.chiffre-grand`,
+ * comme dans les maquettes ; un petit compte inline reste dans le texte courant. */
+.chiffre {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+/* Grand nombre d'affichage : la valeur qu'on vient chercher sur une carte de
+ * chiffres, ou le total du site. Fraunces, comme `.fig-num` et `.num b` dans les
+ * maquettes. */
+.chiffre-grand {
+  font-family: var(--police-titres);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--or-brule);
+  line-height: 1;
+}
+
+.accent {
+  color: var(--or-brule);
+}
+
+strong,
+b {
+  font-weight: 600;
+}
+
+/* --- Liens ---------------------------------------------------------------------
+ *
+ * En encre soulignée par défaut — la palette n'a pas de teinte qui porte un texte
+ * (le jaune ne peut pas). Un lien qui appartient à un système d'accroche (« Lire le
+ * manifeste », « Voir tous les débats ») porte plutôt `.lien-souligne-jaune`, qui
+ * reprend le soulignement jaune de 2 px des maquettes — un repère, pas un texte
+ * jaune : le mot reste en encre, seul le trait dessous change de couleur. */
+a {
+  color: var(--encre);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+
+.lien-souligne-jaune {
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 2px solid var(--jaune);
+  padding-bottom: 1px;
+}
+
+/* Le lien du titre reste une CIBLE à part entière : lui et le pied « Voter » mènent au
+ * même endroit, mais ce sont deux cibles distinctes pour un pouce. */
+.titre-debat a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--cible);
+  padding: var(--esp-4) 0;
+}
+
+.titre-debat a {
+  text-decoration: none;
+}
+
+.titre-debat a:focus-visible {
+  text-decoration: underline;
+}
+
+@media (hover: none) {
+  .titre-debat a {
+    text-decoration: underline;
+  }
+}
+
+/* --- Ossature de page ------------------------------------------------------------ */
+
+/* L'en-tête. CLAIR partout, SAUF sur l'accueil (voir la variante juste en dessous) —
+ * et non défilant partout, y compris sur l'accueil : le rendre collant reviendrait sur
+ * un choix déjà motivé (88 px figés en permanence pour trois liens qu'on emploie une
+ * fois par visite), et la consigne du chantier I2 ne le demande pas.
+ *
+ * Le chantier I avait laissé l'en-tête clair sur TOUTES les pages, en jugeant qu'un
+ * en-tête partagé qui change de couleur romprait la continuité qu'il sert à donner ;
+ * l'instruction 1 du chantier I2 tranche l'inverse pour l'accueil, et pour l'accueil
+ * seul. Voir NOTES-CHANTIER-I2.md. */
+.entete {
+  background: var(--papier);
+  border-bottom: var(--trait-sep);
+  padding: var(--esp-8) var(--esp-16);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-8) var(--esp-16);
+  align-items: center;
+}
+
+.nav-site {
+  order: 3;
+  flex: 1 0 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-16);
+  padding-top: var(--esp-8);
+  border-top: var(--trait-sep);
+}
+
+.nav-site a {
+  padding: 0 var(--esp-4);
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--secondaire);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+}
+
+.nav-site a[aria-current="page"] {
+  color: var(--encre);
+  font-weight: 600;
+  border-bottom-color: var(--jaune);
+}
+
+.entete a,
+.entete button {
+  min-height: var(--cible);
+  display: inline-flex;
+  align-items: center;
+}
+
+.entete .marque {
+  font-family: var(--police-titres);
+  font-weight: 600;
+  font-size: 1.05rem;
+  text-decoration: none;
+  color: var(--encre);
+}
+
+.entete .marque .avatar-nom {
+  text-decoration: none;
+}
+
+.entete .droite {
+  margin-left: auto;
+  display: flex;
+  gap: var(--esp-16);
+  align-items: center;
+}
+
+.entete .nav-large {
+  display: none;
+}
+
+.entete .droite .avatar-nom {
+  display: none;
+}
+
+.entete .droite .avatar {
+  min-width: var(--cible);
+  justify-content: center;
+}
+
+@media (min-width: 720px) {
+  .entete .droite .avatar-nom {
+    display: inline;
+  }
+
+  .entete .droite .avatar {
+    min-width: 0;
+  }
+
+  .entete .nav-large {
+    display: inline-flex;
+  }
+
+  .nav-site {
+    order: 0;
+    flex: 0 1 auto;
+    border-top: none;
+  }
+}
+
+/* --- L'en-tête sombre de l'accueil ---------------------------------------------------
+ *
+ * L'accueil, et l'accueil SEUL (chantier I2, instruction 1). L'accroche du haut de
+ * cette page est un aplat d'encre pleine largeur (`.bandeau-mission`, plus bas) ; pour
+ * que l'ensemble se lise comme un seul aplat continu depuis le tout haut de la page —
+ * et non comme un en-tête clair posé sur un bandeau sombre —, l'en-tête prend le même
+ * fond, et le filet d'1 px qui les sépare est la seule chose entre les deux.
+ *
+ * Le point d'accroche est `body.accueil`, la classe que la page se donne déjà
+ * (`classe_corps`) : la feuille n'a toujours pas à deviner sur quelle URL elle est, et
+ * aucune autre page n'est touchée. C'était la première des deux options proposées par
+ * la consigne ; la seconde (un bandeau sombre sous un en-tête resté clair) ne donne
+ * justement pas l'aplat continu demandé.
+ *
+ * Toutes les couleurs de texte passent aux jetons `--bandeau-*` : `--secondaire`, réglé
+ * pour le papier crème, ne fait que 3,4:1 sur l'aplat. */
+.accueil .entete {
+  background: var(--bandeau-fond);
+  color: var(--bandeau-encre);
+  border-bottom-color: var(--bandeau-filet);
+}
+
+.accueil .entete .marque,
+.accueil .nav-site a:hover,
+.accueil .nav-site a[aria-current="page"],
+.accueil .entete .droite a:hover {
+  color: var(--bandeau-encre);
+}
+
+.accueil .nav-site a,
+.accueil .entete .droite a {
+  color: var(--bandeau-gris);
+}
+
+/* Le trait qui sépare la nav de la marque quand l'en-tête passe sur deux lignes
+ * (en dessous de 720 px) : lui aussi invisible en `--trait` sur l'aplat. */
+.accueil .nav-site {
+  border-top-color: var(--bandeau-filet);
+}
+
+/* L'anneau de la marque et l'anneau de niveau. Leur tracé suit `--encre`, qui est
+ * précisément la couleur de l'aplat : sans cette reprise, le logo disparaîtrait. Le
+ * jaune de l'îlot, lui, ne bouge pas — c'est la règle du document d'identité. */
+.accueil .entete .anneau--logo .anneau-trace {
+  stroke: var(--bandeau-encre);
+}
+
+.accueil .entete .anneau-piste {
+  stroke: var(--bandeau-contour);
+}
+
+.accueil .entete .anneau--niveau .anneau-ilot {
+  fill: var(--bandeau-encre);
+}
+
+/* `--focus` (#2F5FD0) tombe à 2,93:1 sur l'aplat, juste sous le seuil. */
+.accueil .entete *:focus-visible,
+.bandeau-mission *:focus-visible {
+  outline-color: var(--bandeau-focus);
+}
+
+main {
+  max-width: var(--largeur-page);
+  margin: var(--esp-32) auto;
+  padding: 0 var(--esp-16);
+}
+
+.pied {
+  max-width: var(--largeur-page);
+  margin: var(--esp-48) auto var(--esp-32);
+  padding: 0 var(--esp-16);
+  border-top: var(--trait-sep);
+  padding-top: var(--esp-24);
+}
+
+/* --- Blocs ---------------------------------------------------------------------- */
+
+.card {
+  background: var(--panneau);
+  border: var(--trait-sep);
+  border-radius: var(--rayon-bloc);
+  box-shadow: var(--ombre);
+  padding: var(--esp-16);
+  margin-bottom: var(--esp-12);
+}
+
+/* Encart en teinte jaune : étiquette, badge débloqué, information mise de côté. */
+.encart {
+  background: var(--jaune-tendre);
+  border: 1px solid var(--or-brule);
+  border-radius: var(--rayon-bloc);
+  padding: var(--esp-16);
+  margin-bottom: var(--esp-16);
+}
+
+/* --- Messages ------------------------------------------------------------------- */
+.msg {
+  border: var(--trait-sep);
+  border-radius: var(--rayon-bloc);
+  padding: var(--esp-12) var(--esp-16);
+  margin-bottom: var(--esp-16);
+}
+
+.msg.err {
+  border-color: var(--erreur);
+  color: var(--erreur);
+}
+
+.msg.ok {
+  background: var(--jaune-tendre);
+  border-color: var(--or-brule);
+}
+
+.empty {
+  color: var(--secondaire);
+}
+
+/* --- Formulaires ------------------------------------------------------------------ */
+
+label {
+  display: block;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--secondaire);
+  margin: var(--esp-16) 0 var(--esp-4);
+}
+
+input,
+textarea,
+select {
+  width: 100%;
+  max-width: var(--mesure);
+  min-height: var(--cible);
+  padding: var(--esp-8) var(--esp-12);
+  border: var(--trait-controle);
+  border-radius: var(--rayon-objet);
+  background: var(--panneau);
+  color: var(--encre);
+  font-family: var(--police-texte);
+  /* 16 px et pas 15 : en dessous, iOS agrandit la page à la mise au point du champ. */
+  font-size: 16px;
+  line-height: 24px;
+}
+
+textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+input:user-invalid,
+textarea:user-invalid,
+select:user-invalid,
+.invalide {
+  border-color: var(--erreur);
+}
+
+.erreur-champ {
+  color: var(--erreur);
+  font-size: 13px;
+  line-height: 20px;
+  margin: var(--esp-4) 0 0;
+}
+
+/* --- Tableaux --------------------------------------------------------------------- */
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: var(--esp-12) 0;
+}
+
+td,
+th {
+  border-top: var(--trait-sep);
+  padding: var(--esp-8) var(--esp-4);
+  vertical-align: top;
+  text-align: left;
+}
+
+/* --- Listes ------------------------------------------------------------------------ */
+
+ul,
+ol {
+  padding-left: var(--esp-24);
+  margin: 0 0 var(--esp-16);
+  max-width: var(--mesure);
+}
+
+li {
+  margin: var(--esp-4) 0;
+}
+
+/* --- Boutons -----------------------------------------------------------------------
+ *
+ * Les mêmes quatre apparences qu'avant ce chantier, et la même règle pour choisir
+ * entre elles : `.bouton-principal` en aplat jaune pour l'action neutre principale
+ * (une seule par écran), le bouton par défaut sans classe pour tout le reste,
+ * `.bouton-encre` en aplat d'encre pour l'action principale non neutre (supprimer ses
+ * données), `.choix-vote` pour les deux réponses et elles seules. Ce qui change ici
+ * n'est que la forme : coins plus ronds, et un bouton par défaut qui reprend le
+ * panneau teinté des maquettes plutôt qu'un simple contour.
+ *
+ * Le jaune ne désigne toujours JAMAIS un choix de vote.
+ */
+
+button,
+.bouton {
+  font-family: var(--police-texte);
+  font-size: 15px;
+  line-height: 24px;
+  font-weight: 600;
+  padding: var(--esp-8) var(--esp-16);
+  border-radius: var(--rayon-objet);
+  border: var(--trait-controle);
+  background: var(--panneau-2);
+  color: var(--encre);
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--cible);
+  text-align: center;
+  transition: background .12s ease, border-color .12s ease;
+}
+
+button:hover,
+.bouton:hover {
+  border-color: var(--secondaire);
+}
+
+button:active,
+.bouton:active {
+  background: var(--jaune-inactif);
+}
+
+button:disabled,
+.bouton:disabled {
+  color: var(--gris-icone);
+  background: var(--panneau-2);
+  border-color: var(--trait);
+  cursor: not-allowed;
+}
+
+/* L'action neutre principale. Le contour reste en or brûlé : sur `--jaune` (1,5:1),
+ * un contour de la même couleur que l'aplat ne se distinguerait pas assez pour qui
+ * voit mal, et l'or brûlé porte ce contour à 5,9:1 sans toucher au jaune ni au
+ * texte — c'est la limite du jaune que le document d'identité précédent avait déjà
+ * posée, et qui reste vraie ici. */
+.bouton-principal {
+  background: var(--jaune);
+  border-color: var(--or-brule);
+  color: var(--encre);
+}
+
+.bouton-principal:hover {
+  background: var(--jaune-survol);
+  border-color: var(--or-brule);
+}
+
+.bouton-principal:active {
+  background: var(--jaune-actif);
+}
+
+.bouton-principal:disabled {
+  background: var(--jaune-inactif);
+  border-color: var(--trait);
+  color: var(--gris-icone);
+}
+
+.bouton-encre {
+  background: var(--encre);
+  border-color: var(--encre);
+  color: var(--panneau);
+}
+
+.bouton-encre:hover {
+  background: var(--encre);
+  border-color: var(--encre);
+  filter: brightness(1.15);
+}
+
+.bouton-encre:active {
+  background: var(--panneau);
+  color: var(--encre);
+}
+
+.bouton-encre:disabled {
+  background: var(--jaune-inactif);
+  border-color: var(--trait);
+  color: var(--gris-icone);
+}
+
+/* --- La carte de vote ------------------------------------------------------------------
+ *
+ * `.voter` de la maquette debat-vote.html (chantier I2, instruction 10). Elle s'ajoute
+ * à `.card` : seuls le rayon, l'espacement et le filet jaune du bord gauche viennent de
+ * cette maquette-ci.
+ *
+ * Rayon : celui de `.card` (`--rayon-bloc`), comme tous les blocs de la page.
+ */
+.carte-vote {
+  position: relative;
+  overflow: hidden;
+  padding: var(--esp-24);
+  /* La taille de la proposition ET le nombre de lignes qui lui sont réservées vivent
+   * ici, ensemble : la hauteur de la boîte se calcule à partir de la première, et les
+   * séparer ferait mentir la réserve dès qu'on toucherait à la police. */
+  --taille-proposition: clamp(1.2rem, 2.4vw, 1.6rem);
+  --lignes-proposition: 6;
+}
+
+/* Sur un écran large la ligne tient deux fois plus de signes : cinq lignes y couvrent
+ * plus de texte que six sur un téléphone. La réserve suit. */
+@media (min-width: 760px) {
+  .carte-vote {
+    --lignes-proposition: 5;
+  }
+}
+
+/* --- La place réservée à la proposition ---------------------------------------------
+ *
+ * Chantier I2, instruction 16. La boîte a une hauteur FIXE, calculée en lignes de
+ * proposition : ce qu'elle contient — chargement, ligne de méta, texte, sources — peut
+ * varier du simple au quintuple sans que « D'accord » et « Pas d'accord » bougent d'un
+ * pixel. C'est la raison d'être de la règle : les deux réponses doivent tomber au même
+ * endroit à chaque proposition, sinon une main qui a pris le geste finit par voter à
+ * côté, et un vote posé par erreur ne mesure rien.
+ *
+ * Six lignes (cinq au-delà de 760 px) couvrent très largement les propositions
+ * observées en base — la plus longue en fait trois sur un écran large. Le champ de
+ * saisie accepte jusqu'à 500 signes, donc le débordement reste possible : la boîte
+ * défile alors en interne plutôt que de repousser les boutons, et le fondu du bas dit
+ * qu'il reste à lire. Rien n'est tronqué.
+ */
+.zone-proposition {
+  display: flex;
+  flex-direction: column;
+  height: calc(var(--lignes-proposition) * 1.3 * var(--taille-proposition));
+  margin-bottom: var(--esp-16);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  /* Le fondu haut et bas est SOLIDAIRE DU CONTENU (`local`) : il n'apparaît que
+   * lorsqu'il y a du texte dessous, c'est-à-dire exactement quand il reste à lire. En
+   * bout de défilement, il n'y a plus rien sous lui et il ne se voit pas. Il est peint
+   * avec le fond de la carte, donc il suit le thème sombre sans réglage. */
+  background:
+    linear-gradient(var(--panneau) 40%, transparent) top / 100% 24px no-repeat local,
+    linear-gradient(transparent, var(--panneau) 60%) bottom / 100% 24px no-repeat local;
+}
+
+/* La boîte est focalisable au clavier QUAND elle défile, et seulement là : le script
+ * pose `tabindex` d'après la hauteur réelle du contenu. Sans ça, un lecteur au clavier
+ * n'aurait aucun moyen d'atteindre la fin d'une proposition longue. */
+.zone-proposition:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Ce qui reste de la boîte sous la ligne de méta. Le contenu y est centré : une
+ * proposition d'une ligne se pose au milieu de la place réservée, au lieu de laisser un
+ * trou entre elle et les réponses. */
+.corps-proposition {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Le filet jaune du bord gauche. Purement décoratif — il ne distingue rien et ne porte
+ * aucune information, donc aucun seuil de contraste ne s'y applique. */
+.carte-vote::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--jaune);
+}
+
+/* La ligne de méta au-dessus de la proposition (`.voter-meta`). */
+.meta-vote {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-8) var(--esp-12);
+  margin: 0 0 var(--esp-8);
+  max-width: none;
+  font-size: .78rem;
+  color: var(--secondaire);
+}
+
+/* Le repère « Source citée ». Il ne remplace pas les liens, qui restent affichés sous
+ * la proposition : il dit seulement, avant qu'on lise, qu'il y a de quoi se
+ * documenter. */
+.mention-source {
+  color: var(--or-brule);
+  font-weight: 600;
+}
+
+/* Le résultat immédiat (`.result`).
+ *
+ * ÉCART VOLONTAIRE PAR RAPPORT À LA MAQUETTE : elle colore sa barre avec
+ * `--serie-a`/`--serie-b`, le brun et le bleu qui distinguent des GROUPES d'opinion
+ * partout ailleurs sur le site. Ce sont ici le vert et le rouge de l'accord et du
+ * désaccord, ceux que le chantier I a gardés — choisis le 5 septembre 2026 pour leur
+ * écart de clarté en simulation de deutéranopie (1,54:1), qui les laisse distincts même
+ * sans la teinte. Reprendre le brun/bleu aurait mélangé deux grammaires de couleur.
+ * Le segment « passé » reste neutre, comme dans la maquette.
+ *
+ * Les trois classes `.part-*` ne sont PAS redéclarées ici : elles existent déjà plus
+ * bas, pour le tableau des résultats par groupe, aux mêmes valeurs. C'est la même
+ * grammaire — accord, désaccord, passe — et elle ne doit avoir qu'une définition.
+ *
+ * La couleur ne porte jamais l'information seule : la légende écrit les trois libellés
+ * et leurs comptes en toutes lettres, sous la barre. */
+.resultat-immediat {
+  margin-top: var(--esp-16);
+  padding-top: var(--esp-12);
+  border-top: var(--trait-sep);
+}
+
+.resultat-ligne {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--esp-12);
+  margin: 0 0 var(--esp-8);
+  max-width: none;
+  font-size: .8rem;
+  color: var(--secondaire);
+}
+
+.resultat-ligne b {
+  color: var(--encre);
+  font-variant-numeric: tabular-nums;
+}
+
+.barre-resultat {
+  display: flex;
+  gap: 2px;
+  height: 10px;
+  border-radius: 5px;
+  overflow: hidden;
+  background: var(--panneau-2);
+}
+
+.barre-resultat i {
+  display: block;
+  height: 100%;
+  transition: width .5s ease;
+}
+
+
+.legende-resultat {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-4) var(--esp-16);
+  margin: var(--esp-8) 0 0;
+  max-width: none;
+  font-size: .75rem;
+  color: var(--secondaire);
+}
+
+.legende-resultat span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--esp-4);
+}
+
+.legende-resultat b {
+  color: var(--encre);
+  font-variant-numeric: tabular-nums;
+}
+
+.puce-resultat {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex: 0 0 auto;
+}
+
+/* La progression vers le déblocage de la carte des avis (`.progress`).
+ *
+ * Les pastilles sont DÉCORATIVES : le texte à côté dit la même chose en toutes lettres
+ * (« Encore 3 votes pour être situé »), et c'est lui qui porte l'information. Leur
+ * nombre suit le seuil RÉEL de ce débat, jamais les sept fixes de la maquette. */
+.progression-situe {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--esp-8) var(--esp-12);
+  margin: var(--esp-16) 0 0;
+  max-width: none;
+  font-size: .79rem;
+  color: var(--secondaire);
+}
+
+.pastilles {
+  display: flex;
+  gap: 5px;
+}
+
+.pastilles .pastille {
+  width: 22px;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--trait);
+  transition: background .3s ease;
+}
+
+.pastilles .pastille--faite {
+  background: var(--jaune);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .barre-resultat i,
+  .pastilles .pastille {
+    transition: none;
+  }
+}
+
+/* --- Les deux choix de vote ---------------------------------------------------------
+ *
+ * Rigoureusement symétriques, et ça reste la règle la plus stricte de cette feuille.
+ *
+ * ÉCART VOLONTAIRE PAR RAPPORT À LA MAQUETTE `debat-vote.html` : elle fait passer
+ * « D'accord » en jaune au survol (`--yellow-soft`) et « Pas d'accord » en terracotta
+ * — une asymétrie qui laisserait croire que l'un des deux choix est le bon, ou celui
+ * que le site met en avant. Ici les deux reçoivent EXACTEMENT le même traitement, à
+ * chaque état : le panneau teinté neutre (`--panneau-2`) au survol et à l'enfoncement,
+ * la même transition, la même épaisseur de contour. Aucune des deux couleurs de la
+ * maquette n'est reprise pour cet usage précis — ni le jaune (déjà interdit sur un
+ * bouton de vote), ni le terracotta, qui reste réservé à l'erreur. Voir
+ * NOTES-CHANTIER-I.md.
+ */
+.choix-de-vote {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-8);
+  margin: 0 0 var(--esp-8);
+}
+
+.choix-vote {
+  flex: 1 1 160px;
+  max-width: 280px;
+  border: 2px solid var(--encre);
+  border-radius: var(--rayon-bloc);
+  background: var(--panneau);
+  color: var(--encre);
+  padding: var(--esp-12) var(--esp-16);
+  transition: background .12s ease, transform .08s ease;
+}
+
+.choix-vote:hover {
+  background: var(--panneau-2);
+  transform: translateY(-1px);
+}
+
+.choix-vote:active {
+  background: var(--panneau-2);
+  transform: none;
+}
+
+.choix-vote:disabled {
+  border-color: var(--trait);
+  background: var(--panneau);
+  color: var(--gris-icone);
+  transform: none;
+}
+
+/* Raccourci clavier affiché sur le bouton, comme dans la maquette `debat-vote.html`
+ * (`<kbd>A</kbd>`, `<kbd>D</kbd>`) — décoratif ET fonctionnel : les mêmes touches
+ * déclenchent le vote (voir le script de `conversation.html`). */
+.choix-vote kbd,
+.lien-action kbd {
+  font-family: var(--police-texte);
+  font-size: .68rem;
+  font-weight: 600;
+  color: var(--secondaire);
+  border: 1px solid var(--trait);
+  border-radius: 4px;
+  padding: 1px 5px;
+  background: var(--panneau-2);
+  margin-left: var(--esp-8);
+}
+
+.choix-vote {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-8);
+}
+
+/* « Passer » reste un texte : ce n'est pas un troisième choix. */
+.lien-action {
+  border: none;
+  background: none;
+  justify-content: flex-start;
+  min-width: var(--cible);
+  padding: var(--esp-8) 0;
+  font-weight: 400;
+  color: var(--encre);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.lien-action:hover {
+  border: none;
+}
+
+.lien-action:active {
+  background: none;
+}
+
+.lien-action:disabled {
+  background: none;
+  color: var(--gris-icone);
+}
+
+/* --- Anneau de focus clavier --------------------------------------------------------- */
+*:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* --- Composants ------------------------------------------------------------------- */
+
+.card > :first-child,
+.encart > :first-child,
+.msg > :first-child {
+  margin-top: 0;
+}
+
+.card > :last-child,
+.encart > :last-child,
+.msg > :last-child {
+  margin-bottom: 0;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--esp-8);
+  margin: var(--esp-16) 0 0;
+  max-width: none;
+}
+
+.actions:not(:last-child) {
+  margin-bottom: var(--esp-24);
+}
+
+.actions a {
+  min-height: var(--cible);
+  display: inline-flex;
+  align-items: center;
+}
+
+/* --- Bandeau de statut de fin de parcours ------------------------------------------
+ *
+ * Remplace l'ancien titre « Merci de votre participation, vous appartenez au groupe
+ * X » (un `h2`/`h3` en Fraunces ~28px). Un badge COMPACT et EN LIGNE — pas pleine
+ * largeur —, posé directement dans le flux, sans carte autour : c'est un point de
+ * situation, pas un titre de section.
+ */
+.statut-parcours {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--esp-8);
+  background: var(--panneau-2);
+  border-radius: var(--rayon-bloc);
+  padding: var(--esp-4) var(--esp-16);
+  margin: 0 0 var(--esp-4);
+  font-size: 1.05rem;
+}
+
+/* Couleur du « positif/validé » : la même que `.msg.ok` (un or lisible, pas le vert
+ * réservé à l'accord/désaccord d'un vote — voir la note en tête de fichier sur les
+ * grammaires de couleur qui ne se mélangent pas). */
+.statut-parcours .pastille {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  background: var(--or-brule);
+}
+
+/* Le bilan (« vous avez répondu à N propositions ») et les motifs d'attente : un
+ * texte secondaire, sciemment beaucoup plus discret que le bandeau au-dessus — ils
+ * confirment un détail, ils ne portent pas le message. */
+.discret {
+  font-size: .72rem;
+  line-height: 1.4;
+  color: var(--secondaire);
+  margin: 0 0 var(--esp-4);
+}
+
+/* La proposition soumise au vote — en Fraunces, comme `.prop-text` dans la maquette :
+ * c'est l'élément que la page existe pour montrer, et la police change de registre
+ * pour le dire. */
+.proposition {
+  font-family: var(--police-titres);
+  font-weight: 500;
+  /* La même variable que la hauteur réservée, voir `.carte-vote`. */
+  font-size: var(--taille-proposition);
+  line-height: 1.3;
+  /* Aucune marge : l'espace autour de la proposition vient désormais de la boîte à
+   * hauteur fixe qui la contient, et une marge ici décalerait le centrage. */
+  margin: 0;
+}
+
+.champs-empiles textarea {
+  margin-bottom: var(--esp-8);
+}
+
+.sources-proposition {
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--secondaire);
+  /* Collée sous la proposition, dans la même boîte : la marge négative qui rattrapait
+   * l'ancienne marge basse de `.proposition` n'a plus lieu d'être. */
+  margin: var(--esp-8) 0 0;
+}
+
+.sources-proposition a {
+  color: var(--or-brule);
+}
+
+.lien-mort {
+  color: var(--secondaire);
+  font-style: italic;
+}
+
+.sources-saisie {
+  margin: 0 0 var(--esp-12);
+}
+
+.sources-saisie > summary {
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--secondaire);
+  cursor: pointer;
+  min-height: var(--cible);
+  display: flex;
+  align-items: center;
+}
+
+.sources-saisie > summary:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.sources-saisie input {
+  margin-bottom: var(--esp-8);
+}
+
+.proposition-saisie {
+  margin-bottom: var(--esp-24);
+}
+
+/* --- Thèmes ------------------------------------------------------------------------ */
+.grille-themes {
+  list-style: none;
+  margin: 0 0 var(--esp-24);
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0;
+}
+
+.grille-themes label {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-8);
+  min-height: var(--cible);
+  font-weight: 400;
+  cursor: pointer;
+}
+
+/* Étiquette de thème : neutre, le jaune reste réservé à « Nouveau ». */
+.etiquette--theme {
+  background: transparent;
+  color: var(--secondaire);
+  border: var(--trait-controle);
+  border-radius: var(--rayon-objet);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+/* --- Chiffres publics d'un débat --------------------------------------------------- */
+.chiffres {
+  list-style: none;
+  margin: 0 0 var(--esp-24);
+  padding: 0;
+}
+
+.chiffre-valeur {
+  font-family: var(--police-titres);
+  font-size: 2.4rem;
+  line-height: 1;
+  font-weight: 600;
+  color: var(--or-brule);
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.chiffre-intitule {
+  margin: var(--esp-4) 0 var(--esp-8);
+}
+
+.chiffre-dates {
+  margin: 0 0 var(--esp-8);
+}
+
+.chiffre-source a {
+  color: var(--or-brule);
+}
+
+/* La carte d'un chiffre public — comme `.fig-card` dans la maquette
+ * `debat-chiffres.html` : valeur/dates, puis l'emplacement de capture, puis la
+ * source, empilés ; `.chiffre-public-top` met la valeur et le graphique en gaufre
+ * côte à côte dès que la place le permet. Le graphique est du VRAI calcul (le
+ * pourcentage enregistré), donc il reste — voir `.gaufre` plus bas et
+ * `chiffres.py::pourcentage` côté service. */
+.chiffre-public-top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-16);
+  align-items: flex-start;
+  margin-bottom: var(--esp-16);
+}
+
+.chiffre-public .chiffre-corps {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+.chiffre-public .emplacement-image {
+  margin-bottom: var(--esp-12);
+}
+
+.gaufre {
+  flex: 0 0 auto;
+  width: 88px;
+  height: 88px;
+  display: block;
+}
+
+.gaufre rect {
+  fill: var(--trait);
+}
+
+.gaufre rect.pleine {
+  fill: var(--or-brule);
+}
+
+/* Emplacement d'illustration — capture de source, image de mème, dessin décoratif de
+ * bandeau. Ce chantier ne recrée AUCUNE de ces images : chaque emplacement est un
+ * cadre en pointillés, vide, prêt à recevoir un fichier déposé plus tard. Voir la
+ * section 5 de la consigne et NOTES-CHANTIER-I.md. */
+.emplacement-image {
+  border: 1px dashed var(--gris-icone);
+  border-radius: var(--rayon-bloc);
+  background: var(--panneau-2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--esp-4);
+  text-align: center;
+  padding: var(--esp-16);
+  color: var(--secondaire);
+}
+
+.emplacement-image strong {
+  font-size: .86rem;
+  color: var(--encre);
+  font-weight: 600;
+}
+
+.emplacement-image span {
+  font-size: .78rem;
+  max-width: 32ch;
+}
+
+.emplacement-image--16-9 {
+  aspect-ratio: 16 / 9;
+}
+
+/* --- Filtre par thème --------------------------------------------------------------- */
+.separateur-filtre {
+  color: var(--gris-icone);
+  align-self: center;
+  padding: 0 var(--esp-4);
+  user-select: none;
+}
+
+.lien-discret {
+  color: var(--secondaire);
+  font-weight: 400;
+}
+
+.ligne-filtre {
+  margin: calc(-1 * var(--esp-8)) 0 var(--esp-16);
+}
+
+a.etiquette--theme {
+  text-decoration: none;
+}
+
+a.etiquette--theme:hover,
+a.etiquette--theme:focus-visible {
+  border-color: var(--secondaire);
+  color: var(--encre);
+}
+
+/* Rangée de thèmes en liste — page d'un débat et page de compte. La carte d'un débat
+ * ne s'en sert plus depuis le chantier I2 : ses thèmes ont rejoint la rangée de badges
+ * en tête de carte (`.badges-debat`). */
+.themes-debat {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-4);
+  margin: var(--esp-8) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* --- Page d'un débat : le haut de page ------------------------------------------------
+ *
+ * `.debate-head` et `.figures` de la maquette debat-vote.html (chantier I2,
+ * instruction 9). L'en-tête du SITE, lui, ne bouge pas : il reste clair et non collant
+ * — la maquette le montre en `position: sticky`, ce qui reviendrait sur une décision
+ * déjà motivée (voir la note de `.entete` plus haut).
+ */
+.entete-debat {
+  display: flex;
+  flex-wrap: wrap;
+  /* Les chiffres s'alignent sur le BAS du titre, pas sur son milieu : c'est ce qui les
+   * fait lire comme une légende du titre plutôt que comme une colonne à côté. */
+  align-items: flex-end;
+  gap: var(--esp-16);
+  margin-bottom: var(--esp-16);
+}
+
+/* `420px` de base : en dessous, les chiffres passent sous le titre plutôt que de
+ * l'écraser. C'est la valeur de la maquette. */
+.entete-debat-texte {
+  flex: 1 1 420px;
+  min-width: 0;
+}
+
+/* Les thèmes en tête de page — `.tag` de la maquette. Du TEXTE souligné de jaune, et
+ * non l'étiquette encadrée des listes : un débat en porte un à trois, en tête d'une
+ * page qui n'en montre qu'un seul, et trois cadres y pèseraient plus que le titre.
+ *
+ * Le mot est en or brûlé (5,9:1 sur le papier) et non dans le jaune profond de la
+ * maquette (2,5:1) ; le trait, lui, est bien le jaune — il ne porte aucune information
+ * que la couleur seule, il souligne un texte déjà lisible. */
+.themes-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-12);
+  list-style: none;
+  margin: 0 0 var(--esp-8);
+  padding: 0;
+}
+
+.tag-debat {
+  font-size: .72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--or-brule);
+  border-bottom: 2px solid var(--jaune);
+  padding-bottom: 1px;
+}
+
+.titre-page-debat {
+  font-size: clamp(1.5rem, 3.2vw, 2.1rem);
+  line-height: 1.14;
+  margin: 0;
+  max-width: 22ch;
+}
+
+/* Les deux chiffres de cadrage. Chasse tabulaire : deux nombres l'un sous l'autre à
+ * des largeurs de chiffre différentes se lisent mal. */
+.cadrage-debat {
+  display: flex;
+  gap: var(--esp-24);
+  margin: 0;
+  max-width: none;
+  font-size: .82rem;
+  color: var(--secondaire);
+}
+
+/* La vidéo de présentation, en miniature à côté du titre (chantier Vidéo, VIDEO-4).
+ * Hauteur alignée sur celle du titre (`clamp` calé sur les mêmes bornes que
+ * `.titre-page-debat` juste au-dessus) ; `aspect-ratio: 1` plutôt que de refléter le
+ * cadre réel de la vidéo (portrait, paysage ou carré selon la prise de vue, voir
+ * `video.py`) — une miniature qui changerait de forme d'un débat à l'autre romprait
+ * la ligne du bandeau, `object-fit: cover` absorbant chaque fois la différence. */
+.miniature-video-entete {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--esp-4);
+}
+
+/* Agrandie le 17/09/2026 (demande du client) : elle ne suit plus la hauteur du titre
+ * mais s'en tient à une vraie vignette, toujours carrée pour la même raison que sur les
+ * cartes. */
+.miniature-video {
+  width: clamp(7rem, 16vw, 10rem);
+  aspect-ratio: 1;
+  border: var(--trait-sep);
+}
+
+/* « Partager la vidéo » sous la miniature : discret, comme « Signaler ». */
+.partager-video {
+  min-height: 0;
+  min-width: 0;
+  padding: var(--esp-4) 0;
+  border: none;
+  background: none;
+  font-size: .78rem;
+  font-weight: 400;
+  color: var(--secondaire);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.partager-video:hover {
+  border: none;
+  color: var(--encre);
+}
+
+.partager-video:active {
+  background: none;
+}
+
+/* La fenêtre de lecture. La vidéo occupe tout ce que l'écran permet sans déborder, dans
+ * sa forme réelle (portrait ou paysage) : ici on la regarde, on ne la range plus. */
+.fenetre-video {
+  max-width: calc(100vw - 2 * var(--esp-16));
+  max-height: calc(100vh - 2 * var(--esp-16));
+  padding: var(--esp-8);
+  border: none;
+  border-radius: var(--rayon-bloc);
+  background: #000000;
+}
+
+.fenetre-video::backdrop {
+  background: rgb(0 0 0 / .8);
+}
+
+.fenetre-video-lecteur {
+  display: block;
+  max-width: calc(100vw - 2 * var(--esp-16) - 2 * var(--esp-8));
+  max-height: calc(100vh - 2 * var(--esp-16) - 2 * var(--esp-8) - var(--cible));
+  margin: 0 auto;
+  background: #000000;
+}
+
+.fenetre-video-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: var(--cible);
+}
+
+.fenetre-video-actions button {
+  min-height: 0;
+  padding: var(--esp-4) var(--esp-8);
+  border: none;
+  background: none;
+  font-size: .875rem;
+  color: #FFFFFF;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.fenetre-video-actions button:hover {
+  border: none;
+  background: none;
+  opacity: .8;
+}
+
+.cadrage-debat b {
+  display: block;
+  color: var(--encre);
+  font-family: var(--police-titres);
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Le bandeau des chiffres sourcés — `.figures`.
+ *
+ * Rayon : `--rayon-bloc`, comme tous les blocs de la page (voir `.panneau`). Les 10 px
+ * de la maquette ont été harmonisés à la demande du client le 16 septembre 2026.
+ *
+ * Le fond est le panneau teinté de la maquette. Conséquence vérifiée : `--secondaire`
+ * n'y tient que 4,36:1, SOUS le seuil de 4,5:1 — la ligne d'attribution est donc en
+ * `--encre` (14,8:1), et c'est la taille, pas la couleur, qui la met en retrait. Les
+ * autres tiennent : `--or-brule` 5,5:1, `--encre` 14,8:1. */
+.bandeau-chiffres {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--esp-16);
+  background: var(--panneau-2);
+  border: var(--trait-sep);
+  border-radius: var(--rayon-bloc);
+  padding: var(--esp-12) var(--esp-16);
+  margin-bottom: var(--esp-16);
+}
+
+.chiffre-en-tete {
+  display: flex;
+  align-items: baseline;
+  gap: var(--esp-8);
+}
+
+.chiffre-en-tete b {
+  font-family: var(--police-titres);
+  font-weight: 600;
+  font-size: 1.45rem;
+  line-height: 1;
+  color: var(--or-brule);
+  font-variant-numeric: tabular-nums;
+}
+
+.chiffre-en-tete > span {
+  font-size: .82rem;
+  line-height: 1.3;
+  max-width: 24ch;
+}
+
+.separateur-chiffres {
+  width: 1px;
+  align-self: stretch;
+  background: var(--trait);
+}
+
+.lien-chiffres {
+  margin-left: auto;
+  font-size: .8rem;
+  text-align: right;
+}
+
+.lien-chiffres a {
+  display: inline-block;
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 2px solid var(--jaune);
+}
+
+.lien-chiffres a:hover,
+.lien-chiffres a:focus-visible {
+  border-bottom-color: var(--or-brule);
+}
+
+.lien-chiffres small {
+  display: block;
+  font-size: .71rem;
+  margin-top: 3px;
+}
+
+/* En dessous, le lien repasse à gauche et le filet vertical disparaît — il ne
+ * séparerait plus deux colonnes mais deux lignes. */
+@media (max-width: 640px) {
+  .lien-chiffres {
+    margin-left: 0;
+    text-align: left;
+  }
+
+  .separateur-chiffres {
+    display: none;
+  }
+}
+
+/* --- Carte des groupes -------------------------------------------------------------- */
+.carte {
+  margin: 0;
+}
+
+.carte svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  overflow: visible;
+  border-radius: var(--rayon-bloc);
+}
+
+.carte figcaption {
+  margin-top: var(--esp-8);
+}
+
+/* La carte « verrouillée » : quand la personne n'a pas encore assez voté pour
+ * apparaître dessus, le tracé réel (celui des AUTRES participants, déjà calculé)
+ * reste affiché mais flouté, avec un message posé par-dessus — comme dans la
+ * maquette `debat-vote.html`. Ce n'est pas une illustration : les points dessous sont
+ * de vraies personnes qui ont voté, la carte n'est pas remplacée par un emplacement
+ * vide. Voir `_carte.html` et `conversation.html`. */
+.carte-verrouillee {
+  position: relative;
+}
+
+.carte-verrouillee svg {
+  filter: blur(5px) saturate(.6);
+}
+
+/* Les deux schémas de « Comment ça marche » (chantier CCM) qui ne sont pas dans un
+ * conteneur `.carte` : sans cette règle, un `<svg>` sans `width`/`height` ne suit pas
+ * forcément son `viewBox` et peut s'afficher à une taille arbitraire selon le
+ * navigateur. `max-width: 400px` reprend la valeur déjà posée par le client pour
+ * `.rp-s4-tall` (même largeur de `viewBox`, 380) plutôt que d'en inventer une. */
+#svg-1, #svg-3 {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+/* Le voile ne vit QUE dans une carte verrouillée. C'est ce qui permet au script de
+ * tout lever en retirant la seule classe `.carte-verrouillee`, sans avoir à masquer le
+ * voile séparément — et donc sans que les deux gestes puissent se désynchroniser. */
+.verrou {
+  display: none;
+  position: absolute;
+  inset: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--esp-4);
+  text-align: center;
+  padding: var(--esp-16);
+  border-radius: var(--rayon-bloc);
+  background: color-mix(in srgb, var(--panneau) 75%, transparent);
+}
+
+.carte-verrouillee .verrou {
+  display: flex;
+}
+
+.verrou strong {
+  font-size: .92rem;
+}
+
+.verrou span {
+  font-size: .82rem;
+  color: var(--secondaire);
+  max-width: 30ch;
+}
+
+.legende {
+  list-style: none;
+  margin: 0 0 var(--esp-8);
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-8) var(--esp-16);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.legende li {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-8);
+  margin: 0;
+}
+
+.legende .pastille {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+
+.badge {
+  display: flex;
+  gap: var(--esp-12);
+  align-items: flex-start;
+}
+
+.badge-icone {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.aligne-droite {
+  text-align: right;
+}
+
+/* --- L'anneau -----------------------------------------------------------------------
+ *
+ * Inchangé : ni le dessin (`_anneau.html`) ni ses emplois (favicon, avatar, jauge,
+ * badge, chargement) ne sont retouchés par ce chantier — seules ses couleurs suivent
+ * la nouvelle palette, à travers les mêmes jetons `--encre` et `--jaune`.
+ */
+.anneau {
+  display: block;
+  flex: 0 0 auto;
+}
+
+.anneau--logo .anneau-trace {
+  stroke: var(--encre);
+}
+
+.anneau--logo .anneau-ilot {
+  fill: var(--jaune);
+}
+
+.anneau-piste {
+  stroke: var(--trait);
+}
+
+.anneau--niveau .anneau-part {
+  stroke: var(--jaune);
+}
+
+.anneau--niveau .anneau-ilot,
+.anneau--badge .anneau-ilot {
+  fill: var(--encre);
+}
+
+.anneau--badge .anneau-plein {
+  stroke: var(--jaune);
+}
+
+.anneau--chargement .anneau-arc {
+  stroke: var(--encre);
+  transform-origin: 50% 50%;
+  animation: anneau-tourne 1.1s linear infinite;
+}
+
+.anneau--chargement .anneau-ilot {
+  fill: var(--jaune);
+}
+
+@keyframes anneau-tourne {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anneau--chargement .anneau-arc {
+    animation: none;
+    stroke-dasharray: 75 100;
+    transform: rotate(-90deg);
+  }
+}
+
+/* --- L'identicon --------------------------------------------------------------- */
+.identicon {
+  display: block;
+  flex: 0 0 auto;
+  border-radius: 6px;
+}
+
+.identicon-fond {
+  fill: var(--trait);
+}
+
+.identicon--0 .identicon-motif {
+  fill: var(--encre);
+}
+
+.identicon--1 .identicon-motif {
+  fill: var(--jaune);
+}
+
+.identicon--2 .identicon-motif {
+  fill: var(--or-brule);
+}
+
+.identicon--3 .identicon-motif {
+  fill: var(--secondaire);
+}
+
+.zone-chargement {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-12);
+  min-height: 48px;
+  color: var(--secondaire);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+/* --- Avatar de l'en-tête -------------------------------------------------------------- */
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--esp-8);
+  text-decoration: none;
+}
+
+.avatar-nom {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* --- Jauge de niveau ------------------------------------------------------------------- */
+.niveau {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-16);
+}
+
+.niveau-texte {
+  min-width: 0;
+}
+
+/* --- En-tête de la page de compte ------------------------------------------------- */
+.profil-identite {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-16);
+  margin-bottom: var(--esp-16);
+}
+
+.badge-obtenu {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-12);
+  margin: var(--esp-16) 0 0;
+}
+
+.badge-obtenu p {
+  margin: 0;
+}
+
+/* --- L'accueil ------------------------------------------------------------------------
+ *
+ * Toujours la seule page à deux colonnes et la seule large — inchangé. */
+.accueil main,
+.accueil .pied {
+  max-width: var(--largeur-accueil);
+}
+
+/* Bandeau d'accroche — l'« aplat noir » de la maquette accueil.html (chantier I2,
+ * instruction 1), qui remplace l'ancien bandeau de mission (description + liste à
+ * puces) du chantier I.
+ *
+ * Il est posé dans le bloc `bandeau` de public/base.html, donc HORS de `<main>` :
+ * c'est ce qui lui permet d'être pleine largeur et de venir au contact de l'en-tête,
+ * dont il ne se sépare que par un filet d'1 px. `<main>` ne l'aurait pas permis — il
+ * est plafonné en largeur et décollé du haut par sa marge, ce qui aurait fait deux
+ * blocs empilés au lieu d'un aplat continu. */
+.bandeau-mission {
+  background: var(--bandeau-fond);
+  color: var(--bandeau-encre);
+}
+
+/* Le contenu, lui, reste aligné sur la même colonne que le reste de l'accueil —
+ * l'aplat déborde, le texte non. Même geste que `.band` / `.band-inner` dans la
+ * maquette. */
+.bandeau-interieur {
+  max-width: var(--largeur-accueil);
+  margin: 0 auto;
+  padding: var(--esp-32) var(--esp-16);
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-24);
+}
+
+.bandeau-texte {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+/* Le grand titre en Fraunces. `clamp()` repris de la maquette : il tombe à 2rem sur
+ * un téléphone, où 3,1rem ne tiendrait pas. */
+.bandeau-titre {
+  font-size: clamp(2rem, 5vw, 3.1rem);
+  line-height: 1.04;
+  letter-spacing: -0.01em;
+  margin: 0 0 var(--esp-12);
+  max-width: 17ch;
+  color: var(--bandeau-encre);
+}
+
+/* Le petit libellé au-dessus du titre (`.kicker` de la maquette, instruction 15 bis).
+ * En jaune : c'est le SEUL endroit du site où le jaune porte du texte, et il ne le
+ * peut que parce que le fond est sombre — 10,7:1 ici, contre 1,5:1 sur le papier
+ * crème, où la règle « jamais de texte en jaune » reste entière. */
+.bandeau-kicker {
+  font-size: .69rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--jaune);
+  margin: 0 0 var(--esp-8);
+}
+
+/* Les trois arguments, sous le titre (`.pitch-list` de la maquette). La puce est
+ * un tiret jaune, celui de la maquette — un ornement, le texte est en encre du
+ * bandeau (15,9:1). */
+.bandeau-arguments {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--esp-16);
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-8);
+  max-width: 48ch;
+}
+
+.bandeau-arguments li {
+  position: relative;
+  margin: 0;
+  padding-left: 17px;
+  font-size: 1rem;
+  line-height: 1.4;
+  color: var(--bandeau-encre);
+}
+
+.bandeau-arguments li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: calc(.7em - 1px);
+  width: 9px;
+  height: 2px;
+  background: var(--jaune);
+}
+
+/* `max-width: none` : c'est un `<p>`, donc plafonné à 66 caractères par la règle
+ * générale, ce qui n'a aucun sens pour une rangée de boutons. */
+.bandeau-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-12);
+  margin: 0;
+  max-width: none;
+}
+
+.bandeau-note {
+  font-size: .8rem;
+  line-height: 1.4;
+  color: var(--bandeau-gris);
+  margin: var(--esp-12) 0 0;
+  max-width: 54ch;
+}
+
+/* Les deux boutons du bandeau (instruction 17) : « Débattons » en plein jaune,
+ * « Proposer un débat » en contour.
+ *
+ * Le plein NE reprend PAS `.bouton-principal` : cette classe pose son texte en
+ * `--encre`, qui devient crème en mode sombre et tombe alors à 1,5:1 sur le jaune
+ * (défaut du chantier I, présent sur tout le site — signalé dans NOTES-CHANTIER-I2.md,
+ * pas corrigé ici, ce serait hors du périmètre de cette instruction). Le texte du
+ * bouton de bandeau est l'encre DU BANDEAU, sombre dans les deux modes : 10,7:1 en
+ * clair, 10,9:1 en sombre.
+ *
+ * Il n'a pas non plus besoin du contour en or brûlé de `.bouton-principal`, qui existe
+ * pour détacher un aplat jaune d'un fond crème (1,5:1) : ici l'aplat se détache tout
+ * seul de l'encre du bandeau, à 10,7:1. */
+.bouton-bandeau {
+  background: var(--jaune);
+  color: var(--bandeau-fond);
+  border-color: var(--jaune);
+}
+
+.bouton-bandeau:hover {
+  background: var(--jaune-survol);
+  border-color: var(--jaune-survol);
+}
+
+.bouton-bandeau:active {
+  background: var(--jaune-actif);
+  border-color: var(--jaune-actif);
+}
+
+/* Le bouton de contour, rétabli à l'instruction 17 pour « Proposer un débat » (il
+ * portait « Lire le manifeste » à l'instruction 1). Son contour EST ce qui identifie
+ * la commande, donc 3:1 minimum (WCAG 1.4.11) : le `--band-line` que la maquette
+ * emploie ici ne fait que 1,3:1. `--bandeau-contour` le porte à 4,6:1 en clair et
+ * 5,4:1 en sombre — la même distinction que `--trait` / `--trait-controle` sur le
+ * reste du site. */
+.bouton-bandeau-fantome {
+  background: transparent;
+  color: var(--bandeau-encre);
+  border-color: var(--bandeau-contour);
+}
+
+.bouton-bandeau-fantome:hover {
+  border-color: var(--jaune);
+  background: color-mix(in srgb, var(--bandeau-encre) 8%, transparent);
+}
+
+.bouton-bandeau-fantome:active {
+  border-color: var(--jaune);
+  background: color-mix(in srgb, var(--bandeau-encre) 14%, transparent);
+}
+
+/* --- Le schéma « Problème + Ce qu'on a = Solution » (instruction 15 bis) -----------
+ *
+ * Colonne de droite de l'aplat : toute la largeur que le texte laisse libre à partir
+ * de 860 px, sous le texte en deçà (voir « Élargissement »). Repris de `.layout-a`
+ * dans la maquette de Julien, agrandi à l'instruction 17 (plus large, texte plus
+ * grand, étiquettes centrées, opérateurs en signes blancs).
+ *
+ * À NE PAS CONFONDRE avec « Pourquoi ce site existe » (`.pourquoi`, plus bas) : une
+ * section à part, trois grandes cartes vers le manifeste. Rien n'est partagé.
+ *
+ * Rayons : ceux de la charte de l'accueil (`--rayon-bloc` pour les cartes,
+ * `--rayon-objet` pour les étiquettes), pas les 3 / 2 px de la maquette. Les
+ * opérateurs n'ont plus de pastille depuis l'instruction 17 : ce sont des signes
+ * blancs. */
+.bandeau-schema {
+  min-width: 0;
+}
+
+.schema-titre {
+  font-size: .75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--bandeau-gris);
+  margin: 0 0 var(--esp-8);
+}
+
+/* La largeur d'un chien et l'écart qui le sépare de sa carte, déclarés une fois :
+ * l'opérateur en dépend pour se centrer sur les cartes. */
+.schema-pile {
+  --schema-chien: 66px;
+  /* 16 px et non 12 depuis les bulles : c'est le creux où loge la pointe, qui mesure
+   * 16 px de base. L'opérateur se recale tout seul, son retrait est calculé d'ici. */
+  --schema-ecart: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.schema-ligne {
+  display: flex;
+  align-items: center;
+  gap: var(--schema-ecart);
+}
+
+/* Le chien « comme un tampon » : détouré, un liseré crème et une ombre portée — les
+ * deux `drop-shadow` de la maquette, qui suivent la découpe et non le rectangle de
+ * l'image. `width`/`height` du gabarit réservent sa place avant chargement. */
+.schema-chien {
+  flex: none;
+  width: var(--schema-chien);
+  height: auto;
+  filter: drop-shadow(0 0 1.5px color-mix(in srgb, var(--bandeau-encre) 90%, transparent))
+          drop-shadow(0 3px 6px rgba(0, 0, 0, .5));
+}
+
+/* Le troisième chien est retourné : il regardait à gauche, donc hors du bandeau et
+ * dos à ce qu'il dit. Retourné, il regarde sa carte, comme les deux autres — ce qui
+ * n'a de sens que depuis que la carte est une bulle qui part de lui.
+ *
+ * Fait ici et non dans le fichier : l'image reste celle qu'on a reçue, et le sens de
+ * lecture est une décision de mise en page. Visé par la source plutôt que par le rang
+ * dans la pile, pour que l'ordre des trois étapes puisse changer sans retourner le
+ * mauvais chien. L'ombre portée n'a pas d'écart horizontal : le miroir ne la déplace
+ * pas. */
+.schema-chien[src*="chien-solution"] {
+  transform: scaleX(-1);
+}
+
+/* `--schema-couleur` : la couleur de l'étape, posée par la variante. Le liseré n'est
+ * qu'un rappel — l'étiquette dit l'étape en toutes lettres. */
+.schema-carte {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  background: rgba(0, 0, 0, .44);
+  border: 1px solid var(--bandeau-filet);
+  border-left: 3px solid var(--schema-couleur);
+  border-radius: var(--rayon-bloc);
+  /* 12 px de côté et non 14 : l'écart passé à 16 px pour loger la pointe prend
+   * 4 px de large à la carte, et « Solution » — la plus chargée des trois — était à
+   * 4 px près de passer sur une quatrième ligne au-dessus de 1150 px. Les 4 px sont
+   * repris ici plutôt que laissés au texte : la carte garde très exactement la
+   * largeur utile qu'elle avait, et les trois listes le nombre de lignes qu'elles
+   * avaient, à toutes les largeurs. */
+  padding: 12px 12px 13px;
+}
+
+/* La pointe de bulle : l'encadré devient ce que le chien dit. Deux triangles
+ * superposés — le premier dans la couleur de l'étape, le second, plus petit et décalé
+ * de 5 px vers la carte, dans le fond aplati de celle-ci. Ce qui dépasse du second
+ * est le contour, ~3 px, de la même épaisseur que le liseré de gauche auquel il se
+ * raccorde.
+ *
+ * Deux pseudo-éléments et non un `clip-path` ou un SVG : un triangle en bordures est
+ * ce que comprennent tous les moteurs, sans anticrénelage douteux sur les bords.
+ * Purement décoratifs, sans contenu — rien à annoncer.
+ *
+ * Les décalages sont comptés depuis la boîte de PADDING de la carte, pas depuis son
+ * bord : `left: -16px` place donc la pointe 13 px à gauche du bord, le liseré de
+ * 3 px faisant le reste. Le creux mesuré est de 16 px (`--schema-ecart`) : il reste
+ * 3 px entre la pointe et la boîte du chien, à toutes les largeurs. Mesuré, pas
+ * supposé — de 320 à 1920 px. */
+.schema-carte::before {
+  content: "";
+  position: absolute;
+  left: -16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-top: 11px solid transparent;
+  border-bottom: 11px solid transparent;
+  border-right: 16px solid var(--schema-couleur);
+}
+
+.schema-carte::after {
+  content: "";
+  position: absolute;
+  left: -11px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-right: 13px solid var(--schema-carte-fond);
+}
+
+.schema-carte--probleme { --schema-couleur: var(--rouge); }
+.schema-carte--atouts   { --schema-couleur: var(--jaune); }
+.schema-carte--solution { --schema-couleur: var(--vert); }
+
+/* Texte en encre DU BANDEAU, sombre dans les deux modes, comme `.bouton-bandeau` :
+ * 5,3:1 sur le rouge (le plus faible des trois), 6,1:1 en mode sombre. */
+.schema-etiquette {
+  /* Centrée dans sa carte (instruction 17) — la maquette la collait à gauche. */
+  display: block;
+  width: fit-content;
+  margin: 0 auto var(--esp-8);
+  font-size: .72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: 2px 8px;
+  border-radius: var(--rayon-objet);
+  background: var(--schema-couleur);
+  color: var(--bandeau-fond);
+}
+
+.schema-items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 12px;
+  max-width: none;
+}
+
+.schema-items li {
+  position: relative;
+  margin: 0;
+  padding-left: 10px;
+  font-size: .95rem;
+  line-height: 1.3;
+  color: var(--bandeau-encre);
+}
+
+/* Point de 4 px : `--rayon-objet` (3 px) y est ramené à 2 px, donc il est rond. */
+.schema-items li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: calc(.65em - 2px);
+  width: 4px;
+  height: 4px;
+  border-radius: var(--rayon-objet);
+  background: var(--bandeau-gris);
+}
+
+/* L'opérateur entre deux cartes, centré sur les CARTES et non sur la ligne : le
+ * retrait est la largeur d'un chien plus l'écart. Les deux filets sont des
+ * pseudo-éléments — rien à lire, rien à annoncer. */
+.schema-operateur {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-left: calc(var(--schema-chien) + var(--schema-ecart));
+}
+
+.schema-operateur::before,
+.schema-operateur::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--bandeau-filet);
+}
+
+/* « + » et « = » : de simples signes blancs, sans pastille (instruction 17). L'encre
+ * du bandeau : 15,9:1 en clair, 16,3:1 en sombre. */
+.schema-signe {
+  flex: none;
+  min-width: 24px;
+  text-align: center;
+  color: var(--bandeau-encre);
+  font-weight: 700;
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+/* --- « Pourquoi ce site existe » : trois cartes vers le Manifeste ------------------
+ *
+ * Nouvelle section (chantier I), reprise de `.why` dans la maquette `accueil.html`.
+ * Les trois cartes sont des LIENS entiers vers `/manifeste` — la page reste vide de
+ * texte pour l'instant (section 6 de la consigne), donc les trois textes courts
+ * ci-dessous (dans `home.html`) sont ce qu'il y a à lire tant que le manifeste
+ * lui-même n'est pas rédigé.
+ */
+.pourquoi {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--esp-16);
+}
+
+@media (max-width: 760px) {
+  .pourquoi {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Les cartes n'ont plus de pied « Lire dans le manifeste » (chantier I2, instruction
+ * 19) : le seul lien écrit est « Lire le manifeste », dans l'en-tête de la section. */
+.pourquoi-carte {
+  display: block;
+  text-decoration: none;
+  color: var(--encre);
+  /* `.card` pose une marge basse qui sert dans une pile ; dans une grille, c'est le
+   * `gap` qui espace, et la marge ne faisait qu'empêcher les cartes de remplir leur
+   * rangée à hauteur égale. */
+  margin-bottom: 0;
+}
+
+.pourquoi-carte:hover {
+  border-color: var(--jaune);
+  box-shadow: 0 2px 0 var(--jaune), var(--ombre);
+}
+
+.pourquoi-carte .libelle {
+  display: block;
+  margin-bottom: var(--esp-8);
+}
+
+.pourquoi-carte h3 {
+  margin: 0 0 var(--esp-8);
+}
+
+.pourquoi-carte p {
+  margin: 0;
+  color: var(--secondaire);
+  font-size: .92rem;
+}
+
+/* --- Le site en chiffres (accueil) -------------------------------------------------
+ *
+ * Nouvelle section (chantier I), reprise de `.numbers` dans la maquette. Chaque
+ * valeur vient d'une donnée réelle déjà servie ailleurs sur le site — aucun chiffre
+ * n'est écrit en dur ici ni dans le gabarit. Voir NOTES-CHANTIER-I.md pour la source
+ * de chacune.
+ */
+.site-chiffres {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--esp-12);
+}
+
+@media (max-width: 760px) {
+  .site-chiffres {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.site-chiffre {
+  background: var(--panneau-2);
+  border: var(--trait-sep);
+  border-radius: var(--rayon-bloc);
+  padding: var(--esp-16);
+}
+
+.site-chiffre .chiffre-grand {
+  font-size: 1.6rem;
+  display: block;
+}
+
+.site-chiffre span {
+  font-size: .82rem;
+  color: var(--secondaire);
+  display: block;
+  margin-top: var(--esp-4);
+}
+
+/* --- Élargissement ---------------------------------------------------------------------
+ */
+/* Même seuil que `.band-inner` dans la maquette accueil.html : c'est à partir de là
+ * que le bandeau a la place pour une colonne de texte ET le schéma côte à côte sans
+ * que ni l'un ni l'autre ne s'écrase. En dessous, le schéma passe sous le texte —
+ * comme dans la maquette. */
+@media (min-width: 860px) {
+  .bandeau-interieur {
+    flex-direction: row;
+    /* Centré, pas étiré : comme `.layout-a` dans la maquette. */
+    align-items: center;
+    gap: var(--esp-32);
+    padding: var(--esp-48) var(--esp-16);
+  }
+
+  /* Le texte prend la largeur de son contenu (le titre, plafonné à 17 ch) ; le
+   * schéma prend TOUT le reste (instruction 17) — il avait 330 px fixes, qui
+   * laissaient un grand vide entre les puces et lui. */
+  .bandeau-texte {
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+
+  .bandeau-schema {
+    flex: 1 1 0;
+  }
+}
+
+/* --- Barre de tri et de filtre -------------------------------------------------------
+ *
+ * De simples LIENS TEXTE, discrets, séparés par un point médian, l'actif souligné de
+ * jaune — l'apparence du site en ligne, reprise telle quelle.
+ *
+ * Le chantier I les avait restylés en onglets « pastille » d'après `.tab` de la
+ * maquette `accueil.html` ; le chantier I2 (instruction 2) revient dessus, à la
+ * demande du client. Quatre pastilles encadrées en haut de la liste pèsent autant que
+ * les cartes qu'elles trient, alors que ce sont des liens qu'on emploie une fois. Le
+ * repère jaune sur l'actif est le MÊME qu'à la navigation du site, pour la même
+ * raison : c'est le même geste, choisir parmi des vues d'une même chose.
+ *
+ * Ce sont, et c'était déjà vrai sous les pastilles, de VRAIS liens et non des boutons
+ * pilotés en JavaScript : chaque tri est une URL, partageable et ouvrable dans un
+ * onglet. La maquette ne montrait que l'apparence, jamais ce mécanisme.
+ */
+.barre-tri {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  /* Les deux groupes aux extrémités : les tris (et « Choisir mes centres d'intérêt »)
+   * à gauche, le lien vers le catalogue — ou le compteur — à droite, sur une seule
+   * ligne. Ils repassent l'un sous l'autre quand la largeur ne suffit plus. */
+  justify-content: space-between;
+  gap: 0 var(--esp-16);
+  margin-bottom: var(--esp-16);
+  border-bottom: var(--trait-sep);
+}
+
+/* UNE seule ligne, toujours (chantier I2, instruction 19) : « Mes centres d'intérêt »
+ * passait sous les onglets dès que la largeur manquait — sur un téléphone, quatre tris
+ * et le filtre demandent environ 570 px. Plutôt que de replier, la rangée défile
+ * horizontalement ; l'onglet coupé au bord dit qu'il y a une suite. `overflow-x` fait
+ * aussi de la liste un élément flexible qui peut rétrécir dans `.barre-tri`, où le
+ * compteur de la page « Débats » repasse dessous si la place manque. */
+.tris {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: baseline;
+  gap: 0 var(--esp-16);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  white-space: nowrap;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+/* Un conteneur qui défile rogne ce qui dépasse de lui, anneau de focus compris : il
+ * passe à l'intérieur du lien. */
+.tris a:focus-visible {
+  outline-offset: -2px;
+}
+
+.tris li {
+  margin: 0;
+}
+
+.tris a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--cible);
+  padding: 0 var(--esp-4);
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--secondaire);
+  text-decoration: none;
+  /* Réservé au repos pour que l'actif ne décale pas ses voisins de 2 px en
+   * s'allumant — même raison qu'à la navigation du site. */
+  border-bottom: 2px solid transparent;
+}
+
+.tris a:hover {
+  color: var(--encre);
+}
+
+.tris a[aria-current="page"] {
+  color: var(--encre);
+  font-weight: 600;
+  border-bottom-color: var(--jaune);
+}
+
+.compte-propositions {
+  margin: 0;
+}
+
+/* Le lien du bout de ligne. Même dessin que le lien d'en-tête de section, aligné sur
+ * la ligne de base des liens de tri plutôt que centré sur leur hauteur. */
+.lien-barre {
+  align-self: baseline;
+}
+
+/* --- Mini-barre de répartition des groupes (accueil) ------------------------------------
+ *
+ * Les teintes de cette barre restent celles décidées au chantier G3/G ultérieur — un
+ * écart assumé par rapport à la carte, consigné dans CHANTIER_G_LOG.md, que ce
+ * chantier ne rouvre pas. Seule la forme suit la nouvelle échelle de rayons.
+ */
+.repartition {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-4);
+}
+
+/* Le `.spark` de la maquette : plus fine qu'avant (6 px), coins peu arrondis, et des
+ * segments SÉPARÉS par un vide de 2 px plutôt que par un filet de la couleur du
+ * panneau — le vide tient quel que soit le fond, le filet supposait un panneau blanc.
+ * `overflow: hidden` disparaît avec lui : ce sont les segments qui portent désormais
+ * l'arrondi, aux deux bouts de la rangée. */
+.barre-groupes {
+  display: flex;
+  gap: 2px;
+  height: 6px;
+  background: transparent;
+}
+
+.segment {
+  height: 100%;
+}
+
+.segment:first-child {
+  border-start-start-radius: 2px;
+  border-end-start-radius: 2px;
+}
+
+.segment:last-child {
+  border-start-end-radius: 2px;
+  border-end-end-radius: 2px;
+}
+
+.segment--attente {
+  width: 100%;
+  border-radius: 2px;
+  background: var(--trait);
+}
+
+/* En-tête de section (`.sec-head` dans la maquette) : le titre à gauche, le lien vers
+ * la page entière à droite, sur une ligne — et l'un sous l'autre quand la place manque.
+ * `align-items: baseline` aligne le lien sur la ligne de base du titre plutôt que sur
+ * son milieu, sans quoi il flotte au-dessus d'un titre en Fraunces à 22 px. */
+.entete-section {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--esp-8) var(--esp-16);
+  margin: var(--esp-32) 0 var(--esp-12);
+}
+
+/* Le titre reprend sa place dans la ligne : c'est l'en-tête qui porte la marge. */
+.entete-section > h2 {
+  margin: 0;
+}
+
+.lien-section {
+  font-size: .9rem;
+  font-weight: 600;
+  color: var(--or-brule);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.lien-section:hover,
+.lien-section:focus-visible {
+  text-decoration: underline;
+}
+
+.lien-section .fleche {
+  display: inline-block;
+  transition: transform .15s ease;
+}
+
+.lien-section:hover .fleche,
+.lien-section:focus-visible .fleche {
+  transform: translateX(3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lien-section .fleche {
+    transition: none;
+  }
+}
+
+/* Variante soulignée de jaune (« Lire le manifeste », chantier I2, instruction 19) : le
+ * trait jaune est déjà là, le soulignement du survol le doublerait — c'est la flèche
+ * qui bouge qui signale le survol. */
+.lien-section--souligne:hover,
+.lien-section--souligne:focus-visible {
+  text-decoration: none;
+}
+
+/* --- La carte d'un débat ----------------------------------------------------------------
+ *
+ * Chantier I2 (instruction 2) : la forme de `.debate` dans la maquette accueil.html —
+ * une pile verticale, là où la carte était une rangée horizontale (mini-barre à
+ * gauche, texte à droite). Même contenu, remis dans l'ordre de lecture de la maquette :
+ * badges, titre, mini-barre, chiffres, pied « Voter ».
+ */
+.carte-debat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-8);
+  margin-bottom: 0;   /* c'est la grille (ou la liste) qui espace, plus la carte. */
+}
+
+/* La rangée de l'accueil (instruction 17) : une seule ligne de cartes qui défile à
+ * l'horizontale, à la place de la grille à deux colonnes de l'instruction 2. Deux
+ * cartes à l'écran au-dessus de 760 px (le seuil de l'ancienne grille), une en
+ * dessous — et chaque fois le bord de la suivante qui dépasse, sans quoi rien ne dit
+ * qu'il y a une suite à faire défiler. Elle ne s'applique qu'à l'accueil — la page
+ * « Débats » garde sa colonne unique.
+ *
+ * Aucun script : le défilement est celui du navigateur (doigt, molette, pavé), et le
+ * clavier y circule en passant d'un lien à l'autre. */
+.rangee-debats {
+  display: flex;
+  gap: var(--esp-12);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--esp-4);
+  scrollbar-width: thin;
+  /* De quoi ne pas rogner l'ombre du survol et décoller la barre de défilement des
+   * cartes ; la marge négative garde les cartes alignées sur le reste de la page. */
+  padding: var(--esp-4) var(--esp-4) var(--esp-16);
+  margin: 0 calc(-1 * var(--esp-4)) var(--esp-8);
+}
+
+.rangee-debats > .carte-debat {
+  flex: 0 0 85%;
+  scroll-snap-align: start;
+}
+
+@media (min-width: 760px) {
+  .rangee-debats > .carte-debat {
+    /* Deux cartes, moins 32 px chacune : les 64 px rendus sont ce qui laisse
+     * dépasser la troisième. */
+    flex-basis: calc((100% - var(--esp-12)) / 2 - var(--esp-32));
+  }
+}
+
+/* « Voir tous les débats », au bout de la rangée. Une carte plus étroite, qui est un
+ * lien entier — même pied que les cartes « Pourquoi ce site existe » (encre et
+ * soulignement jaune, 16,8:1 sur le panneau), même survol que les cartes de débat. */
+.rangee-fin {
+  flex: 0 0 12rem;
+  scroll-snap-align: end;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--esp-4);
+  text-align: center;
+  color: var(--encre);
+  text-decoration: none;
+}
+
+.rangee-fin:hover,
+.rangee-fin:focus-visible {
+  border-color: var(--jaune);
+  box-shadow: 0 2px 0 var(--jaune), var(--ombre);
+}
+
+.rangee-fin .fleche {
+  display: inline-block;
+  transition: transform .15s ease;
+}
+
+.rangee-fin:hover .fleche,
+.rangee-fin:focus-visible .fleche {
+  transform: translateX(3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rangee-fin .fleche {
+    transition: none;
+  }
+}
+
+/* Hors grille (page « Débats »), les cartes se suivent : l'espacement revient. */
+#liste-debats > .carte-debat {
+  margin-bottom: var(--esp-12);
+}
+
+/* Le survol de la maquette, mais déclenché seulement par les liens RÉELS de la carte :
+ * elle n'est pas cliquable dans son ensemble (les étiquettes de thème sont des liens
+ * de filtre, un lien dans un lien serait invalide), donc elle ne doit pas s'éclairer
+ * quand on la survole n'importe où. Les navigateurs sans `:has()` n'ont simplement
+ * pas l'effet. */
+.carte-debat:has(.titre-debat a:hover, .aller-debat a:hover) {
+  border-color: var(--jaune);
+  box-shadow: 0 2px 0 var(--jaune), var(--ombre);
+}
+
+/* La rangée de badges en tête de carte (`.badges`). */
+.badges-debat {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-8);
+}
+
+/* La description : deux lignes au plus. Dans une grille, une carte dont la description
+ * fait six lignes impose sa hauteur à sa voisine, qui se retrouve à moitié vide. */
+.description-debat {
+  margin: 0;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+/* Les chiffres (`.stats`). Une rangée d'éléments séparés par l'espace, et non plus une
+ * phrase à points médians : dans une carte étroite, la phrase se coupait n'importe où.
+ * `margin-top: auto` colle la rangée au bas de la carte, pour que les pieds « Voter »
+ * de deux cartes voisines s'alignent même si leurs titres n'ont pas la même hauteur. */
+.meta-debat {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-4) var(--esp-16);
+  margin: auto 0 0;
+  max-width: none;
+  font-size: .8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Le pied de carte (`.go`). Un filet le sépare des chiffres, l'or brûlé porte le mot :
+ * `--yellow-deep` de la maquette ne fait que 2,5:1 sur le panneau, `--or-brule` 6,25:1
+ * — c'est la même substitution que le chantier I a faite partout ailleurs. */
+.aller-debat {
+  margin: 0;
+  padding-top: var(--esp-8);
+  border-top: var(--trait-sep);
+  justify-content: space-between;
+}
+
+.aller-debat a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-8);
+  flex: 1 1 auto;
+  min-height: var(--cible);
+  font-size: .83rem;
+  font-weight: 600;
+  color: var(--or-brule);
+  text-decoration: none;
+}
+
+/* Le mot est souligné de jaune, comme dans la maquette. C'est un ornement posé SOUS un
+ * texte déjà lisible à 6,25:1 — le jaune ne porte aucune information ici. */
+.aller-debat .aller-mot {
+  border-bottom: 2px solid var(--jaune);
+}
+
+.aller-debat a:focus-visible .aller-mot,
+.aller-debat a:hover .aller-mot {
+  border-bottom-color: var(--or-brule);
+}
+
+.aller-debat .fleche {
+  transition: transform .15s ease;
+}
+
+.aller-debat a:hover .fleche,
+.aller-debat a:focus-visible .fleche {
+  transform: translateX(3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aller-debat .fleche {
+    transition: none;
+  }
+}
+
+/* La base commune des étiquettes. Son aplat jaune n'a PLUS AUCUN emploi depuis le
+ * chantier I2 (instruction 8) : les quatre variantes ci-dessous le remplacent toutes
+ * par un fond transparent et un contour. Ne pas poser `class="etiquette"` seule sans
+ * s'être demandé si le jaune plein est vraiment voulu là — c'est précisément ce qui a
+ * été retiré des cartes de débat. */
+.etiquette {
+  display: inline-block;
+  padding: 0 var(--esp-8);
+  border-radius: var(--rayon-objet);
+  background: var(--jaune-tendre);
+  color: var(--or-brule);
+  font-size: 11px;
+  line-height: 20px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+/* L'étiquette d'ancienneté d'un débat (« Ouvert hier », « Ouvert il y a 4 jours »).
+ *
+ * NEUTRE, et c'est le point : elle remplace le « Nouveau » que le chantier I posait en
+ * aplat jaune plein et en capitales (chantier I2, instruction 8). Un aplat jaune est
+ * le repère le plus fort de la palette, et il le dépensait sur chacune des cinq cartes
+ * d'un écran — un repère que tout le monde porte ne repère plus personne. Le contour
+ * tient 3,7:1 sur un panneau (WCAG 1.4.11 en demande 3), le texte 4,95:1.
+ *
+ * Pas de capitales non plus : « OUVERT IL Y A 4 JOURS » est une phrase, pas un mot-clé,
+ * et la lettre espacée des capitales rendait la rangée plus large que le titre au-dessus. */
+.etiquette--ouverture {
+  background: transparent;
+  color: var(--secondaire);
+  border: var(--trait-controle);
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0.01em;
+}
+
+.etiquette--clivant {
+  background: transparent;
+  border: 1px solid var(--or-brule);
+  line-height: 18px;
+}
+
+.ligne-tri {
+  margin: calc(-1 * var(--esp-8)) 0 var(--esp-16);
+}
+
+/* --- « Le plus consensuel » --------------------------------------------------------- */
+.chapeau-accords {
+  margin: calc(-1 * var(--esp-8)) 0 var(--esp-16);
+  max-width: 60ch;
+}
+
+.accords {
+  list-style: none;
+  margin: 0 0 var(--esp-16);
+  padding: 0;
+}
+
+.accord {
+  padding: var(--esp-16) 0;
+  border-bottom: var(--trait-sep);
+}
+
+.accord:first-child {
+  border-top: var(--trait-sep);
+}
+
+.accord-texte {
+  margin: 0 0 var(--esp-8);
+  max-width: 60ch;
+}
+
+.accord-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--esp-8);
+  margin: 0;
+}
+
+/* --- Résultats par proposition ------------------------------------------------------- */
+.resultats {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.resultat {
+  padding-top: var(--esp-16);
+  border-top: var(--trait-sep);
+  margin-bottom: var(--esp-16);
+}
+
+.resultat:last-child {
+  margin-bottom: 0;
+}
+
+.resultat-texte {
+  margin: 0 0 var(--esp-4);
+  font-weight: 600;
+}
+
+.groupes-reponses {
+  list-style: none;
+  margin: var(--esp-8) 0 0;
+  padding: 0;
+}
+
+.groupe-reponse {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--esp-4) var(--esp-12);
+  margin-bottom: var(--esp-8);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.groupe-reponse:last-child {
+  margin-bottom: 0;
+}
+
+.groupe-nom {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-8);
+  flex: 0 0 auto;
+  min-width: 96px;
+}
+
+.groupe-nom .pastille {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+
+.barre-reponse {
+  flex: 1 1 160px;
+  display: flex;
+  height: var(--esp-12);
+  min-width: 120px;
+  border-radius: var(--rayon-objet);
+  overflow: hidden;
+  border: 1px solid var(--trait);
+}
+
+.part {
+  height: 100%;
+}
+
+/* Les teintes restent `--vert-accord` / `--rouge-desaccord`, mais posées à 70 %
+ * d'opacité dans les statistiques : pleines, elles criaient (demande du client du
+ * 16 septembre 2026). La transparence plutôt qu'une nouvelle teinte : le fond de
+ * chaque thème, clair ou sombre, adoucit la couleur de lui-même. */
+.part-accord { background: color-mix(in srgb, var(--vert-accord) 70%, transparent); }
+.part-desaccord { background: color-mix(in srgb, var(--rouge-desaccord) 70%, transparent); }
+.part-passe { background: var(--trait); }
+
+.resultat-chiffre {
+  margin: 0 0 0 auto;
+  white-space: nowrap;
+}
+
+.legende-reponses .pastille {
+  border-radius: 3px;
+}
+
+.pastille-accord { background: color-mix(in srgb, var(--vert-accord) 70%, transparent); }
+.pastille-desaccord { background: color-mix(in srgb, var(--rouge-desaccord) 70%, transparent); }
+.pastille-passe { background: var(--trait); border: 1px solid var(--gris-icone); }
+
+/* --- Ce sur quoi nous sommes d'accord / ce qui caractérise un groupe --------------- */
+.etiquette--sens {
+  background: transparent;
+  color: var(--secondaire);
+  border: var(--trait-sep);
+  border-radius: var(--rayon-objet);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.groupes-representatifs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.groupe-representatif {
+  padding-top: var(--esp-16);
+  border-top: var(--trait-sep);
+  margin-bottom: var(--esp-16);
+}
+
+.groupe-representatif:last-child {
+  margin-bottom: 0;
+}
+
+.groupe-representatif > .groupe-nom {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-8);
+  margin: 0 0 var(--esp-8);
+  font-family: var(--police-titres);
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.representatives {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.representative {
+  margin-bottom: var(--esp-12);
+}
+
+.representative:last-child {
+  margin-bottom: 0;
+}
+
+/* Plus petit que le texte courant : ces propositions sont un DÉTAIL sous chaque nom
+ * de groupe, redondant avec les tableaux de résultats au-dessus, qui portent déjà le
+ * même texte à la taille normale. `.resultat-texte` seul (dans les deux autres
+ * tableaux de la page) garde sa taille pleine. */
+.representative .resultat-texte {
+  font-size: .84rem;
+}
+
+.representative-chiffre {
+  margin-left: var(--esp-8);
+  white-space: nowrap;
+}
+
+/* Fond dégradé de l'encadré « D'accord / En désaccord plus souvent que les autres
+ * groupes » — rouge près de 0 %, neutre (la couleur du panneau : littéralement AUCUNE
+ * couleur ajoutée) autour de 50 %, vert près de 100 %.
+ *
+ * `--pct` est un NOMBRE écrit en ligne par le gabarit (`style="--pct:{{ ... }}"`),
+ * jamais une couleur : seule cette feuille décide des couleurs (voir la note en tête
+ * de fichier, et `app/services/avatar.py`). Les deux teintes réemployées sont
+ * `--vert-accord` / `--rouge-desaccord`, déjà déclarées plus haut — une seule
+ * décision de couleur pour « l'accord », pas une seconde qui pourrait diverger.
+ *
+ * La formule mélange RGB en ligne droite entre chaque teinte et `--panneau` plutôt
+ * que de suivre la roue des teintes : un dégradé rouge → vert en ligne droite
+ * passerait par l'orange/jaune, ce qui n'a pas de sens ici. `color-mix` fait ce calcul
+ * nativement ; `clamp()` évite qu'un pourcentage hors de [0, 100] ne sorte du dégradé.
+ *
+ * Le mélange plafonne à 55 % de la teinte pleine (72 % jusqu'au 16 septembre 2026), pas 100 % : `--vert-accord` et
+ * `--rouge-desaccord` sont calibrés pour un REMPLISSAGE (3:1 sur `--panneau`/`--trait`,
+ * voir plus haut), pas pour porter du texte. Posés à pleine intensité sous le texte
+ * fixe de cet encadré (`--encre`), le bout vert du dégradé ne tenait que 2,6:1 — sous
+ * les 4,5:1 qu'un texte de cette taille demande. Dilués à 72 % vers `--panneau`, le
+ * pire des deux bouts (le vert) remonte à 4,8:1.
+ */
+.etiquette-repness {
+  --pct: 50;
+  /* 55 % et non plus 72 % : moins vif, à la même demande que `.part-accord` (et un
+   * texte d'autant plus lisible). */
+  --repness-max: 55%;
+  --repness-rouge: clamp(0%, calc((50% - var(--pct) * 1%) * 1.1), var(--repness-max));
+  --repness-vert: clamp(0%, calc((var(--pct) * 1% - 50%) * 1.1), var(--repness-max));
+  background: color-mix(
+    in srgb,
+    var(--rouge-desaccord) var(--repness-rouge),
+    color-mix(in srgb, var(--panneau) calc(100% - var(--repness-vert)), var(--vert-accord) var(--repness-vert))
+  );
+  /* Le texte reste dans une couleur neutre FIXE, quel que soit le fond : `--secondaire`
+   * (utilisé par `.etiquette--sens` normalement) ne tient 4,5:1 que sur `--panneau`, pas
+   * sur les bouts teintés du dégradé ci-dessus. `--encre` le fait sur toute la plage
+   * (au pire 4,8:1, contre 16,8:1 sur un panneau blanc — voir le calcul ci-dessus). */
+  color: var(--encre);
+}
+
+/* --- La page de vote — grille à deux colonnes --------------------------------------
+ *
+ * Nouvelle au chantier I : la carte de vote et la carte 2D d'un côté, le formulaire
+ * de proposition et le parcours de l'autre — comme `.grid` dans la maquette
+ * `debat-vote.html`. `classe_corps` vaut « debat » sur cette page (voir
+ * `conversation.html`), ce qui élargit `main` à `--largeur-debat` via la même
+ * mécanique que `.accueil` pour sa propre largeur.
+ */
+.debat main {
+  max-width: var(--largeur-debat);
+}
+
+/* La grille à deux colonnes de la maquette (`.grid`), SOUS la carte de vote — qui
+ * occupe désormais toute la largeur, comme dans la maquette. Le chantier I avait mis
+ * la carte de vote et la carte des groupes dans une colonne et le formulaire dans
+ * l'autre ; la maquette place la carte de vote au-dessus des deux colonnes, et les
+ * panneaux de lecture en dessous.
+ *
+ * Seuil de 800 px, celui de la maquette. Les proportions 1,42 / 1 sont les siennes. */
+/* `margin-bottom` : les sections de fin de parcours qui suivent la grille (« Ce qui
+ * caractérise chaque groupe »…) s'en détachent du même écart que les panneaux entre
+ * eux — sans lui, elles collaient au dernier panneau. */
+.grille-debat {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--esp-16);
+  align-items: start;
+  margin-bottom: var(--esp-16);
+}
+
+@media (min-width: 800px) {
+  .grille-debat {
+    grid-template-columns: 1.42fr 1fr;
+  }
+}
+
+.colonne-panneaux,
+.colonne-laterale {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-16);
+  min-width: 0;
+}
+
+/* --- Les panneaux de la page d'un débat -------------------------------------------
+ *
+ * `.panel` de la maquette debat-vote.html : même fond et même ombre que `.card`, et
+ * désormais le même rayon. Tous les blocs de cette page (carte de vote, bandeau de
+ * chiffres, bandeau de fin, panneaux, `.card`) sont à `--rayon-bloc`, le plus droit
+ * d'entre eux — demande du client du 16 septembre 2026. */
+.panneau {
+  background: var(--panneau);
+  border: var(--trait-sep);
+  border-radius: var(--rayon-bloc);
+  box-shadow: var(--ombre);
+  padding: var(--esp-16) var(--esp-24);
+}
+
+.panneau > h2 {
+  font-size: .93rem;
+  font-weight: 700;
+  font-family: var(--police-texte);
+  margin: 0 0 var(--esp-4);
+}
+
+/* Le sous-titre d'une SECTION dans un panneau. `.panneau > h2` est le titre du
+ * panneau ; un `<h3>` y nomme une section, à la taille du texte courant. */
+.panneau h3 {
+  font-family: var(--police-texte);
+  font-size: .88rem;
+  font-weight: 700;
+  margin: var(--esp-16) 0 var(--esp-4);
+}
+
+/* « Ce sur quoi nous sommes d'accord » : un `h3` de panneau, mais qui porte une des
+ * deux sections de résultats de la page — pas un simple sous-titre. Il reprend donc
+ * la taille du titre de l'autre section, « Ce que chaque groupe a répondu » (un `h2`
+ * de `.card`, à la taille globale de `h2`), plutôt que les .88rem de `.panneau h3`
+ * ci-dessus. Sélecteur doublement qualifié pour l'emporter sur cette règle-là. */
+.panneau h3.titre-sous-section,
+.panneau-carte > h2 {
+  font-family: var(--police-titres);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+/* Premier titre de son panneau depuis le retrait de « Ce que le débat révèle déjà » :
+ * pas de marge au-dessus, comme `.panneau > h2`. */
+.panneau h3.titre-sous-section:first-child {
+  margin-top: 0;
+}
+
+.sous-titre-panneau {
+  font-size: .82rem;
+  line-height: 1.45;
+  color: var(--secondaire);
+  margin: 0 0 var(--esp-12);
+}
+
+/* « Ajouter une proposition » — `details.propose` de la maquette. Le panneau EST le
+ * `<details>` : c'est son `<summary>` qui l'ouvre, sans en-tête séparé. */
+.proposer > summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: .9rem;
+  /* La flèche native disparaît au profit du « + » : deux marqueurs pour un seul
+   * repliement se contrediraient à l'ouverture. `list-style` couvre les navigateurs
+   * récents, la règle WebKit ceux qui l'ignorent encore. */
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-8);
+  min-height: var(--cible);
+}
+
+.proposer > summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Le « + » pivote d'un huitième de tour à l'ouverture : il devient le « × » qui
+ * referme. `aria-hidden` sur l'élément — l'état ouvert/fermé est déjà porté par
+ * `<details>`, qu'un lecteur d'écran annonce seul. */
+.proposer .plus {
+  color: var(--secondaire);
+  font-size: 1.1rem;
+  line-height: 1;
+  transition: transform .15s ease;
+}
+
+.proposer[open] .plus {
+  transform: rotate(45deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .proposer .plus {
+    transition: none;
+  }
+}
+
+.corps-proposer {
+  padding-top: var(--esp-12);
+}
+
+/* Le premier `<label>` du corps n'a pas à repousser le sommaire : la marge haute de
+ * `label` sert à séparer deux champs successifs. */
+.corps-proposer > label:first-child {
+  margin-top: 0;
+}
+
+.aide-saisie {
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--secondaire);
+  margin: var(--esp-4) 0 0;
+}
+
+/* La question posée pendant la frappe (chantier Modération, MOD-2).
+
+   Elle hérite d'`aide-saisie` pour la taille et l'interligne, mais s'en écarte sur
+   deux points, et pour la même raison : la MÊME page affiche déjà de l'aide statique
+   dans ce style juste en dessous ("Une adresse en http:// ..."). Deux lignes
+   identiques, l'une permanente et l'autre qui apparaît, ne se distingueraient pas.
+
+   - l'encre pleine plutôt que `--secondaire` : ce n'est pas une note de bas de page,
+     c'est une question posée à quelqu'un ;
+   - un filet jaune à gauche, qui est le repère d'attention du site (chantiers F et G,
+     où `--jaune` ne sert jamais de texte mais toujours de trait ou d'aplat).
+
+   Aucune forme nouvelle n'est introduite : ni encadré, ni icône, ni couleur d'alerte.
+   Un rouge ou un point d'exclamation en feraient un refus, alors que rien n'est
+   refusé — on peut proposer sans rien changer. */
+.question-detection {
+  color: var(--encre);
+  border-left: 2px solid var(--jaune);
+  padding-left: var(--esp-8);
+  margin: var(--esp-8) 0 0;
+}
+
+/* Vide, elle ne prend pas de place — mais elle RESTE dans le document. C'est ce qui
+   permet à `aria-live` de l'annoncer : une région retirée de l'arbre d'accessibilité
+   (ce que ferait `hidden`) n'annonce rien quand elle réapparaît. */
+.question-detection:empty {
+  display: none;
+}
+
+/* La seconde source garde le repli — `liens.LIENS_MAX` en autorise deux, mais quatre
+ * champs vides d'affilée donneraient à croire qu'il faut les remplir. Même dessin que
+ * le repli des sources de la page « proposer une conversation ». */
+.seconde-source {
+  margin: var(--esp-12) 0 0;
+}
+
+.seconde-source > summary {
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--secondaire);
+  cursor: pointer;
+  min-height: var(--cible);
+  display: flex;
+  align-items: center;
+}
+
+.seconde-source input {
+  margin-bottom: var(--esp-8);
+}
+
+/* Le SVG de la carte prend le rayon des blocs de la page. Le verrou pose le même
+ * rayon, pour que le voile épouse exactement le tracé qu'il recouvre. */
+.panneau-carte .carte svg {
+  border-radius: var(--rayon-bloc);
+}
+
+/* --- Le signalement d'une proposition (chantier Modération, MOD-3b) -----------------
+ *
+ * Aucune couleur neuve, aucune taille de police neuve, aucun composant neuf : tout ce
+ * qui suit compose des jetons déjà là. La fenêtre est un `<dialog>` natif — son piège à
+ * focus, sa touche Échap et son voile viennent du navigateur.
+ */
+
+/* La fin de la ligne de méta : le repère de source et le bouton « Signaler », groupés
+ * pour que `space-between` continue de coller la numérotation à gauche et ce couple à
+ * droite. Sans ce groupe, trois enfants se répartiraient et la numérotation cesserait
+ * d'être alignée sur le bord. */
+.meta-vote-fin {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--esp-12);
+}
+
+/* Le bouton « Signaler ». DISCRET et SECONDAIRE, à dessein : il n'est pas une quatrième
+ * réponse. Il reprend l'apparence de `.lien-action` (« Passer ») sans en reprendre la
+ * classe — les deux ne doivent pas se ressembler au point d'être confondus, d'où la
+ * taille de la ligne de méta (.78rem) et la couleur secondaire plutôt que l'encre.
+ *
+ * `min-height` retombe sous `--cible` : c'est un écart assumé par rapport aux 44 px du
+ * reste du site, et c'est ICI la bonne décision. Une cible de 44 px en haut d'une carte
+ * de vote est une cible de 44 px de plus à ne pas toucher par erreur pendant une rafale
+ * de votes ; la zone de clic reste confortable (la ligne entière, remplissage compris)
+ * sans devenir un obstacle. Le geste rare paie, le geste fréquent est protégé. */
+.lien-signaler {
+  min-height: 0;
+  min-width: 0;
+  padding: var(--esp-8) 0;
+  border: none;
+  background: none;
+  font-size: .78rem;
+  font-weight: 400;
+  color: var(--secondaire);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.lien-signaler:hover {
+  border: none;
+  color: var(--encre);
+}
+
+.lien-signaler:active {
+  background: none;
+}
+
+/* La fenêtre. Largeur bornée en `min()` : elle tient dans un téléphone sans marge
+ * négative, et ne s'étale pas sur un écran large où la liste deviendrait illisible. */
+.fenetre-signalement {
+  width: min(30rem, calc(100vw - 2 * var(--esp-16)));
+  padding: var(--esp-24);
+  border: var(--trait-controle);
+  border-radius: var(--rayon-bloc);
+  background: var(--panneau);
+  color: var(--encre);
+}
+
+.fenetre-signalement::backdrop {
+  /* Le seul endroit du site qui pose un voile. Il n'est pas tiré d'un jeton parce
+   * qu'aucun ne décrit « du noir translucide » : les jetons nomment des surfaces et des
+   * encres, pas des voiles. Il tient dans les deux modes — un voile sombre sur un fond
+   * clair comme sur un fond sombre reste un voile. */
+  background: rgb(0 0 0 / .45);
+}
+
+.fenetre-signalement h2 {
+  margin-top: 0;
+}
+
+/* La liste des dix motifs. Pas de puces, pas de regroupement visible par famille : un
+ * regroupement donnerait au participant une échelle de gravité, donc lui dirait quelle
+ * case pèse le plus. */
+.motifs-signalement {
+  list-style: none;
+  margin: var(--esp-16) 0;
+  padding: 0;
+}
+
+.motifs-signalement label {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-8);
+  /* La ligne entière est cliquable et haute de `--cible` : ici, contrairement au bouton
+   * d'ouverture, la cible large est le bon choix — on est dans une fenêtre dédiée, il
+   * n'y a rien à côté qu'on risque d'atteindre par erreur. */
+  min-height: var(--cible);
+  padding: 0 var(--esp-8);
+  border-radius: var(--rayon-objet);
+  cursor: pointer;
+}
+
+.motifs-signalement label:hover {
+  background: var(--panneau-2);
+}
+
+/* Une case désactivée l'est parce que le plafond de deux est atteint. Le curseur et la
+ * couleur le disent ; le texte, lui, ne change pas — expliquer le plafond en toutes
+ * lettres à côté de chaque case chargerait la fenêtre pour un cas qui se comprend. */
+.motifs-signalement input:disabled + span {
+  color: var(--gris-icone);
+}
+
+.motifs-signalement label:has(input:disabled) {
+  cursor: not-allowed;
+}
+
+.actions-signalement {
+  display: flex;
+  gap: var(--esp-8);
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  margin-top: var(--esp-16);
+}

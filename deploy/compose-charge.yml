@@ -1,0 +1,57 @@
+# Pile JETABLE pour l'essai de charge — strictement séparée de la production.
+#
+#   docker compose -p chantier-c-charge -f deploy/compose-charge.yml up -d
+#   docker compose -p chantier-c-charge -f deploy/compose-charge.yml \
+#       exec -T charge python -m bin.essai_charge
+#   docker compose -p chantier-c-charge -f deploy/compose-charge.yml down -v
+#
+# Ce qui garantit l'isolement, et pourquoi chaque point compte :
+#   - projet `chantier-c-charge` : réseau et volumes propres, aucun nom partagé ;
+#   - AUCUN port publié : rien n'est joignable depuis l'hôte ni depuis l'extérieur ;
+#   - le réseau `polis-net` n'est PAS joint : ni Pol.is ni nginx ne voient cette pile ;
+#   - volume nommé du projet, emporté par `down -v` ;
+#   - `image:` et non `build:` : on réutilise l'image DÉJÀ construite de l'API, donc
+#     exactement le code de production, sans reconstruction ni cache à invalider.
+#
+# OMP/OPENBLAS_NUM_THREADS=2 : scikit-learn parallélise via BLAS et prendrait les
+# 8 cœurs de l'hôte. L'API vivante tourne sur la même machine — un essai de charge
+# n'a pas à la ralentir pour produire ses chiffres.
+
+name: chantier-c-charge
+
+services:
+  db-charge:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: chantierc
+      POSTGRES_PASSWORD: charge-jetable
+      POSTGRES_DB: chantierc_charge
+    volumes:
+      - charge-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U chantierc -d chantierc_charge"]
+      interval: 3s
+      timeout: 5s
+      retries: 20
+
+  charge:
+    image: chantier-c-api
+    environment:
+      DATABASE_URL: postgresql+asyncpg://chantierc:charge-jetable@db-charge:5432/chantierc_charge
+      ENVIRONMENT: charge
+      SECRET_KEY: charge-jetable-sans-valeur
+      OMP_NUM_THREADS: "2"
+      OPENBLAS_NUM_THREADS: "2"
+      MKL_NUM_THREADS: "2"
+    depends_on:
+      db-charge:
+        condition: service_healthy
+    volumes:
+      - ../app:/app/app
+      - ../migrations:/app/migrations
+      - ../alembic.ini:/app/alembic.ini:ro
+      - ../bin:/app/bin
+    command: sleep infinity
+
+volumes:
+  charge-data:

@@ -1,0 +1,310 @@
+{% extends "base.html" %}
+{% block title %}Signalements{% endblock %}
+{#
+  L'écran du responsable (MOD-3a). Aucun design nouveau : les gabarits de modération
+  sont repris tels qu'ils sont, et le chantier I2 ne s'occupe pas de cette file.
+
+  Quatre principes le gouvernent, et chacun répond à une décision prise plus tôt :
+
+    1. **Une proposition signalée dix fois est UNE ligne, pas dix.** Ce qui se décide
+       est le sort de la proposition, une fois. Dix lignes feraient dix décisions à
+       prendre pour un seul contenu, et neuf occasions de se contredire.
+    2. **Tri par gravité, puis par ancienneté.** Une ligne rouge vue il y a trois
+       minutes passe devant un doublon vu hier ; à gravité égale, le plus vieux
+       d'abord, ce qui empêche une plainte de rester au fond indéfiniment.
+    3. **Le message à l'auteur est affiché, pas envoyé.** Aucun courriel ne part de ce
+       lot. Il est montré pour être relu — c'est la seule façon de s'apercevoir avant
+       l'envoi qu'un gabarit dit quelque chose que le site ne fait pas.
+    4. **Deux repères en tête, pas cinq.** Le nombre de signalements non traités et
+       l'âge du plus ancien. Ce sont ceux qui disent vite si le dispositif tient : un
+       nombre qui monte sans qu'aucun ne descende, ou un âge qui dépasse la journée, se
+       voient d'un coup d'œil. Une moyenne ne se voit pas.
+#}
+{% block body %}
+<h1>Signalements{% if lignes %} ({{ lignes|length }} proposition{{ 's' if lignes|length > 1 }}){% endif %}</h1>
+
+{# Les deux repères. Ils sont en tête et non en pied : ce sont eux qu'on vient lire
+   quand on ouvre la page sans y être appelé par un chiffre de la barre. #}
+<div class="card" style="display:flex;gap:2rem;flex-wrap:wrap">
+  <div>
+    <div class="mu">Signalements non traités</div>
+    <div style="font-size:1.6rem;font-weight:600">{{ non_traites }}</div>
+  </div>
+  <div>
+    <div class="mu">Âge du plus ancien</div>
+    <div style="font-size:1.6rem;font-weight:600">{{ age_lisible or '—' }}</div>
+  </div>
+</div>
+
+{#
+  Les contestations AVANT les signalements, et c'est le seul ordre défendable : une
+  personne qui conteste attend une réponse de vous, un signalement n'attend personne.
+  Elles n'ont pas de bouton — ce lot les recueille et les montre, il ne les instruit pas
+  (l'appel devant quatre arbitres est le MOD-12). Poser ici un bouton « accepter » ferait
+  croire à une procédure qui n'existe pas encore.
+#}
+{% set ids_en_file = lignes|map(attribute='statement.id')|list %}
+{% if contestations %}
+{% set a_lire = contestations|map(attribute='non_lues')|map('length')|sum %}
+<h2>Demandes de réexamen à lire ({{ a_lire }})</h2>
+{#
+  Un dossier par PROPOSITION et non par contestation (MOD-13) : le schéma autorise
+  délibérément plusieurs dépôts pour un même retrait — un auteur qui se ravise ou
+  complète ne doit pas trouver porte close — et trois cartes feraient croire à trois
+  dossiers à trancher là où il n'y a qu'un retrait à réexaminer.
+#}
+{% for dossier in contestations %}
+<div class="card">
+  <p style="margin:0 0 .3rem">
+    {% if dossier.etat == 'retiree' %}
+      <span class="tag" style="border-color:#e0c0c0;color:#a11">retirée de la circulation</span>
+      {% if dossier.statement.id in ids_en_file %}
+      <span class="tag">sa carte est plus bas, avec les gestes</span>
+      {% else %}
+      {# Le signalement est déjà traité (confirmé ou classé) : la file ne montre que les
+         signalements NON TRAITÉS, donc cette proposition n'a plus de carte. Le geste
+         d'annulation est porté ICI depuis le MOD-13b — c'est l'option A du journal,
+         tranchée par dom. #}
+      <span class="tag">signalement déjà traité — le geste est ci-dessous</span>
+      {% endif %}
+    {% elif dossier.etat == 'remise_en_ligne' %}
+      {# L'angle mort d'avant le MOD-13 : la demande restait affichée comme en souffrance
+         alors que le responsable avait déjà tranché en faveur de l'auteur. #}
+      <span class="tag" style="border-color:#c0d8c0;color:#161">retrait annulé depuis :
+        la proposition est de nouveau en ligne</span>
+    {% else %}
+      <span class="tag">proposition supprimée depuis</span>
+    {% endif %}
+  </p>
+
+  {% if dossier.statement %}
+  <p style="margin:0 0 .4rem"><em>{{ dossier.statement.text }}</em></p>
+  <p class="mu" style="margin:0 0 .5rem">
+    {%- if dossier.statement.retire_motif %}Retirée pour
+    {{ libelle(dossier.statement.retire_motif) }} · {% endif -%}
+    {% set n = dossier.contestations|length %}{% set nl = dossier.non_lues|length -%}
+    {{ n }} demande{{ 's' if n > 1 }} déposée{{ 's' if n > 1 }}, dont {{ nl }} non lue{{ 's' if nl > 1 }}
+  </p>
+  {% endif %}
+
+  {% for contestation in dossier.contestations %}
+  <div style="margin:0 0 .6rem">
+    <p class="mu" style="margin:0 0 .2rem">
+      Reçue le {{ contestation.cree_le.strftime('%d/%m/%Y à %H:%M') }}
+      {%- if contestation.traite_le %} · <span class="tag">lue le
+      {{ contestation.traite_le.strftime('%d/%m/%Y à %H:%M') }}</span>{% endif %}
+    </p>
+    <blockquote class="mu" style="margin:.2rem 0 .4rem;padding-left:.8rem;
+                border-left:3px solid var(--bd)">{{ contestation.texte }}</blockquote>
+    {% if not contestation.traite_le %}
+    {#
+      Le seul bouton de ce bloc, et il ne décide de rien : il dit « j'ai lu », pour que
+      cette liste diminue. Répondre, confirmer ou annuler sont ailleurs — un bouton
+      « accepter » ici ferait croire à une procédure d'appel qui n'existe pas (MOD-12).
+    #}
+    <form method="post" action="/moderation/contestations/{{ contestation.id }}/lue">
+      <button class="sec">J'ai lu cette demande</button>
+    </form>
+    {% endif %}
+  </div>
+  {% endfor %}
+
+  {#
+    LE GESTE, quand la proposition n'a plus de carte dans la file (MOD-13b, option A).
+
+    Un seul bouton, et non les trois. Les deux autres n'auraient rien à faire :
+      — « confirmer » écrirait au journal d'audit un second `retrait_confirme` décrivant
+        un retrait déjà confirmé, c'est-à-dire un acte qui n'a pas eu lieu ce jour-là ;
+      — « classer sans suite » ne clôt que des signalements en attente, et il n'y en a
+        plus aucun — le bouton serait sans effet.
+    Annuler est le seul geste qui change encore quelque chose, et c'est précisément celui
+    que la contestation appelle : l'auteur demande que sa proposition revienne.
+
+    Il n'apparaît PAS quand la carte est plus bas : deux endroits pour une même décision
+    sont deux occasions de se contredire.
+  #}
+  {% if dossier.etat == 'retiree' and dossier.statement.id not in ids_en_file %}
+  <div class="row" style="margin-top:.4rem">
+    <form method="post" action="/moderation/signalements/{{ dossier.statement.id }}/annuler">
+      <button class="sec">Annuler le retrait (remettre en circulation)</button>
+    </form>
+  </div>
+  <p class="mu" style="margin:.3rem 0 0">Maintenir le retrait ne demande aucun geste : il
+    est déjà confirmé, et le journal d'audit en porte la trace.</p>
+  {% endif %}
+</div>
+{% endfor %}
+<h2>Signalements</h2>
+{% endif %}
+
+<p class="mu">Un signalement n'est <strong>pas un verdict</strong> : c'est une plainte,
+  elle ouvre un examen et ne le conclut pas. Le seul cas où elle agit seule est la
+  <strong>ligne rouge</strong>, où le premier signalement suffit à déclencher un retrait
+  conservatoire — sans seuil, sans délai, sans quorum. Rien n'est supprimé en base : une
+  proposition retirée sort de la circulation, ses votes restent comptés.</p>
+
+{% if not lignes %}
+<p class="empty">Aucun signalement en attente.</p>
+{% endif %}
+
+{% for ligne in lignes %}
+<div class="card">
+  <p style="margin:0 0 .3rem">
+    <span class="tag">{{ routes_libelles[ligne.route.value] }}</span>
+    {% if ligne.retiree %}
+    {# Dit en toutes lettres, parce que c'est l'information qui change la nature du
+       geste suivant : confirmer ou annuler, et non trancher à froid. #}
+    <span class="tag" style="border-color:#e0c0c0;color:#a11">retirée de la circulation</span>
+    {% endif %}
+  </p>
+
+  <p style="margin:0 0 .4rem">{{ ligne.statement.text }}</p>
+
+  <p class="mu" style="margin:0 0 .6rem">
+    {% if ligne.conversation %}
+    Débat : <a href="/moderation/conversations/{{ ligne.conversation.id }}">{{ ligne.conversation.title }}</a> ·
+    {% endif %}
+    {{ ligne.signaleurs_distincts }} signaleur{{ 's' if ligne.signaleurs_distincts > 1 }} distinct{{ 's' if ligne.signaleurs_distincts > 1 }} ·
+    {{ ligne.signalements|length }} signalement{{ 's' if ligne.signalements|length > 1 }} ·
+    le plus ancien il y a {{ ages[ligne.statement.id] }}
+  </p>
+
+  {# Les motifs AVEC leur décompte : « mal formulé ×7 » ne se lit pas comme
+     « mal formulé ». La fréquence est affichée, et elle ne décide de rien — elle ne
+     servira qu'à choisir le message, jamais la décision. #}
+  <p class="mu" style="margin:0 0 .6rem">
+    Motifs :
+    {% for code, combien in ligne.motifs_decomptes %}
+    <span class="tag">{{ libelle(code) }}{% if combien > 1 %} ×{{ combien }}{% endif %}</span>
+    {% endfor %}
+  </p>
+
+  {% if ligne.textes_libres %}
+  {# Le seul texte de signaleur montré : l'explication exigée par « Autre raison ».
+     Échappé par Jinja comme tout le reste — c'est du texte écrit par un inconnu. #}
+  <p class="mu" style="margin:0 0 .2rem">Explications écrites sous « Autre raison » :</p>
+  <ul class="mu" style="margin:.2rem 0 .6rem;padding-left:1.1rem">
+    {% for texte in ligne.textes_libres %}<li>{{ texte }}</li>{% endfor %}
+  </ul>
+  {% endif %}
+
+  <p class="mu" style="margin:0 0 .2rem">Message qui <strong>serait</strong> envoyé à
+    l'auteur (aucun courriel ne part de ce lot) :</p>
+  <pre class="mu" style="white-space:pre-wrap;background:var(--bg);border:1px solid var(--bd);
+       border-radius:4px;padding:.6rem .7rem;margin:.2rem 0 .8rem;font:inherit">{{ ligne.message }}</pre>
+
+  {#
+    L'adresse de recours, en clair, pour une proposition retirée. Elle est ici parce
+    qu'AUCUN canal ne la porte encore jusqu'à l'auteur : l'envoi de courriel est hors
+    périmètre, et la page de débat ne montre rien à l'auteur d'une proposition retirée.
+    C'est donc le responsable qui la transmet, à la main, quand il a de quoi joindre
+    quelqu'un. Écrit plutôt que sous-entendu : un recours que personne ne sait
+    communiquer n'est pas un recours.
+  #}
+  {% if ligne.retiree and ligne.statement.jeton_contestation %}
+  <p class="mu" style="margin:0 0 .6rem">
+    Adresse de recours à transmettre à l'auteur (rien ne part automatiquement) :<br>
+    <code>{{ lien_de_contestation(ligne.statement.jeton_contestation) }}</code>
+  </p>
+  {% endif %}
+
+  {#
+    LA DÉFENSE DE L'AUTEUR, juste avant les boutons (MOD-13). C'est tout l'objet du lot :
+    elle était en haut de la page depuis le MOD-3b, c'est-à-dire à un endroit qu'il
+    fallait avoir pensé à lire avant de descendre trancher. Le geste et ce qui le motive
+    doivent tenir dans le même regard — sinon on confirme un retrait sans savoir qu'il
+    est contesté, ce qui est exactement ce qu'un recours doit empêcher.
+
+    Les demandes déjà lues restent affichées ici : sur cette carte une contestation n'est
+    pas une tâche à cocher, c'est une pièce du dossier.
+  #}
+  {#
+    LA NAVETTE DE REFORMULATION (MOD-10), juste avant la défense et les boutons.
+
+    **Elle n'apparaît que là où une plainte la demande** : `reformulables` contient les
+    propositions dont un signalement encore reçu est routé `A_REFORMULER`. Ailleurs, ce
+    formulaire serait une porte ouverte pour retoucher le texte de quelqu'un sans que
+    personne l'ait demandé — et c'est exactement ce que ce chantier refuse depuis le
+    MOD-1 : le responsable ne décide pas de ce qui est bien écrit, il répond à une plainte.
+
+    **Ou le formulaire, ou l'échange en cours, jamais les deux.** Un second formulaire
+    sous une proposition déjà partie vers son auteur inviterait à écrire une variante que
+    la base refuserait (index unique partiel) — et laisserait croire qu'on peut corriger
+    son envoi, ce qu'on ne peut pas.
+  #}
+  {% if ligne.statement.id in reformulables %}
+  {% set navette = navettes.get(ligne.statement.id) %}
+  <div style="margin:0 0 .8rem;padding:.6rem .7rem;border:1px solid var(--bd);border-radius:4px">
+    {% if navette %}
+    <p style="margin:0 0 .4rem"><strong>Une reformulation attend la réponse de l'auteur</strong>
+      — <span class="mu">proposée le {{ navette.propose_le.strftime('%d/%m/%Y à %H:%M') }}</span></p>
+    <blockquote style="margin:.1rem 0 .4rem;padding-left:.8rem;border-left:3px solid var(--or-brule)">
+      {{ navette.texte_propose }}</blockquote>
+    <p class="mu" style="margin:0">L'auteur la voit à sa prochaine visite. Tant qu'il n'a
+      pas répondu, aucune autre ne peut être proposée — et son texte n'a pas bougé.</p>
+    {% else %}
+    <p style="margin:0 0 .4rem"><strong>Proposer une reformulation à l'auteur</strong></p>
+    <p class="mu" style="margin:0 0 .4rem">Il l'acceptera ou la refusera lui-même. S'il
+      accepte, sa proposition portera ce texte <strong>et gardera ses votes</strong> ; s'il
+      refuse, rien ne change et le signalement vous revient.</p>
+    <form method="post" action="/moderation/signalements/{{ ligne.statement.id }}/reformuler">
+      {#
+        Pré-rempli avec le texte actuel : on reformule, on ne repart pas de zéro. Un champ
+        vide inviterait à réécrire l'idée plutôt qu'à la rendre lisible.
+      #}
+      <textarea name="texte" rows="3" maxlength="{{ reformulation_max }}"
+                style="width:100%;font:inherit;padding:.4rem;border:1px solid var(--bd);
+                       border-radius:4px">{{ ligne.statement.text }}</textarea>
+      <button type="submit" class="bouton" style="margin-top:.4rem">Proposer à l'auteur</button>
+    </form>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% set contestees = contestations_par_proposition.get(ligne.statement.id, []) %}
+  {% if contestees %}
+  <div style="margin:0 0 .8rem;padding:.6rem .7rem;border:1px solid #e0c0c0;border-radius:4px">
+    <p style="margin:0 0 .4rem"><strong>L'auteur a demandé un réexamen</strong>
+      ({{ contestees|length }} demande{{ 's' if contestees|length > 1 }}) —
+      <span class="mu">à lire avant de confirmer ou d'annuler</span></p>
+    {% for contestation in contestees %}
+    <p class="mu" style="margin:.3rem 0 .1rem">
+      Reçue le {{ contestation.cree_le.strftime('%d/%m/%Y à %H:%M') }}
+      {%- if contestation.traite_le %} · lue le
+      {{ contestation.traite_le.strftime('%d/%m/%Y à %H:%M') }}
+      {%- else %} · <strong>pas encore lue</strong>{% endif %}
+    </p>
+    <blockquote class="mu" style="margin:.1rem 0 .3rem;padding-left:.8rem;
+                border-left:3px solid var(--bd)">{{ contestation.texte }}</blockquote>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="row">
+    {% if ligne.retiree %}
+    <form method="post" action="/moderation/signalements/{{ ligne.statement.id }}/confirmer">
+      <button class="no">Confirmer le retrait</button>
+    </form>
+    <form method="post" action="/moderation/signalements/{{ ligne.statement.id }}/annuler">
+      <button class="sec">Annuler le retrait (remettre en circulation)</button>
+    </form>
+    {% endif %}
+    <form method="post" action="/moderation/signalements/{{ ligne.statement.id }}/classer">
+      <button class="sec">Classer sans suite</button>
+    </form>
+  </div>
+</div>
+{% endfor %}
+
+{# La note de confidentialité, affichée ici et pas seulement écrite dans le code : c'est
+   le responsable qui aura à la faire ajouter, et c'est lui qui ouvre cette page. #}
+<h2>Avant toute mise en production</h2>
+<p class="mu">La politique de confidentialité doit mentionner la finalité
+  « prévention des abus » des données de contexte captées au signalement (empreintes du
+  référent et de l'adresse IP, purgées à {{ jours_contexte }} jours par
+  <code>python -m app.cli purge-contexte-signalements</code>). Phrase à coller telle
+  quelle :</p>
+<blockquote class="mu" style="margin:.4rem 0 0;padding-left:.8rem;border-left:3px solid var(--bd)">
+  {{ note_confidentialite }}
+</blockquote>
+{% endblock %}

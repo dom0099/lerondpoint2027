@@ -1,0 +1,31 @@
+# Secrets — jamais versionnés
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+# …et la forme LIEN SYMBOLIQUE, qu'un worktree utilise pour partager l'environnement
+# du dépôt principal. « .venv/ » ne l'attrape pas : un lien n'est pas un répertoire.
+.venv
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# Divers
+*.log
+
+# Verrou de dépendances d'uv. Non versionné parce que ce n'est pas le chemin
+# d'installation du projet : l'image est construite depuis `pyproject.toml`, et les
+# versions qui comptent y sont épinglées à la main (red-dwarf, concave-hull). Ce
+# fichier n'apparaît que quand on lance la suite de tests avec `uv` hors conteneur —
+# c'est un artefact de poste de travail, pas une source de vérité.
+uv.lock
+
+# Bancs JavaScript : jsdom s'installe ici, rien n'en est servi ni deploye.
+bancs/node_modules/
+
+# Médias envoyés par les usagers (chantier Vidéo) : le fichier vit sur le disque du
+# serveur, la base n'en connaît que le chemin. Rien de tout cela ne se versionne — ni
+# les originaux, ni les transcodages, ni les miniatures.
+media/

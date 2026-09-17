@@ -1,0 +1,69 @@
+{#
+  L'anneau — la seule forme du site.
+
+  Logo réduit, favicon, avatar, indicateur de chargement, jauge de niveau et badge
+  sont le MÊME dessin. C'est ce qui donne au ludique une grammaire au lieu d'un
+  encart ajouté : quand l'anneau se remplit dans l'en-tête et que le même anneau
+  tourne pendant un chargement, le visiteur n'apprend qu'une forme.
+
+  Géométrie, dans un repère de 32 unités (les proportions du document d'identité,
+  pas des valeurs choisies ici) :
+
+      rayon extérieur   14,5     hauteur de capitale
+      épaisseur          5,5     0,15 em rapporté à la hauteur de capitale
+      contre-poinçon     5,5     blanc, de 3,5 à 9 — jamais bouché, même à 16 px
+      îlot central       3,5     le jaune, et rien que lui
+
+  Le jaune ne sort JAMAIS de l'îlot, sauf dans la jauge où il est un aplat de
+  remplissage — usage que le document d'identité cite nommément. Il ne devient
+  jamais un trait fin : à 1,31:1 sur blanc, il disparaîtrait.
+
+  La piste du mot-logo complet (« Le Rond-Point²⁰²⁷ » avec les branches) n'est pas
+  tranchée. L'anneau seul est employé partout ici — c'est déjà la règle du document
+  en dessous de 24 px, et rien de ce qui est fait ne sera perdu quand elle le sera.
+#}
+
+{% macro anneau(taille=32, variante='logo', part=0, titre=None, classe='') -%}
+{#
+  variante :
+    logo        anneau d'encre, îlot jaune. Marque, avatar sans niveau connu.
+    niveau      piste grise, arc jaune rempli à `part` %, îlot d'encre.
+    chargement  piste grise, arc d'encre qui tourne, îlot jaune IMMOBILE.
+    badge       anneau jaune fermé, îlot d'encre — l'anneau qui vient de se refermer.
+#}
+<svg class="anneau anneau--{{ variante }} {{ classe }}"
+     viewBox="0 0 32 32" width="{{ taille }}" height="{{ taille }}"
+     {% if titre %}role="img"{% else %}aria-hidden="true" focusable="false"{% endif %}>
+  {% if titre %}<title>{{ titre }}</title>{% endif %}
+
+  {% if variante == 'logo' %}
+    <circle class="anneau-trace" cx="16" cy="16" r="11.75" fill="none" stroke-width="5.5"/>
+  {% elif variante == 'badge' %}
+    <circle class="anneau-plein" cx="16" cy="16" r="11.75" fill="none" stroke-width="5.5"/>
+  {% else %}
+    {# Piste : l'anneau non encore parcouru. Toujours dessinée en entier, pour que
+       la forme reste un anneau même à 0 % — un arc seul ne se lit pas comme un
+       rond-point. #}
+    <circle class="anneau-piste" cx="16" cy="16" r="11.75" fill="none" stroke-width="5.5"/>
+    {% if variante == 'niveau' %}
+      {# `pathLength="100"` : le tiret se règle en pourcentage, sans avoir à
+         recalculer 2πr à chaque changement de rayon. Départ à midi (rotation de
+         -90°), sens des aiguilles. Bout droit et non arrondi : un bout arrondi
+         déborderait de la piste à 0 % et ferait croire à un début de progression
+         là où il n'y en a aucune. #}
+      <circle class="anneau-part" cx="16" cy="16" r="11.75" fill="none" stroke-width="5.5"
+              pathLength="100" stroke-dasharray="{{ part }} 100"
+              stroke-linecap="butt" transform="rotate(-90 16 16)"/>
+    {% elif variante == 'chargement' %}
+      {# Un quart d'anneau qui tourne autour du reste : un rond-point ne tourne pas,
+         ce sont les voitures qui tournent autour. L'îlot, lui, ne bouge pas — c'est
+         la seule chose qui rende l'image juste. #}
+      <circle class="anneau-arc" cx="16" cy="16" r="11.75" fill="none" stroke-width="5.5"
+              pathLength="100" stroke-dasharray="25 100" stroke-linecap="butt"/>
+    {% endif %}
+  {% endif %}
+
+  {# L'îlot, toujours en dernier et toujours hors de ce qui tourne. #}
+  <circle class="anneau-ilot" cx="16" cy="16" r="3.5"/>
+</svg>
+{%- endmacro %}

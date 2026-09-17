@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Indépendance des signalements{% endblock %}
+{#
+  L'écran de surveillance (MOD-5). Aucun design nouveau : les gabarits de modération sont
+  repris tels quels.
+
+  **Rien de ce qui est ici ne s'affiche jamais publiquement** : ni les indicateurs, ni
+  les seuils, ni l'alerte, ni le fait même qu'un débat soit surveillé. La ligne du projet
+  est de publier la MÉTHODE ; publier le détail d'une défense anti-abus, c'est en publier
+  la notice de contournement. La règle est publique, les seuils de détection sont privés.
+
+  Trois principes gouvernent cet écran :
+
+    1. **Pas de score unique.** Cinq indicateurs nommés, chacun avec sa valeur, son seuil
+       et sa phrase. Un nombre de 0 à 100 serait opaque, invérifiable et impossible à
+       contester — donc impossible à corriger quand il se trompe.
+    2. **« Non mesurable » se distingue de zéro, à l'œil.** Un indicateur qu'on ne sait
+       pas calculer est écrit en gris avec son motif, jamais en « 0 ». Les confondre
+       ferait passer un vieux débat purgé pour parfaitement sain.
+    3. **Une alerte n'est pas un verdict.** Elle dit « regardez », pas « agissez » : ce
+       lot n'a aucun effet sur aucune proposition.
+#}
+{% block body %}
+<h1>Indépendance des signalements</h1>
+
+<p class="mu">Un signalement coordonné vient presque toujours d'un seul côté de la carte
+  des opinions, et c'est cela qui se voit. Cet écran ne fait que regarder :
+  <strong>aucune proposition n'est retirée, aucun signalement n'est écarté, aucun seuil
+  n'est armé</strong>. Une alerte dit « regardez », pas « agissez ».</p>
+
+<p class="mu"><strong>Ne publiez rien de cette page.</strong> Les seuils de détection sont
+  privés : les publier reviendrait à publier la notice pour les contourner.</p>
+
+{% if not debats %}
+<p class="empty">Aucun débat n'a reçu de signalement.</p>
+{% endif %}
+
+{% for d in debats %}
+<div class="card">
+  <p style="margin:0 0 .3rem">
+    {% if d.analyse.alerte %}
+    <span class="tag" style="border-color:#e0c0c0;color:#a11">alerte — {{ d.analyse.depassements|length }} indicateurs au-delà du seuil</span>
+    {% else %}
+    <span class="tag">rien à signaler</span>
+    {% endif %}
+  </p>
+
+  <p style="margin:0 0 .4rem">
+    <a href="/moderation/conversations/{{ d.conversation.id }}">{{ d.conversation.title }}</a>
+  </p>
+  <p class="mu" style="margin:0 0 .6rem">
+    {{ d.signalements }} signalement{{ 's' if d.signalements > 1 }} ·
+    {{ d.analyse.signalants }} signalant{{ 's' if d.analyse.signalants > 1 }}
+    {%- if d.dernier %} · dernier le {{ d.dernier.strftime('%d/%m/%Y à %H:%M') }}{% endif %}
+  </p>
+
+  <table>
+    <tr><th>Indicateur</th><th>Valeur</th><th>Seuil</th><th>Ce qu'on lit</th></tr>
+    {% for i in d.analyse.indicateurs %}
+    <tr>
+      <td>{{ i.libelle }}</td>
+      {# « Non mesurable » en gris et en toutes lettres : jamais un zéro, qui se lirait
+         comme « mesuré, et rien trouvé ». #}
+      <td{% if not i.mesurable %} class="mu"{% elif i.depasse %} style="color:#a11;font-weight:600"{% endif %}>
+        {%- if not i.mesurable %}non mesurable
+        {%- elif i.code == 'rafale' %}×{{ '%.1f'|format(i.valeur)|replace('.', ',') }}
+        {%- else %}{{ (i.valeur * 100)|round|int }} %{% endif -%}
+      </td>
+      <td class="mu">
+        {%- if i.code == 'rafale' %}×{{ '%.0f'|format(i.seuil) }}
+        {%- else %}{{ (i.seuil * 100)|round|int }} %{% endif -%}
+      </td>
+      <td class="mu">{{ i.detail }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  {% if d.analyse.non_mesurables %}
+  <p class="mu" style="margin:.6rem 0 0">
+    {{ d.analyse.non_mesurables|length }} indicateur(s) non mesurable(s) — le plus souvent
+    parce que le contexte a été purgé au bout de {{ jours_contexte }} jours. Un débat dont
+    on ne sait rien n'est pas un débat sain, c'est un débat dont on ne sait rien.
+  </p>
+  {% endif %}
+</div>
+{% endfor %}
+
+<h2>Comment lire ces cinq indicateurs</h2>
+<p class="mu">Une alerte demande <strong>au moins deux</strong> indicateurs au-delà de leur
+  seuil, jamais un seul. Chacun pris isolément a une explication innocente : un débat qui
+  vient d'ouvrir n'a que des identités fraîches, un partage qui marche produit une rafale,
+  un bureau où deux personnes lisent la même page concentre une adresse. C'est leur
+  conjonction qui n'en a pas — et c'est aussi ce qui évite de crier sur un débat vivant.</p>
+{% endblock %}

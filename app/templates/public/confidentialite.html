@@ -1,0 +1,179 @@
+{% extends "public/base.html" %}
+{% block title %}Politique de confidentialité — Le Rond-Point 2027{% endblock %}
+{% block body %}
+<h1>Politique de confidentialité</h1>
+<p class="lead">Dernière mise à jour : {{ maj }}. Ce document décrit exactement ce que
+  le site enregistre, pourquoi, combien de temps, et comment tout effacer.</p>
+
+<h2>Qui traite vos données</h2>
+<p>L'éditeur du site, joignable à <a href="mailto:{{ contact }}">{{ contact }}</a>
+  (voir les <a href="/mentions-legales">mentions légales</a>). Le site est hébergé en
+  France par OVH SAS. Aucune donnée n'est transférée hors de l'Union européenne.</p>
+
+<h2>Pourquoi</h2>
+<ul>
+  <li><strong>Organiser la consultation</strong> : recueillir les positions de chacun
+    sur des propositions, et permettre d'en proposer de nouvelles.</li>
+  <li><strong>Dégager les grandes familles d'opinion</strong> : un calcul automatique
+    regroupe les participants dont les votes se ressemblent. Aucune décision produisant
+    un effet juridique n'est prise sur cette base ; le résultat est une lecture
+    d'ensemble, affichée à tous.</li>
+  <li><strong>Entretenir la participation</strong> : niveaux et badges.</li>
+  <li><strong>Protéger le service</strong> : limiter les envois d'e-mails, les
+    propositions et les tentatives de connexion abusives.</li>
+</ul>
+
+<h2>Base légale — un point encore ouvert</h2>
+<p>La participation repose sur votre démarche volontaire, et la création d'un compte
+  n'est jamais obligatoire pour voter.</p>
+<div class="msg">
+  <p><strong>Point en cours d'examen juridique.</strong> La question de
+  savoir si les votes exprimés ici constituent des « opinions politiques » au sens de
+  l'article 9 du RGPD — catégorie particulière de données, soumise à un régime plus
+  strict — n'est <strong>pas tranchée à ce stade</strong>. Par prudence, et dans
+  l'attente d'un avis juridique formel, nous traitons ces données comme si elles
+  relevaient de cette catégorie, avec le niveau de protection le plus élevé décrit
+  ici.</p>
+  <p>La base légale retenue à titre provisoire est celle d'un <strong>motif
+  d'intérêt public important</strong> (article 9, paragraphe 2, point g, du RGPD) :
+  faire émerger, sur des sujets d'intérêt général, une lecture structurée de l'opinion
+  citoyenne, dans des conditions qui excluent tout usage publicitaire, tout profilage
+  à des fins commerciales, et toute décision automatisée produisant un effet sur vous.
+  Cette qualification n'est pas confirmée par un avis juridique extérieur ; elle sera
+  précisée dès qu'il sera rendu, et vous en serez informé par la date de mise à jour
+  ci-dessus.</p>
+</div>
+
+<h2>Ce qui est enregistré</h2>
+<p><strong>Si vous participez sans compte</strong> — un identifiant aléatoire déposé
+  dans un cookie signé de votre navigateur, et rien d'autre qui vous concerne :
+  ni nom, ni adresse.</p>
+<p><strong>Si vous créez un compte</strong> — votre adresse e-mail, le nom que vous
+  choisissez d'afficher, une description de profil (bio) si vous en rédigez une, vos
+  centres d'intérêt si vous en sélectionnez, une empreinte chiffrée de votre mot de
+  passe (argon2id : le mot de passe lui-même n'est jamais enregistré), et la date de
+  création.</p>
+<p><strong>Dans les deux cas</strong> :</p>
+<ul>
+  <li>vos votes : la proposition, votre position (d'accord, pas d'accord, passer), la
+    date ;</li>
+  <li>les propositions et conversations que vous proposez — <em>texte libre : n'y
+    écrivez pas d'information personnelle</em>, elles sont publiques une fois
+    approuvées ;</li>
+  <li>la vidéo de présentation que vous joignez à une conversation, si vous en
+    ajoutez une — elle montre nécessairement votre image et votre voix, et devient
+    publique dans les mêmes conditions que le reste de la conversation, une fois
+    approuvée ;</li>
+  <li>le résultat du calcul d'opinion vous concernant : deux coordonnées et le groupe
+    auquel vos réponses vous rattachent, recalculés régulièrement ;</li>
+  <li>vos badges et vos points, si vous avez un compte ;</li>
+  <li>des traces techniques de plafonnement : votre adresse IP lors d'une proposition
+    ou d'une tentative de connexion, votre adresse e-mail lors d'une demande de
+    réinitialisation de mot de passe ;</li>
+  <li>les journaux techniques du serveur, qui contiennent des adresses IP.</li>
+</ul>
+
+<h2>Ce qui est public, et ce qui ne l'est jamais</h2>
+<table>
+  <tr><th>Donnée</th><th>Visible par</th></tr>
+  <tr><td>Nom affiché</td><td>Public</td></tr>
+  <tr><td>Badges et points</td><td>Public, sur votre profil consultable</td></tr>
+  <tr><td>Bio</td><td>Public, sur votre profil consultable</td></tr>
+  <tr><td>Centres d'intérêt</td><td>Personne d'autre que vous</td></tr>
+  <tr><td>Propositions et conversations</td><td>Public une fois approuvées</td></tr>
+  <tr><td>Vidéo de présentation</td>
+      <td>Public une fois la conversation approuvée</td></tr>
+  <tr><td>Vos votes</td>
+      <td>Jamais nominatifs pour les autres participants</td></tr>
+  <tr><td>Votre position et votre groupe d'opinion</td>
+      <td>Jamais nominatifs — seule la carte d'ensemble, agrégée, est publique</td></tr>
+</table>
+
+<h3>Si vous signalez une proposition</h3>
+{# Le texte vient de `app/services/signalement.py` (MOD-3a) et n'est pas recopié ici :
+   c'est la même phrase que celle affichée au responsable sur son écran, et deux copies
+   d'une phrase juridique finissent toujours par différer. #}
+<p>{{ note_confidentialite }}</p>
+<p><strong>Aucun traceur publicitaire, aucune mesure d'audience, aucun cookie tiers.</strong>
+  Les deux seuls cookies déposés sont strictement nécessaires au fonctionnement : celui
+  qui porte votre identifiant de participant (un an) et, si vous vous connectez, celui
+  de votre session (trente jours). C'est pourquoi ce site n'affiche pas de bandeau
+  cookies : il n'a rien à vous faire accepter.</p>
+
+<h2>Combien de temps</h2>
+<table>
+  <tr><th>Donnée</th><th>Suppression demandée</th>
+      <th>Disparition réelle et complète</th></tr>
+  <tr><td>Compte, votes, badges, résultats d'analyse</td>
+      <td>Immédiate en base</td>
+      <td>Jusqu'à 6 mois — le temps que la rotation des sauvegardes purge les
+        instantanés antérieurs</td></tr>
+  <tr><td>Identifiant de participant sans compte, jamais rattaché</td>
+      <td>Immédiate si demandée, sinon 1 an</td>
+      <td>Idem, jusqu'à 6 mois après</td></tr>
+  <tr><td>Identifiant de participant rattaché à un compte</td>
+      <td>Supprimé immédiatement et automatiquement au moment du rattachement</td>
+      <td>—</td></tr>
+  <tr><td>Propositions publiées</td>
+      <td>Jamais supprimées — détachées de vous</td>
+      <td>—</td></tr>
+  <tr><td>Vidéo de présentation</td>
+      <td>Sur demande écrite, tant que la conversation reste en ligne</td>
+      <td>Jusqu'à 6 mois après retrait effectif</td></tr>
+  <tr><td>Traces de plafonnement (IP, adresse e-mail)</td>
+      <td>24 heures au plus, effacées automatiquement même sans nouvelle visite</td>
+      <td>24h + fenêtre de sauvegarde résiduelle</td></tr>
+  <tr><td>Empreintes conservées lors d'un signalement</td>
+      <td>30 jours au plus, puis effacées</td>
+      <td>30j + fenêtre de sauvegarde résiduelle</td></tr>
+  <tr><td>Journaux techniques</td>
+      <td>Volume borné et écrasé en continu (quelques semaines de trafic)</td>
+      <td>—</td></tr>
+  <tr><td>Sauvegardes chiffrées</td>
+      <td>14 jours, puis 8 semaines, puis 6 mois</td>
+      <td>—</td></tr>
+</table>
+<p class="mu">Une suppression demandée est immédiate dans la base ; elle disparaît des
+  sauvegardes au fil de leur rotation, au plus tard dans les six mois.</p>
+
+<h2>Qui d'autre y a accès</h2>
+<p>Personne d'autre que l'éditeur. Trois prestataires techniques interviennent, tous
+  situés dans l'Union européenne :</p>
+<ul>
+  <li><strong>OVH</strong> (hébergement)</li>
+  <li><strong>Brevo</strong> (envoi des e-mails de vérification et de
+    réinitialisation, qui reçoit à ce titre votre adresse e-mail)</li>
+  <li><strong>Backblaze B2</strong> (dépôt des sauvegardes chiffrées ; les données y
+    sont chiffrées avant l'envoi, Backblaze n'a accès qu'à des octets illisibles)</li>
+</ul>
+<p>Vos votes ne sont transmis à aucun tiers et ne sont ni vendus, ni échangés.</p>
+
+<h2>Vos droits</h2>
+<p>Vous disposez des droits d'accès, de rectification, d'effacement, de limitation,
+  d'opposition et de portabilité, du droit de retirer votre consentement à tout
+  moment, et du droit de définir des directives sur le sort de vos données après
+  votre décès.</p>
+<p>Pour les exercer, écrivez à <a href="mailto:{{ contact }}">{{ contact }}</a>.
+  Réponse sous un mois.</p>
+<p>Avec un compte, une demande de suppression emporte le compte, tous vos votes, vos
+  badges et votre position dans les groupes. Sans compte, elle emporte les votes
+  rattachés à ce navigateur. Dans les deux cas, les propositions que vous avez
+  publiées restent en ligne mais sont <strong>détachées de vous</strong> : d'autres
+  personnes ont voté dessus, les retirer réécrirait leur consultation.</p>
+<p class="mu">Une vidéo de présentation suit la même règle que les propositions : la
+  suppression de votre compte ne l'efface pas automatiquement, tant que la
+  conversation qu'elle présente reste en ligne pour les autres participants.
+  Écrivez-nous pour en demander le retrait sans attendre.</p>
+<p>Vous pouvez aussi introduire une réclamation auprès de la CNIL
+  (<a href="https://www.cnil.fr">www.cnil.fr</a>).</p>
+
+<h2>Sécurité</h2>
+<ul>
+  <li>Échanges chiffrés (HTTPS)</li>
+  <li>Mots de passe stockés sous forme d'empreinte argon2id</li>
+  <li>Sauvegardes chiffrées avant leur envoi au prestataire de stockage, puis
+    déposées hors du serveur</li>
+  <li>Accès d'administration réservé à un compte modérateur et plafonné en nombre de
+    tentatives</li>
+</ul>
+{% endblock %}

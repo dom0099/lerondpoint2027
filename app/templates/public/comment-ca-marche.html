@@ -1,0 +1,424 @@
+{% extends "public/base.html" %}
+{% block title %}Comment ça marche — Le Rond-Point 2027{% endblock %}
+{% block body %}
+<h1>Comment ça marche</h1>
+<p class="lead">Comment fonctionnent les débats, les votes, les groupes d'opinion, la formation de consensus et la modération.</p>
+
+<h2>1. Un débat, des propositions </h2>
+<p>Chaque débat rassemble des propositions sur un même sujet. N'importe qui peut écrire une
+  nouvelle proposition sur un débat existant et proposer nouveau débat.</p>
+
+<svg id="svg-1" viewBox="0 0 380 500" role="img" aria-label="Une proposition est écrite, passe deux filtres — 500 caractères et 10 par 24 heures — puis est publiée immédiatement ; elle entre alors dans le tirage des votes et reste exposée au signalement." font-family="Carlito, Calibri, 'Segoe UI', sans-serif">
+        <defs>
+          <marker id="ar1" viewBox="0 0 9 9" refX="8" refY="4.5" markerWidth="5.5" markerHeight="5.5" orient="auto"><path d="M0 0 L9 4.5 L0 9 z" fill="#7A5C00"/></marker>
+        </defs>
+
+        <line x1="34" y1="49" x2="34" y2="136" stroke="#7A5C00" stroke-width="1.5" marker-end="url(#ar1)"/>
+        <line x1="34" y1="161" x2="34" y2="246" stroke="#7A5C00" stroke-width="1.5" marker-end="url(#ar1)"/>
+
+        <!-- 1 -->
+        <rect x="60" y="16" width="304" height="100" fill="#FFFFFF" stroke="#E4E4E8"/>
+        <circle cx="34" cy="38" r="11" fill="#1F2A44"/>
+        <text x="34" y="42" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#FFFFFF" text-anchor="middle">1</text>
+        <text x="76" y="37" font-family="'IBM Plex Mono', monospace" font-size="10" letter-spacing="1" fill="#666B7D">VOUS ÉCRIVEZ</text>
+        <rect x="76" y="46" width="272" height="56" fill="#FFFFFF" stroke="#8C8C96"/>
+        <text x="88" y="67" font-size="12" fill="#1F2A44">Les zones 30 devraient être</text>
+        <text x="88" y="83" font-size="12" fill="#1F2A44">généralisées en centre-ville.</text>
+        <text x="336" y="96" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#666B7D" text-anchor="end">57 / 500</text>
+
+        <!-- 2 -->
+        <rect x="60" y="128" width="304" height="90" fill="#FFFFFF" stroke="#E4E4E8"/>
+        <circle cx="34" cy="150" r="11" fill="#1F2A44"/>
+        <text x="34" y="154" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#FFFFFF" text-anchor="middle">2</text>
+        <text x="76" y="149" font-family="'IBM Plex Mono', monospace" font-size="10" letter-spacing="1" fill="#666B7D">LES DEUX SEULS FILTRES</text>
+        <rect x="76" y="158" width="130" height="34" fill="#FFFFFF" stroke="#8C8C96"/>
+        <text x="141" y="180" font-family="'IBM Plex Mono', monospace" font-size="12" fill="#1F2A44" text-anchor="middle">500 caractères</text>
+        <rect x="218" y="158" width="130" height="34" fill="#FFFFFF" stroke="#8C8C96"/>
+        <text x="283" y="180" font-family="'IBM Plex Mono', monospace" font-size="12" fill="#1F2A44" text-anchor="middle">10 par 24 h</text>
+        <text x="76" y="208" font-family="'IBM Plex Mono', monospace" font-size="9" fill="#666B7D">au-delà, l’envoi est refusé — rien n’attend en file</text>
+
+        <!-- 3 -->
+        <rect x="60" y="240" width="304" height="68" fill="#FCFCDD" stroke="#7A5C00"/>
+        <circle cx="34" cy="262" r="11" fill="#1F2A44"/>
+        <text x="34" y="266" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#FFFFFF" text-anchor="middle">3</text>
+        <text x="76" y="271" font-size="18" font-weight="700" fill="#1F2A44">Publiée. Tout de suite.</text>
+        <text x="76" y="291" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#7A5C00">aucune relecture avant publication</text>
+
+        <path d="M133 308 L133 346" stroke="#7A5C00" stroke-width="1.5" fill="none" marker-end="url(#ar1)"/>
+        <path d="M291 308 L291 346" stroke="#7A5C00" stroke-width="1.5" fill="none" marker-end="url(#ar1)"/>
+
+        <rect x="60" y="352" width="146" height="70" fill="#FFFFFF" stroke="#E4E4E8"/>
+        <text x="74" y="372" font-family="'IBM Plex Mono', monospace" font-size="9" letter-spacing="1" fill="#666B7D">ENSUITE</text>
+        <text x="74" y="392" font-size="12" fill="#1F2A44">Elle entre dans</text>
+        <text x="74" y="408" font-size="12" fill="#1F2A44">le tirage des votes.</text>
+
+        <rect x="218" y="352" width="146" height="70" fill="#FFFFFF" stroke="#E4E4E8"/>
+        <text x="232" y="372" font-family="'IBM Plex Mono', monospace" font-size="9" letter-spacing="1" fill="#666B7D">EN MÊME TEMPS</text>
+        <text x="232" y="392" font-size="12" fill="#1F2A44">Elle est exposée</text>
+        <text x="232" y="408" font-size="12" fill="#1F2A44">au signalement.</text>
+
+        <line x1="60" y1="448" x2="364" y2="448" stroke="#E4E4E8"/>
+        <text x="60" y="468" font-family="'IBM Plex Mono', monospace" font-size="9" fill="#666B7D">un nouveau débat, lui, attend l’accord d’un</text>
+        <text x="60" y="482" font-family="'IBM Plex Mono', monospace" font-size="9" fill="#666B7D">modérateur — une proposition, non</text>
+      </svg>
+
+<h2>2. Voter : d'accord, pas d'accord, ou on passe</h2>
+<p>Vous lisez une proposition et vous répondez par un choix parmi trois : d'accord, pas
+  d'accord, ou je passe (si elle est ambiguë, hors sujet, ou si vous n'avez tout
+  simplement pas d'avis). Aucun compte n'est nécessaire pour voter. En créer un (e-mail
+  et mot de passe) permet de retrouver ses votes d'un appareil à l'autre et permet de participer à la modération (voir section 4). Vous ne pouvez pas répondre directement à une proposition mais faire une autre proposition est possible à tout moment.</p>
+
+<p>Les propositions ne vous sont pas montrées au hasard ni dans l'ordre d'arrivée :
+  celles qui divisent ou qui font réagir sont montrées un peu plus souvent, pour que la
+  mesure reflète mieux les vrais points de friction — mais aucune proposition n'est
+  jamais écartée de manière définitive, chacune continue d'être proposée aux votes.</p>
+
+<h2>3. Les groupes d'opinion se révèlent</h2>
+<p>Les groupes d'opinion calculés sur un sujet sont utilisés pour comprendre quelles propositions sont consensuelles pour des groupes qui ont voté différement. À partir de l'ensemble des votes, un calcul mathématique (recalculé toutes les dix
+  minutes environ) fait apparaître des groupes d'opinion : des ensembles de participants
+  qui ont tendance à répondre de la même façon. Ce n'est jamais quelqu'un qui décide qui
+  appartient à quel groupe — c'est un résultat de calcul, qui peut évoluer avec les
+  votes.</p>
+
+<svg id="svg-3" viewBox="0 0 380 774" role="img" aria-label="En trois temps : un tableau des votes de chaque participant sur chaque proposition, en plus, moins et ronds ; une décomposition en composantes principales transforme chaque participant en un point ; un algorithme des k-moyennes regroupe les points proches, les points isolés restant gris." font-family="Carlito, Calibri, 'Segoe UI', sans-serif">
+        <defs>
+          <marker id="ar3" viewBox="0 0 9 9" refX="8" refY="4.5" markerWidth="5.5" markerHeight="5.5" orient="auto"><path d="M0 0 L9 4.5 L0 9 z" fill="#000000"/></marker>
+        </defs>
+
+        <!-- 1 : le tableau des votes -->
+        <rect x="16" y="24" width="348" height="130" fill="#FFFFFF" stroke="#000000"/>
+        <text x="32" y="42" font-size="11" font-weight="700" letter-spacing="1" fill="#000000">1 · CE QUE CHACUN.E A VOTÉ</text>
+
+        <rect x="32" y="50" width="316" height="22" fill="#000000"/>
+        <text x="40" y="65" font-size="11.5" font-weight="700" fill="#FFFFFF">Proposition</text>
+        <text x="139" y="65" font-size="11.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">n°1</text>
+        <text x="177" y="65" font-size="11.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">n°2</text>
+	<text x="215" y="65" font-size="11.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">n°3</text>
+	<text x="253" y="65" font-size="11.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">n°4</text>
+        <text x="291" y="65" font-size="11.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">n°5</text>
+        <text x="329" y="65" font-size="11.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">n°6</text>
+
+        <text x="40" y="88" font-size="11.5" fill="#000000">Alix</text>
+        <text x="139" y="89" font-size="14" fill="#000000" text-anchor="middle">+</text>
+        <text x="177" y="89" font-size="14" fill="#000000" text-anchor="middle">+</text>
+        <text x="215" y="89" font-size="14" fill="#000000" text-anchor="middle">−</text>
+        <text x="253" y="89" font-size="13" fill="#000000" text-anchor="middle">○</text>
+        <text x="291" y="89" font-size="14" fill="#000000" text-anchor="middle">+</text>
+        <text x="329" y="89" font-size="14" fill="#000000" text-anchor="middle">−</text>
+
+        <text x="40" y="110" font-size="11.5" fill="#000000">Karim</text>
+        <text x="139" y="111" font-size="14" fill="#000000" text-anchor="middle">−</text>
+        <text x="177" y="111" font-size="13" fill="#000000" text-anchor="middle">○</text>
+        <text x="215" y="111" font-size="14" fill="#000000" text-anchor="middle">+</text>
+        <text x="253" y="111" font-size="14" fill="#000000" text-anchor="middle">+</text>
+        <text x="291" y="111" font-size="14" fill="#000000" text-anchor="middle">−</text>
+        <text x="329" y="111" font-size="14" fill="#000000" text-anchor="middle">+</text>
+
+        <text x="40" y="132" font-size="11.5" font-weight="700" fill="#000000">vous</text>
+        <text x="139" y="133" font-size="14" fill="#000000" text-anchor="middle">+</text>
+        <text x="177" y="133" font-size="14" fill="#000000" text-anchor="middle">−</text>
+        <text x="215" y="133" font-size="14" fill="#000000" text-anchor="middle">−</text>
+        <text x="253" y="133" font-size="13" fill="#000000" text-anchor="middle">○</text>
+        <text x="291" y="133" font-size="14" fill="#000000" text-anchor="middle">+</text>
+        <text x="329" y="133" font-size="14" fill="#000000" text-anchor="middle">+</text>
+
+        <g stroke="#000000" stroke-width=".9">
+          <line x1="32" y1="50" x2="348" y2="50"/>
+          <line x1="32" y1="72" x2="348" y2="72"/>
+          <line x1="32" y1="94" x2="348" y2="94"/>
+          <line x1="32" y1="116" x2="348" y2="116"/>
+          <line x1="32" y1="138" x2="348" y2="138"/>
+          <line x1="32" y1="50" x2="32" y2="138"/>
+          <line x1="120" y1="50" x2="120" y2="138"/>
+          <line x1="158" y1="50" x2="158" y2="138"/>
+          <line x1="196" y1="50" x2="196" y2="138"/>
+          <line x1="234" y1="50" x2="234" y2="138"/>
+          <line x1="272" y1="50" x2="272" y2="138"/>
+          <line x1="310" y1="50" x2="310" y2="138"/>
+          <line x1="348" y1="50" x2="348" y2="138"/>
+        </g>
+
+        <!-- passage 1 → 2 -->
+        <line x1="44" y1="160" x2="44" y2="216" stroke="#000000" stroke-width="1.6" marker-end="url(#ar3)"/>
+        <text x="62" y="182" font-size="11" fill="#000000">calcul par l’algorithme de décomposition</text>
+        <text x="62" y="196" font-size="11" fill="#000000">en composantes principales</text>
+
+        <!-- 2 : le nuage -->
+        <rect x="16" y="222" width="348" height="200" fill="#FFFFFF" stroke="#000000"/>
+        <text x="32" y="244" font-size="11" font-weight="700" letter-spacing="1" fill="#000000">2 · CHACUN.E DEVIENT UN POINT</text>
+        <g fill="#000000">
+          <circle cx="76" cy="350" r="5"/><circle cx="98" cy="366" r="5"/><circle cx="92" cy="330" r="5"/>
+          <circle cx="118" cy="354" r="5"/><circle cx="104" cy="342" r="5"/><circle cx="80" cy="376" r="5"/>
+          <circle cx="246" cy="282" r="5"/><circle cx="268" cy="298" r="5"/><circle cx="240" cy="312" r="5"/>
+          <circle cx="284" cy="272" r="5"/><circle cx="262" cy="258" r="5"/>
+          <circle cx="214" cy="380" r="5"/><circle cx="238" cy="368" r="5"/><circle cx="196" cy="362" r="5"/>
+          <circle cx="160" cy="312" r="5"/><circle cx="176" cy="346" r="5"/>
+        </g>
+        <text x="32" y="412" font-size="10" fill="#1F2A44">les axes ne veulent rien dire : seule compte la distance</text>
+
+        <!-- passage 2 → 3 -->
+        <line x1="44" y1="428" x2="44" y2="484" stroke="#000000" stroke-width="1.6" marker-end="url(#ar3)"/>
+        <text x="62" y="460" font-size="11" fill="#000000">calcul par l’algorithme des k-moyennes</text>
+
+        <!-- 3 : les groupes -->
+        <rect x="16" y="490" width="348" height="216" fill="#FFFFFF" stroke="#000000"/>
+        <text x="32" y="512" font-size="11" font-weight="700" letter-spacing="1" fill="#000000">3 · LES POINTS PROCHES FORMENT UN GROUPE</text>
+        <ellipse cx="97" cy="617" rx="36" ry="34" fill="#0072B2" fill-opacity=".16"/>
+        <ellipse cx="260" cy="548" rx="38" ry="34" fill="#E69F00" fill-opacity=".18"/>
+        <ellipse cx="216" cy="638" rx="34" ry="22" fill="#009E73" fill-opacity=".18"/>
+        <g fill="#0072B2" stroke="#000000" stroke-width=".9">
+          <circle cx="76" cy="618" r="5"/><circle cx="98" cy="634" r="5"/><circle cx="92" cy="598" r="5"/>
+          <circle cx="118" cy="622" r="5"/><circle cx="104" cy="610" r="5"/><circle cx="80" cy="644" r="5"/>
+        </g>
+        <g fill="#E69F00" stroke="#000000" stroke-width=".9">
+          <circle cx="246" cy="550" r="5"/><circle cx="268" cy="566" r="5"/><circle cx="240" cy="580" r="5"/>
+          <circle cx="284" cy="540" r="5"/><circle cx="262" cy="526" r="5"/>
+        </g>
+        <g fill="#009E73" stroke="#000000" stroke-width=".9">
+          <circle cx="214" cy="648" r="5"/><circle cx="238" cy="636" r="5"/><circle cx="196" cy="630" r="5"/>
+        </g>
+        <g fill="#9199A6" stroke="#000000" stroke-width=".9">
+          <circle cx="160" cy="580" r="5"/><circle cx="176" cy="614" r="5"/>
+        </g>
+        <circle cx="40" cy="678" r="4.5" fill="#0072B2" stroke="#000000" stroke-width=".9"/>
+        <text x="50" y="682" font-size="11" fill="#000000">Groupe A</text>
+        <circle cx="142" cy="678" r="4.5" fill="#E69F00" stroke="#000000" stroke-width=".9"/>
+        <text x="152" y="682" font-size="11" fill="#000000">Groupe B</text>
+        <circle cx="244" cy="678" r="4.5" fill="#009E73" stroke="#000000" stroke-width=".9"/>
+        <text x="254" y="682" font-size="11" fill="#000000">Groupe C</text>
+        <text x="32" y="698" font-size="10" fill="#1F2A44">gris : sans position nette — jamais un groupe</text>
+
+        <line x1="16" y1="724" x2="364" y2="724" stroke="#000000"/>
+        <text x="16" y="742" font-size="10.5" fill="#000000">5 groupes au maximum</text>
+        <text x="16" y="758" font-size="10.5" fill="#000000">recalcul toutes les 10 minutes</text>
+      </svg>
+
+<p>Chaque débat affiche une carte où chaque point représente une personne, et où les
+  groupes apparaissent en couleur — une couleur liée au rang de taille du groupe au
+  moment du calcul (le plus grand groupe reçoit toujours la même teinte). Le nom du groupe, lui, reste stable d'un calcul à l'autre. Cette
+  carte reste floutée jusqu'à ce que vous ayez pas voté suffisamment de fois sur ce débat
+  pour que votre position puisse être calculée de façon fiable — un chiffre affiché à
+  l'écran indique combien de votes il reste à exprimer.</p>
+
+<h2>4. La modération</h2>
+<p>La modération est participative. Il existe deux niveaux de modération (voir le
+  schéma) : relecteur (modérateur de niveau 1) et arbitre (modérateur de niveau 2). Pour atteindre un niveau supérieur de modération, il est nécessaire d'effectuer un certain nombre d'examen de proposition (proposition tirée au sort 1 fois sur 7 votes). En
+  attendant que suffisamment de participants possèdent un compte et acquièrent une
+  expérience suffisante pour participer à la modération (quelques semaines), elle repose
+  entièrement sur les modérateurs qui ont lancé le projet.</p>
+
+<p>Aucun débat proposé par un participant n'est visible tant qu'il n'a pas été validé par
+  la modération ; un débat lancé directement par l'équipe du site est publié dès sa
+  création. Les propositions, elles, sont visibles directement mais peuvent être
+  signalées.</p>
+
+<p>Une affirmation de fait fausse mais inoffensive n'est en revanche pas supprimée : elle
+  est publiée, contextualisée si besoin, et reste votable. Le rôle du site n'est pas de
+  dire qui a raison, mais de révéler où portent réellement les désaccords et surtout les
+  consensus — sur des valeurs, ou sur des faits vérifiables.</p>
+
+
+<div id="bloc-4" class="rp-s4">
+        <style>
+          .rp-s4-wide,.rp-s4-tall{display:block;width:100%;height:auto;margin:0 auto}
+          .rp-s4-wide{max-width:900px}
+          .rp-s4-tall{display:none;max-width:400px}
+          @media (max-width:760px){.rp-s4-wide{display:none}.rp-s4-tall{display:block}}
+        </style>
+
+        <!-- ============ version large ============ -->
+        <svg class="rp-s4-wide" viewBox="0 0 900 770" role="img" aria-label="Quatre routes selon le motif retenu. Ligne rouge : retrait dès le premier signalement, puis examen par quatre modérateurs de niveau 2, qui aboutit à une remise en ligne ou à un retrait définitif. Qualité du fait : la proposition reste en ligne, cinq modérateurs de niveau 1 examinent, une reformulation ou un retrait définitif revient à l’auteur, qui valide sous quinze jours ou la proposition est définitivement retirée. Qualité de la forme : même suite. Volume : file du responsable, aucune suite automatique." font-family="Carlito, Calibri, 'Segoe UI', sans-serif">
+          <defs>
+            <marker id="f4w" viewBox="0 0 9 9" refX="8" refY="4.5" markerWidth="5.5" markerHeight="5.5" orient="auto"><path d="M0 0 L9 4.5 L0 9 z" fill="#7A5C00"/></marker>
+          </defs>
+
+          <rect x="114" y="14" width="172" height="46" fill="#FCFCDD" stroke="#7A5C00"/>
+          <text x="200" y="36" font-size="14" font-weight="700" fill="#1F2A44" text-anchor="middle">Proposition publiée</text>
+          <text x="200" y="51" font-family="'IBM Plex Mono', monospace" font-size="9" fill="#7A5C00" text-anchor="middle">déjà en ligne, déjà votable</text>
+
+          <path d="M180 60 C180 76 115 74 115 88" fill="none" stroke="#7A5C00" stroke-width="1.4" marker-end="url(#f4w)"/>
+          <path d="M220 60 C220 76 285 74 285 88" fill="none" stroke="#7A5C00" stroke-width="1.4" marker-end="url(#f4w)"/>
+
+          <rect x="40" y="88" width="150" height="84" fill="#FFFFFF" stroke="#E4E4E8"/>
+          <text x="54" y="107" font-family="'IBM Plex Mono', monospace" font-size="9" letter-spacing=".8" fill="#666B7D">N’IMPORTE QUI</text>
+          <text x="54" y="128" font-size="12" fill="#1F2A44">Un signalement</text>
+          <text x="54" y="152" font-family="'IBM Plex Mono', monospace" font-size="9.5" fill="#7A5C00">10 motifs,</text>
+          <text x="54" y="163" font-family="'IBM Plex Mono', monospace" font-size="9.5" fill="#7A5C00">sans compte</text>
+
+          <rect x="210" y="88" width="150" height="84" fill="#FFFFFF" stroke="#E4E4E8"/>
+          <text x="224" y="107" font-family="'IBM Plex Mono', monospace" font-size="9" letter-spacing=".8" fill="#666B7D">TIRÉE AU SORT</text>
+          <text x="224" y="128" font-size="12" fill="#1F2A44">Une carte de validation</text>
+          <text x="224" y="163" font-family="'IBM Plex Mono', monospace" font-size="9.5" fill="#7A5C00">1 fois sur 7 votes</text>
+
+          <path d="M115 172 L115 188" stroke="#7A5C00" stroke-width="1.4"/>
+          <path d="M285 172 L285 188" stroke="#7A5C00" stroke-width="1.4"/>
+          <line x1="115" y1="188" x2="285" y2="188" stroke="#7A5C00" stroke-width="1.4"/>
+          <line x1="200" y1="188" x2="200" y2="206" stroke="#7A5C00" stroke-width="1.4" marker-end="url(#f4w)"/>
+          <text x="200" y="224" font-family="'IBM Plex Mono', monospace" font-size="10" letter-spacing="1" fill="#666B7D" text-anchor="middle">SELON LE MOTIF RETENU</text>
+
+          <!-- route 1 -->
+          <rect x="16" y="240" width="368" height="96" fill="#FFFFFF" stroke="#1F2A44"/>
+          <rect x="16" y="240" width="6" height="96" fill="#1F2A44"/>
+          <text x="40" y="268" font-family="'IBM Plex Mono', monospace" font-size="9.5" fill="#666B7D">haine · violence · discrimination · données d’un tiers</text>
+          <text x="40" y="294" font-size="13" font-weight="700" fill="#1F2A44">Retrait dès le premier signalement.</text>
+          <text x="40" y="314" font-family="'IBM Plex Mono', monospace" font-size="9.5" fill="#666B7D">le seul cas où la proposition disparaît avant tout examen</text>
+          <text x="444" y="262" font-family="'IBM Plex Mono', monospace" font-size="9" fill="#7A5C00" text-anchor="middle">Examen par 4</text>
+          <text x="444" y="273" font-family="'IBM Plex Mono', monospace" font-size="9" fill="#7A5C00" text-anchor="middle">modérateurs</text>
+          <text x="444" y="284" font-family="'IBM Plex Mono', monospace" font-size="9" fill="#7A5C00" text-anchor="middle">de niveau 2</text>
+          <line x1="392" y1="290" x2="496" y2="290" stroke="#7A5C00" stroke-width="1.4" marker-end="url(#f4w)"/>
+          <rect x="504" y="262" width="150" height="56" fill="#FFFFFF" stroke="#1F2A44"/>
+          <text x="579" y="286" font-size="11.5" fill="#1F2A44" text-anchor="middle">Remise en ligne</text>
+          <text x="579" y="301" font-size="11.5" fill="#1F2A44" text-anchor="middle">ou retrait définitif</text>
+
+          <!-- route 2 -->
+          <rect x="16" y="356" width="368" height="96" fill="#FFFFFF" stroke="#E4E4E8"/>
+          <rect x="16" y="356" width="4" height="96" fill="#8C8C96"/>
+          <text x="38" y="384" font-family="'IBM Plex Mono', monospace" font-size="9.5" fill="#666B7D">fausse information · source douteuse</text>
+          <text x="38" y="410" font-size="13" fill="#1F2A44">Reste en ligne. À qualifier.</text>
+          <text x="38" y="430" font-family="'IBM Plex Mono', monospace" font-size="9.5" fill="#666B7D">aucun retrait à ce stade</text>
+          <text x="444" y="378" font-family="'IBM Plex Mono', monospace" font-size="9" fill="#7A5C00" text-anchor="middle">Examen par 5</text>
+          <text x="444" y="389" font-family="'IBM Plex Mono', monospace" font-size="9" fill="#7A5C00" text-anchor="middle">modérateurs</text>
+          <text x="444" y="400" font-family="'IBM Plex Mono', monospace" font-size="9" fill="#7A5C00" text-anchor="middle">de niveau 1</text>
+          <line x1="392" y1="406" x2="496" y2="406" stroke="#7A5C00" stroke-width="1.4" marker-end="url(#f4w)"/>
+          <rect x="504" y="376" width="150" height="56" fill="#FFFFFF" stroke="#8C8C96"/>
+          <text x="579" y="398" font-size="11.5" fill="#1F2A44" text-anchor="middle">Reformulation</text>
+          <text x="579" y="413" font-size="11.5" fill="#1F2A44" text-anchor="middle">ou retrait définitif</text>
+          <text x="699" y="388" font-family="'IBM Plex Mono', monospace" font-size="9" fill="#7A5C00" text-anchor="middle">Retour vers</text>
+          <text x="699" y="399" font-family="'IBM Plex Mono', monospace" font-size="9" fill="#7A5C00" text-anchor="middle">l’auteur</text>
+          <line x1="662" y1="406" x2="736" y2="406" stroke="#7A5C00" stroke-width="1.4" marker-end="url(#f4w)"/>
+          <rect x="744" y="371" width="140" height="66" fill="#FFFFFF" stroke="#8C8C96"/>
+          <text x="814" y="391" font-size="11.5" fill="#1F2A44" text-anchor="middle">Validation sous 15</text>
+          <text x="814" y="406" font-size="11.5" fill="#1F2A44" text-anchor="middle">jours, ou retrait</text>
+          <text x="814" y="421" font-size="11.5" fill="#1F2A44" text-anchor="middle">définitif</text>
+
+          <!-- route 3 -->
+          <rect x="16" y="472" width="368" height="96" fill="#FFFFFF" stroke="#E4E4E8"/>
+          <rect x="16" y="472" width="4" height="96" fill="#8C8C96"/>
+          <text x="38" y="500" font-family="'IBM Plex Mono', monospace" font-size="9.5" fill="#666B7D">mal formulé · doublon d’une proposition existante</text>
+          <text x="38" y="526" font-size="13" fill="#1F2A44">Reformulation proposée, ou fusion.</text>
+          <text x="38" y="546" font-family="'IBM Plex Mono', monospace" font-size="9.5" fill="#666B7D">la fusion ne concerne que les doublons</text>
+          <text x="444" y="494" font-family="'IBM Plex Mono', monospace" font-size="9" fill="#7A5C00" text-anchor="middle">Examen par 5</text>
+          <text x="444" y="505" font-family="'IBM Plex Mono', monospace" font-size="9" fill="#7A5C00" text-anchor="middle">modérateurs</text>
+          <text x="444" y="516" font-family="'IBM Plex Mono', monospace" font-size="9" fill="#7A5C00" text-anchor="middle">de niveau 1</text>
+          <line x1="392" y1="522" x2="496" y2="522" stroke="#7A5C00" stroke-width="1.4" marker-end="url(#f4w)"/>
+          <rect x="504" y="492" width="150" height="56" fill="#FFFFFF" stroke="#8C8C96"/>
+          <text x="579" y="514" font-size="11.5" fill="#1F2A44" text-anchor="middle">Reformulation</text>
+          <text x="579" y="529" font-size="11.5" fill="#1F2A44" text-anchor="middle">ou retrait définitif</text>
+          <text x="699" y="504" font-family="'IBM Plex Mono', monospace" font-size="9" fill="#7A5C00" text-anchor="middle">Retour vers</text>
+          <text x="699" y="515" font-family="'IBM Plex Mono', monospace" font-size="9" fill="#7A5C00" text-anchor="middle">l’auteur</text>
+          <line x1="662" y1="522" x2="736" y2="522" stroke="#7A5C00" stroke-width="1.4" marker-end="url(#f4w)"/>
+          <rect x="744" y="487" width="140" height="66" fill="#FFFFFF" stroke="#8C8C96"/>
+          <text x="814" y="507" font-size="11.5" fill="#1F2A44" text-anchor="middle">Validation sous 15</text>
+          <text x="814" y="522" font-size="11.5" fill="#1F2A44" text-anchor="middle">jours, ou retrait</text>
+          <text x="814" y="537" font-size="11.5" fill="#1F2A44" text-anchor="middle">définitif</text>
+
+          <!-- route 4 -->
+          <rect x="16" y="588" width="368" height="76" fill="#FFFFFF" stroke="#E4E4E8"/>
+          <rect x="16" y="588" width="4" height="76" fill="#8C8C96"/>
+          <text x="38" y="614" font-family="'IBM Plex Mono', monospace" font-size="9.5" fill="#666B7D">publicité ou spam · autre</text>
+          <text x="38" y="640" font-size="13" fill="#1F2A44">File du responsable, pas d'effet automatique.</text>
+          <text x="38" y="658" font-family="'IBM Plex Mono', monospace" font-size="9.5" fill="#666B7D">aucun examen collégial n’est déclenché</text>
+          <text x="404" y="630" font-family="'IBM Plex Mono', monospace" font-size="9" fill="#8C8C96">aucune suite automatique</text>
+
+          <rect x="16" y="690" width="868" height="64" fill="#FCFCDD" stroke="#7A5C00"/>
+          <text x="38" y="712" font-family="'IBM Plex Mono', monospace" font-size="10" letter-spacing=".8" fill="#7A5C00">DANS TOUS LES CAS</text>
+          <text x="38" y="732" font-size="12" fill="#1F2A44">Rien n’est effacé : une proposition retirée quitte l’affichage, ses votes restent comptés.</text>
+          <text x="38" y="748" font-size="12" fill="#1F2A44">Un texte n’est jamais réécrit sans l’accord de son auteur.</text>
+        </svg>
+
+        <!-- ============ version étroite, mêmes blocs ============ -->
+        <svg class="rp-s4-tall" viewBox="0 0 380 1140" role="img" aria-label="Même schéma en colonne pour les petits écrans : quatre routes selon le motif retenu, chacune suivie de ses panneaux d’examen et de décision, reliés par des flèches descendantes." font-family="Carlito, Calibri, 'Segoe UI', sans-serif">
+          <defs>
+            <marker id="f4t" viewBox="0 0 9 9" refX="8" refY="4.5" markerWidth="5.5" markerHeight="5.5" orient="auto"><path d="M0 0 L9 4.5 L0 9 z" fill="#7A5C00"/></marker>
+          </defs>
+
+          <rect x="104" y="14" width="172" height="46" fill="#FCFCDD" stroke="#7A5C00"/>
+          <text x="190" y="36" font-size="14" font-weight="700" fill="#1F2A44" text-anchor="middle">Proposition publiée</text>
+          <text x="190" y="51" font-family="'IBM Plex Mono', monospace" font-size="9" fill="#7A5C00" text-anchor="middle">déjà en ligne, déjà votable</text>
+
+          <path d="M170 60 C170 76 105 74 105 88" fill="none" stroke="#7A5C00" stroke-width="1.4" marker-end="url(#f4t)"/>
+          <path d="M210 60 C210 76 275 74 275 88" fill="none" stroke="#7A5C00" stroke-width="1.4" marker-end="url(#f4t)"/>
+
+          <rect x="30" y="88" width="150" height="84" fill="#FFFFFF" stroke="#E4E4E8"/>
+          <text x="44" y="107" font-family="'IBM Plex Mono', monospace" font-size="9" letter-spacing=".8" fill="#666B7D">N’IMPORTE QUI</text>
+          <text x="44" y="128" font-size="12" fill="#1F2A44">Un signalement</text>
+          <text x="44" y="152" font-family="'IBM Plex Mono', monospace" font-size="9.5" fill="#7A5C00">10 motifs,</text>
+          <text x="44" y="163" font-family="'IBM Plex Mono', monospace" font-size="9.5" fill="#7A5C00">sans compte</text>
+
+          <rect x="200" y="88" width="150" height="84" fill="#FFFFFF" stroke="#E4E4E8"/>
+          <text x="214" y="107" font-family="'IBM Plex Mono', monospace" font-size="9" letter-spacing=".8" fill="#666B7D">TIRÉE AU SORT</text>
+          <text x="214" y="128" font-size="12" fill="#1F2A44">Une carte de validation</text>
+          <text x="214" y="163" font-family="'IBM Plex Mono', monospace" font-size="9.5" fill="#7A5C00">1 fois sur 7 votes</text>
+
+          <path d="M105 172 L105 188" stroke="#7A5C00" stroke-width="1.4"/>
+          <path d="M275 172 L275 188" stroke="#7A5C00" stroke-width="1.4"/>
+          <line x1="105" y1="188" x2="275" y2="188" stroke="#7A5C00" stroke-width="1.4"/>
+          <line x1="190" y1="188" x2="190" y2="206" stroke="#7A5C00" stroke-width="1.4" marker-end="url(#f4t)"/>
+          <text x="190" y="224" font-family="'IBM Plex Mono', monospace" font-size="10" letter-spacing="1" fill="#666B7D" text-anchor="middle">SELON LE MOTIF RETENU</text>
+
+          <!-- route 1 -->
+          <rect x="16" y="240" width="348" height="76" fill="#FFFFFF" stroke="#1F2A44"/>
+          <rect x="16" y="240" width="6" height="76" fill="#1F2A44"/>
+          <text x="40" y="266" font-family="'IBM Plex Mono', monospace" font-size="9.5" fill="#666B7D">haine · violence · discrimination · données d’un tiers</text>
+          <text x="40" y="292" font-size="13" font-weight="700" fill="#1F2A44">Retrait dès le premier</text>
+          <text x="40" y="308" font-size="13" font-weight="700" fill="#1F2A44">signalement.</text>
+          <line x1="60" y1="320" x2="60" y2="348" stroke="#7A5C00" stroke-width="1.4" marker-end="url(#f4t)"/>
+          <text x="78" y="330" font-family="'IBM Plex Mono', monospace" font-size="9" fill="#7A5C00">Examen par 4 modérateurs</text>
+          <text x="78" y="342" font-family="'IBM Plex Mono', monospace" font-size="9" fill="#7A5C00">de niveau 2</text>
+          <rect x="40" y="354" width="324" height="40" fill="#FFFFFF" stroke="#1F2A44"/>
+          <text x="58" y="379" font-size="12" fill="#1F2A44">Remise en ligne ou retrait définitif</text>
+
+          <!-- route 2 -->
+          <rect x="16" y="418" width="348" height="76" fill="#FFFFFF" stroke="#E4E4E8"/>
+          <rect x="16" y="418" width="4" height="76" fill="#8C8C96"/>
+          <text x="38" y="444" font-family="'IBM Plex Mono', monospace" font-size="9.5" fill="#666B7D">fausse information · source douteuse</text>
+          <text x="38" y="470" font-size="13" fill="#1F2A44">Reste en ligne. À qualifier.</text>
+          <text x="38" y="487" font-family="'IBM Plex Mono', monospace" font-size="9.5" fill="#666B7D">aucun retrait à ce stade</text>
+          <line x1="60" y1="498" x2="60" y2="530" stroke="#7A5C00" stroke-width="1.4" marker-end="url(#f4t)"/>
+          <text x="78" y="508" font-family="'IBM Plex Mono', monospace" font-size="9" fill="#7A5C00">Examen par 5 modérateurs</text>
+          <text x="78" y="520" font-family="'IBM Plex Mono', monospace" font-size="9" fill="#7A5C00">de niveau 1</text>
+          <rect x="40" y="536" width="324" height="40" fill="#FFFFFF" stroke="#8C8C96"/>
+          <text x="58" y="561" font-size="12" fill="#1F2A44">Reformulation ou retrait définitif</text>
+          <line x1="60" y1="580" x2="60" y2="608" stroke="#7A5C00" stroke-width="1.4" marker-end="url(#f4t)"/>
+          <text x="78" y="596" font-family="'IBM Plex Mono', monospace" font-size="9" fill="#7A5C00">Retour vers l’auteur</text>
+          <rect x="40" y="614" width="324" height="40" fill="#FFFFFF" stroke="#8C8C96"/>
+          <text x="58" y="639" font-size="12" fill="#1F2A44">Validation sous 15 jours, ou retrait définitif</text>
+
+          <!-- route 3 -->
+          <rect x="16" y="678" width="348" height="76" fill="#FFFFFF" stroke="#E4E4E8"/>
+          <rect x="16" y="678" width="4" height="76" fill="#8C8C96"/>
+          <text x="38" y="704" font-family="'IBM Plex Mono', monospace" font-size="9.5" fill="#666B7D">mal formulé · doublon d’une proposition existante</text>
+          <text x="38" y="730" font-size="13" fill="#1F2A44">Reformulation proposée, ou fusion.</text>
+          <text x="38" y="747" font-family="'IBM Plex Mono', monospace" font-size="9.5" fill="#666B7D">la fusion ne concerne que les doublons</text>
+          <line x1="60" y1="758" x2="60" y2="790" stroke="#7A5C00" stroke-width="1.4" marker-end="url(#f4t)"/>
+          <text x="78" y="768" font-family="'IBM Plex Mono', monospace" font-size="9" fill="#7A5C00">Examen par 5 modérateurs</text>
+          <text x="78" y="780" font-family="'IBM Plex Mono', monospace" font-size="9" fill="#7A5C00">de niveau 1</text>
+          <rect x="40" y="796" width="324" height="40" fill="#FFFFFF" stroke="#8C8C96"/>
+          <text x="58" y="821" font-size="12" fill="#1F2A44">Reformulation ou retrait définitif</text>
+          <line x1="60" y1="840" x2="60" y2="868" stroke="#7A5C00" stroke-width="1.4" marker-end="url(#f4t)"/>
+          <text x="78" y="856" font-family="'IBM Plex Mono', monospace" font-size="9" fill="#7A5C00">Retour vers l’auteur</text>
+          <rect x="40" y="874" width="324" height="40" fill="#FFFFFF" stroke="#8C8C96"/>
+          <text x="58" y="899" font-size="12" fill="#1F2A44">Validation sous 15 jours, ou retrait définitif</text>
+
+          <!-- route 4 -->
+          <rect x="16" y="938" width="348" height="76" fill="#FFFFFF" stroke="#E4E4E8"/>
+          <rect x="16" y="938" width="4" height="76" fill="#8C8C96"/>
+          <text x="38" y="964" font-family="'IBM Plex Mono', monospace" font-size="9.5" fill="#666B7D">publicité ou spam · autre</text>
+          <text x="38" y="990" font-size="13" fill="#1F2A44">File du responsable, pas d'effet</text>
+          <text x="38" y="1006" font-size="13" fill="#1F2A44">automatique.</text>
+
+          <rect x="16" y="1038" width="348" height="82" fill="#FCFCDD" stroke="#7A5C00"/>
+          <text x="38" y="1060" font-family="'IBM Plex Mono', monospace" font-size="10" letter-spacing=".8" fill="#7A5C00">DANS TOUS LES CAS</text>
+          <text x="38" y="1080" font-size="12" fill="#1F2A44">Rien n’est effacé : une proposition retirée quitte l’affichage,</text>
+          <text x="38" y="1095" font-size="12" fill="#1F2A44">ses votes restent comptés.</text>
+          <text x="38" y="1113" font-size="12" fill="#1F2A44">Un texte n’est jamais réécrit sans l’accord de son auteur.</text>
+        </svg>
+      </div>
+
+<h2>5. Les comptes et la progression</h2>
+<p>Un compte n'est jamais obligatoire pour participer aux débats. En créer un permet de
+  conserver son historique de vote, de progresser, et d'accumuler la confiance
+  suffisante pour participer à la modération : un niveau qui monte avec le nombre de
+  votes et de débats proposés, badges, etc.</p>
+{% endblock %}
+

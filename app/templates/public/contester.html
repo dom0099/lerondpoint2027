@@ -1,0 +1,79 @@
+{% extends "public/base.html" %}
+{% block title %}Contester un retrait — Le Rond-Point 2027{% endblock %}
+{#
+  La voie de recours (MOD-3b). Elle existe parce que dès qu'un retrait devient visible
+  par son auteur, l'exposé des motifs et le recours sont dus — pas au retrait définitif,
+  au premier retrait.
+
+  Trois principes, et chacun répond à une décision prise ailleurs :
+
+    1. **Le jeton est le seul droit d'accès.** Il n'y a pas de compte sur lequel
+       s'appuyer : 164 des 167 participants du site n'en ont pas. La page ne demande
+       donc aucune identification, et n'en propose aucune.
+    2. **Aucun délai n'est promis.** On n'écrit pas « sous 48 heures » tant que personne
+       ne garantit 48 heures. La page dit ce qui se passe — la demande arrive en tête de
+       la file du responsable — et s'arrête là.
+    3. **Aucun design neuf.** `.card`, `.msg`, `.lead`, les boutons et les champs sont
+       ceux du site. Rien n'est ajouté à la feuille de style pour cette page.
+#}
+{% block body %}
+<h1>Contester le retrait de votre proposition</h1>
+
+{% if envoyee %}
+{#
+  La confirmation remplace le formulaire plutôt que de s'afficher au-dessus : laisser le
+  champ rempli et le bouton actif invite à renvoyer, et une seconde demande identique
+  n'aide personne — ni l'auteur, ni celui qui relira.
+#}
+<div class="msg ok">
+  <p><strong>Votre demande est enregistrée.</strong> Elle a été transmise à la personne
+    qui répond de ce qui est publié sur ce site. Vous pouvez fermer cette page.</p>
+</div>
+<p class="mu">Cette adresse reste valable : si vous voulez ajouter quelque chose, vous
+  pouvez y revenir et écrire à nouveau.</p>
+
+{% else %}
+<p class="lead">Votre proposition a été retirée de la circulation. Voici pourquoi, et
+  comment demander un réexamen.</p>
+
+{#
+  L'exposé des motifs. Trois éléments, et pas un de plus : le texte concerné, le motif
+  retenu, la date. C'est ce que le règlement européen sur les services numériques appelle
+  un exposé des motifs, et ce qui permet à quelqu'un de savoir ce qu'on lui reproche
+  avant de répondre.
+
+  Le texte de la proposition est montré à son auteur : c'est le sien. Aucun signalement,
+  aucun décompte, aucun signaleur n'apparaît ici — ce sont des tiers, et le §4 du cadrage
+  interdit de faire du signalement un jeu où l'on compte les points.
+#}
+<div class="card">
+  <p class="mu" style="margin:0 0 .3rem">Votre proposition</p>
+  <p style="margin:0 0 1rem"><em>{{ statement.text }}</em></p>
+
+  <p class="mu" style="margin:0 0 .3rem">Motif retenu</p>
+  <p style="margin:0 0 .2rem"><strong>{{ motif_libelle }}</strong></p>
+  <p class="mu" style="margin:0 0 1rem">Elle a été retirée car {{ motif_phrase }}.</p>
+
+  <p class="mu" style="margin:0">Retirée le {{ retire_le }}.</p>
+</div>
+
+{% if error %}<div class="msg err"><p>{{ error }}</p></div>{% endif %}
+
+<form method="post" action="/contester/{{ jeton }}">
+  <label for="texte">Ce que vous voulez faire valoir</label>
+  <textarea id="texte" name="texte" maxlength="{{ maximum }}" rows="7" required
+            placeholder="Expliquez pourquoi vous estimez que ce retrait n'est pas justifié."
+            >{{ texte or '' }}</textarea>
+  <p class="mu">{{ maximum }} caractères au maximum.</p>
+  <button type="submit">Demander un réexamen</button>
+</form>
+
+{#
+  Ce que la page ne promet pas, dit explicitement plutôt que laissé à deviner : sans
+  cette phrase, l'absence de délai se lit comme un oubli, et quelqu'un attend.
+#}
+<p class="mu">Votre demande sera lue par une personne, pas par une machine. Aucun délai
+  n'est garanti : ce site est tenu par une équipe très réduite, et annoncer un délai
+  qu'elle ne peut pas tenir vaudrait moins que de ne rien annoncer.</p>
+{% endif %}
+{% endblock %}

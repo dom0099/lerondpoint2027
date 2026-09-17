@@ -1,0 +1,120 @@
+{% extends "public/base.html" %}
+{% block title %}Les chiffres — {{ conversation.title }} — Le Rond-Point 2027{% endblock %}
+{% block body %}
+<p class="mu"><a href="/c/{{ conversation.slug }}">← {{ conversation.title }}</a></p>
+
+<p class="libelle">Les chiffres du débat</p>
+<h1>Les chiffres du débat</h1>
+<p class="lead">{{ conversation.title }}</p>
+
+{#
+  La page s'appelle « Les chiffres » et non « Les sources », et ce n'est pas un détail
+  de vocabulaire : elle ne porte QUE les chiffres saisis par un modérateur. Les liens
+  apportés par les participants restent sous la proposition qui les porte, pendant le
+  vote (décision du client, 5 septembre 2026). Une page intitulée « Sources » qui les
+  omettrait promettrait ce qu'elle n'affiche pas.
+
+  Restylé en bandeau « méthode » (chantier I), comme `.method` dans la maquette
+  debat-chiffres.html — le texte lui-même ne change pas.
+#}
+<div class="encart">
+  <p class="mu">
+    <strong>Ces chiffres sont recopiés à la main par un modérateur, avec leur
+    source.</strong> Rien n'est récupéré automatiquement : le site n'interroge aucun
+    service extérieur. Les liens apportés par les participants s'affichent, eux, sous
+    la proposition qu'ils appuient, pendant le vote.
+  </p>
+</div>
+
+{% if chiffres %}
+<ol class="chiffres">
+  {% for c in chiffres %}
+  {#
+    `pourcentage(c.valeur)` ne renvoie une valeur QUE si le chiffre saisi EST un
+    pourcentage entier (« 40 % ») — `c.valeur` est du texte libre, rien ne garantit
+    que c'en est un. Le graphique en gaufre reste alors fonctionnel : c'est un calcul
+    sur une vraie donnée, pas une illustration (section 5 de la consigne). Un chiffre
+    qui n'est pas un pourcentage reste affiché en grand, sans graphique inventé.
+  #}
+  {% set pct = pourcentage(c.valeur) %}
+  <li class="card chiffre-public">
+    <div class="chiffre-public-top">
+      <div class="chiffre-corps">
+        {# La VALEUR d'abord, en grand : c'est ce qu'on vient chercher. L'intitulé la
+           qualifie, il ne la précède pas. #}
+        <p class="chiffre-valeur">{{ c.valeur }}</p>
+        <p class="chiffre-intitule">{{ c.titre }}</p>
+        {#
+          Les deux dates, toujours toutes les deux nommées — y compris quand l'une
+          manque. « Mis à jour le 5 septembre » ne dit pas si la donnée est de 2026
+          ou de 2019, et taire l'absence d'une date de donnée recréerait exactement
+          cette confusion.
+        #}
+        <p class="mu chiffre-dates">
+          {% if c.date_donnees %}Donnée de {{ date_lisible(c.date_donnees) }}
+          {%- else %}Date de la donnée non précisée{% endif %} ·
+          {% if c.date_verification %}vérifiée le {{ date_lisible(c.date_verification) }}
+          {%- else %}jamais revérifiée depuis la saisie{% endif %}
+        </p>
+      </div>
+      {% if pct is not none %}
+      <svg class="gaufre" viewBox="0 0 104 104" role="img"
+           aria-label="{{ pct }} carrés sur 100 sont remplis">
+        {% for rangee in range(10) %}
+          {% for colonne in range(10) %}
+            {% set n = rangee * 10 + colonne %}
+            <rect x="{{ '%.2f'|format(colonne * 10.6 + 1) }}"
+                  y="{{ '%.2f'|format(rangee * 10.6 + 1) }}"
+                  width="8.6" height="8.6" rx="2"
+                  {% if n < pct %}class="pleine"{% endif %}></rect>
+          {% endfor %}
+        {% endfor %}
+      </svg>
+      {% endif %}
+    </div>
+
+    {#
+      Emplacement pour la capture de la source (chantier I) — reprend `.shot` de la
+      maquette debat-chiffres.html. Ce n'est pas encore branché sur une vraie
+      donnée : le modèle `ConversationSource` ne porte aujourd'hui aucun champ
+      image, et en ajouter un est hors du périmètre de ce chantier (visuel), pas du
+      prochain qui touchera aux chiffres sourcés. Voir NOTES-CHANTIER-I.md.
+    #}
+    <div class="emplacement-image emplacement-image--16-9">
+      <strong>Emplacement image</strong>
+      <span>Capture de la page {{ ('« ' ~ c.domaine ~ ' »') if c.domaine else 'source' }} d'où vient ce chiffre.</span>
+    </div>
+
+    {#
+      Le lien d'un chiffre officiel n'est PAS un lien d'utilisateur : c'est le
+      modérateur qui l'a choisi, et le site en répond. D'où l'absence de `nofollow`
+      et d'`ugc`, que portent les liens de participants — ceux-là sont des apports,
+      pas des recommandations. `noopener noreferrer` restent, qui n'ont rien à voir
+      avec l'éditorial.
+
+      **Une adresse dont on ne sait pas nommer la destination n'est jamais un
+      LIEN** (même règle qu'à `schemas.statement_read()`) et **le lien signalé
+      injoignable reste un lien** (chantier K3, décision du client) : on informe,
+      on ne retire pas.
+    #}
+    <p class="mu chiffre-source">
+      {% if c.domaine %}
+      <a href="{{ c.url }}" rel="noopener noreferrer" target="_blank">
+        Source — {{ c.domaine }}</a>
+      {% if signale_le.get(c.url) %}
+      <span class="lien-mort">— lien signalé injoignable depuis le {{ signale_le[c.url] }}</span>
+      {% endif %}
+      {% else %}
+      <span class="mu">Source non affichable : l'adresse enregistrée n'est pas une
+        adresse web valide.</span>
+      {% endif %}
+    </p>
+  </li>
+  {% endfor %}
+</ol>
+{% else %}
+<p class="empty">Aucun chiffre n'a encore été rassemblé pour ce débat.</p>
+{% endif %}
+
+<p class="actions"><a href="/c/{{ conversation.slug }}">Retour au débat</a></p>
+{% endblock %}

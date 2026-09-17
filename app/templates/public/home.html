@@ -1,0 +1,314 @@
+{% extends "public/base.html" %}
+{% import "public/_carte_debat.html" as debat %}
+{% import "public/_barre_liste.html" as liste %}
+{% import "public/_liste_accords.html" as consensus %}
+{% block classe_corps %}accueil{% endblock %}
+{#
+  Bandeau d'accroche — l'« aplat noir » de la maquette accueil.html (chantier I2,
+  instruction 1). Il est posé dans le bloc `bandeau` de public/base.html, donc HORS
+  de `<main>` : c'est ce qui lui permet d'être pleine largeur et au contact immédiat
+  de l'en-tête, lequel passe en sombre sur cette seule page (`body.accueil .entete`
+  dans styles.css). Les deux ne sont séparés que par un filet d'1 px, si bien que
+  l'ensemble se lit comme un seul aplat continu depuis le tout haut de la page.
+
+  TEXTE (chantier I2, instruction 15 bis) : c'est la rédaction de JULIEN, reprise
+  telle quelle de sa maquette « Problème, atouts, solution » (artifact 3fd946df…).
+  Elle remplace celle de l'instruction 1 — qui répartissait l'ancienne description
+  du site — sans en garder de fragment. Ne pas la reformuler sans lui demander.
+#}
+{% block bandeau %}
+<div class="bandeau-mission">
+  <div class="bandeau-interieur">
+    <div class="bandeau-texte">
+      <p class="bandeau-kicker">Plateforme de débat populaire</p>
+      <h1 class="bandeau-titre">Révéler nos consensus pour sortir de l'impasse
+        politique</h1>
+
+      <ul class="bandeau-arguments">
+        <li>Par et pour celles et ceux qui n'attendent plus rien des médias ni des
+          politiques.</li>
+        <li>Outil numérique open source facilitant l'émergence de propositions
+          consensuelles.</li>
+        <li>S'organiser à beaucoup de manière horizontale et démocratique.</li>
+        <li>Objectif : rendre les élections 2027 un peu plus intéressantes que les précédentes ;)</li>
+      </ul>
+
+      {#
+        Deux destinations qui EXISTENT (la maquette a un `href="#"`) :
+        « Débattons » mène à la page des débats ouverts — débattre, sur ce site, c'est
+        voter sur un débat, et c'est là qu'on le choisit. « Proposer un débat » est
+        l'ancien bouton jaune « Proposer une conversation » de la section « Les débats
+        ouverts », remonté ici (instruction 17) ; il passe en contour pour que le
+        bandeau garde une seule action pleine.
+      #}
+      <p class="bandeau-actions">
+        <a class="bouton bouton-bandeau" href="/debats">Débattons</a>
+        <a class="bouton bouton-bandeau-fantome" href="/proposer">Proposer un débat</a>
+      </p>
+
+      {# Vrai : c'est ce que le pied de page et la page d'inscription disent déjà. #}
+      <p class="bandeau-note">Pas besoin de compte, en avoir un permet de participer à la modération.
+        </p>
+    </div>
+
+    {#
+      Le schéma « Problème + Ce qu'on a = Solution », colonne de droite. Contenu réel
+      voulu par Julien — il prend la place de l'emplacement d'image vide que le
+      chantier I réservait ici.
+
+      À NE PAS CONFONDRE avec la section « Pourquoi ce site existe », plus bas : celle-là
+      est une section à part, trois grandes cartes cliquables vers le manifeste. Ce
+      schéma-ci n'est qu'une illustration du bandeau ; les deux ne partagent aucun
+      texte, et c'est voulu.
+
+      Le petit titre est un `<p>` et non un `<h2>` : un titre « Pourquoi ce site » dans
+      le plan de la page, juste avant « Pourquoi ce site existe », ferait deux entrées
+      presque identiques pour un lecteur d'écran.
+
+      Les chiens ont `alt=""` : ils illustrent, le texte des cartes dit tout. Voir
+      NOTES-CHANTIER-I2.md, instruction 15 bis.
+    #}
+    <div class="bandeau-schema">
+      <p class="schema-titre">Pourquoi ce site</p>
+      <div class="schema-pile">
+        <div class="schema-ligne">
+          <img class="schema-chien" src="/static/images/chien-probleme.png" alt=""
+               width="231" height="260">
+          <div class="schema-carte schema-carte--probleme">
+            <span class="schema-etiquette">Problème</span>
+            <ul class="schema-items">
+              <li>Crise politique</li>
+              <li>Élection 2027</li>
+              <li>15 % de confiance dans les partis</li>
+              <li>Fake news</li>
+              <li>Société polarisée</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="schema-operateur"><span class="schema-signe">+</span></div>
+
+        <div class="schema-ligne">
+          <img class="schema-chien" src="/static/images/chien-atouts.png" alt=""
+               width="183" height="260">
+          <div class="schema-carte schema-carte--atouts">
+            <span class="schema-etiquette">Ce qu'on a</span>
+            <ul class="schema-items">
+              <li>82% de confiance en la science et en la démocratie</li>
+              <li>Des envies de démocraties directes </li>
+              <li>Des outils de débat numériques efficaces</li>
+              <li>Des choses à dire</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="schema-operateur"><span class="schema-signe">=</span></div>
+
+        <div class="schema-ligne">
+          <img class="schema-chien" src="/static/images/chien-solution.png" alt=""
+               width="260" height="204">
+          <div class="schema-carte schema-carte--solution">
+            <span class="schema-etiquette">Solution</span>
+            <ul class="schema-items">
+              <li>Assemblée populaire</li>
+              <li>Propositions sourcées</li>
+              <li>Consensus rationnels</li>
+              <li>Plateforme de débats open source</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block body %}
+{# Le rappel à l'auteur (MOD-6). Inclus ICI et pas dans
+   `public/conversation.html` : le flux de vote reste intouchable. #}
+{% include "public/_rappel.html" %}
+{#
+  Cible de l'entrée « Débats » de la navigation (l'identifiant reste, l'ancre
+  `/#debats` du G4 continue de fonctionner).
+
+  `<h2>` et non plus `<h1>` depuis le chantier I2 : le titre de la page est désormais
+  celui du bandeau, juste au-dessus. Deux `<h1>` sur une même page brouilleraient le
+  plan de titres pour un lecteur d'écran, et cette section est de même niveau que
+  « Pourquoi ce site existe » et « Le site en chiffres », toutes deux en `<h2>` plus
+  bas. Seul effet visible : 22 px au lieu de 32, comme les autres sections.
+#}
+{#
+  Cible de l'entrée « Débats » de la navigation (l'identifiant reste, l'ancre
+  `/#debats` du G4 continue de fonctionner).
+
+  Titre nu, sans lien à sa droite : « Tous les débats → » est descendu sur la ligne de
+  tri (chantier I2, instruction 8), puis au bout de la rangée de cartes, sous le nom
+  « Voir tous les débats » (instruction 17).
+#}
+<h2 id="debats">Les débats ouverts</h2>
+
+{#
+  « Proposer une conversation », qui était ici en jaune, est remonté dans le bandeau
+  sous le nom « Proposer un débat », à côté de « Débattons » (instruction 17).
+#}
+
+{#
+  Barre de tri et de filtre, partagée avec la page « Débats » depuis le J6.
+
+  Ce sont des LIENS et non des boutons : chaque tri, chaque filtre est une URL, donc
+  partageable, ouvrable dans un onglet, et retrouvée par le bouton « précédent ». Un
+  état en JavaScript, sur un site sans outil de construction, aurait été invisible de
+  l'extérieur.
+#}
+{{ liste.barre(base, tri, tris, filtre, adresse, libelle_theme, mes_themes_reglees,
+               propositions_ouvertes, tri_mesure, compte=false) }}
+
+{#
+  Le quatrième onglet ne réordonne pas la liste, il en change l'objet : des propositions
+  au lieu des débats (L6). C'est le service qui le dit — `accueil.liste_de_propositions`
+  —, pas une comparaison de chaîne écrite ici.
+#}
+{% if liste_de_propositions %}
+{{ consensus.chapeau() }}
+{% if accords %}
+  <ul class="accords">
+    {% for a in accords %}{{ consensus.accord(a) }}{% endfor %}
+  </ul>
+  {% if encore %}
+  <p class="actions voir-tout">
+    <a href="{{ adresse('/debats', tri=tri, filtre=filtre) }}">Voir tous les accords</a>
+  </p>
+  {% endif %}
+{% else %}
+{{ consensus.vide(filtre) }}
+{% endif %}
+
+{% elif conversations %}
+  {#
+    Une seule RANGÉE qui défile à l'horizontale (instruction 17), à la place de la
+    grille à deux colonnes de l'instruction 2 : deux cartes à l'écran sur grand écran,
+    une sur téléphone, et le bord de la suivante qui dépasse pour dire qu'il y a une
+    suite. Au plus cinq : c'est la limite de la vitrine (`LIMITE_ACCUEIL`, chantier
+    G10), pas une règle écrite ici.
+
+    Au bout de la rangée, « Voir tous les débats » : le lien vers le catalogue, qui
+    était au bout de la ligne de tri (instruction 8), et qui emporte toujours le tri et
+    le filtre courants. La rangée défile au doigt, à la molette ou au pavé, et au
+    clavier en passant d'un lien au suivant — aucun script.
+
+    La page « Débats » garde sa colonne unique, chargée au défilement.
+
+    `clivant=false` : pas d'étiquette « Clivant » sur les cartes de l'accueil
+    (instruction 17). Le compte « N propositions divisent les groupes » reste.
+  #}
+  <div class="rangee-debats">
+    {% for c in conversations %}
+    {{ debat.carte(c, repartitions[c.id], depuis_ouverture, base, themes=false, clivant=false) }}
+    {% endfor %}
+    <a class="card rangee-fin" href="{{ adresse('/debats', tri=tri, filtre=filtre) }}">
+      <span class="lien-souligne-jaune">Voir tous les débats</span>
+      <span class="fleche" aria-hidden="true">→</span></a>
+  </div>
+  {#
+    Le lien « Voir tous les accords » du quatrième onglet reste en bas de sa liste :
+    l'onglet « Le plus consensuel » ne montre pas des débats mais des accords.
+  #}
+{% elif filtre.actif %}
+{# L'état vide d'une liste FILTRÉE n'est pas celui d'un site vide : il doit porter la
+   sortie, sans quoi il ressemble à une panne. #}
+<p class="empty">Aucun débat sur
+  {% if filtre.sur_mes_themes %}vos thèmes{% else %}ce thème{% endif %} pour l'instant.
+  <a href="{{ adresse(base, tri=tri, theme=None, mes_themes=None) }}">Voir tous les débats</a>,
+  ou <a href="/proposer">en proposer un</a>.</p>
+{% else %}
+<p class="empty">Aucune consultation ouverte pour le moment.</p>
+{% endif %}
+
+{#
+  « Pourquoi ce site existe » : trois cartes reprenant la structure de `.why` dans la
+  maquette `accueil.html`, chacune un lien ENTIER vers `/manifeste` — qui reste vide de
+  texte pour l'instant (section 6 de la consigne du chantier I).
+
+  Les trois titres et paragraphes sont le texte de Julien (chantier I2, instruction 19),
+  qui remplace le texte de démonstration de la maquette. Orthographe corrigée, tournures
+  laissées telles quelles — voir NOTES-CHANTIER-I2.md.
+
+  Un seul lien écrit : « Lire le manifeste », dans l'en-tête. Le sous-titre, les pieds
+  « Lire dans le manifeste » des cartes et le lien sous la grille sont retirés à la même
+  instruction. Les cartes restent des liens (survol jaune), faute de consigne contraire.
+
+  Tous les liens de cette section mènent à `/manifeste` SANS fragment : la page n'a
+  aucune section ni aucune ancre tant qu'elle n'est pas rédigée, et un `#manifeste-
+  constat` qui ne mènerait nulle part serait pire qu'un lien vers la page entière. À
+  reprendre le jour où le manifeste aura des parties.
+#}
+<section>
+  {# Le titre à gauche, le lien vers le manifeste à droite. #}
+  <div class="entete-section">
+    <h2>Pourquoi ce site existe</h2>
+    <a class="lien-section lien-section--souligne" href="/manifeste"><span class="lien-souligne-jaune">Lire le manifeste</span>
+      <span class="fleche" aria-hidden="true">→</span></a>
+  </div>
+
+  <div class="pourquoi">
+    <a class="card pourquoi-carte" href="/manifeste">
+      <span class="libelle">Le constat</span>
+      <h3>Qui croit encore en la politique&nbsp;?</h3>
+      <p>Nous sommes dans le creux de la vague, pour en sortir nous avons besoin de
+        nouveaux outils démocratiques.</p>
+    </a>
+    <a class="card pourquoi-carte" href="/manifeste">
+      <span class="libelle">La méthode</span>
+      <h3>Révéler ce qui nous unit pour relever le débat</h3>
+      <p>Le principe est simple&nbsp;: proposer des sujets puis voter à des propositions.
+        Ensuite calculer les différents groupes d'opinions et analyser les propositions
+        consensuelles entre ces groupes. Enfin, lister les consensus derrière lesquels
+        tout le monde se rassemble.</p>
+    </a>
+    <a class="card pourquoi-carte" href="/manifeste">
+      <span class="libelle">Le but</span>
+      <h3>Qu'il se passe quelque chose pour les élections 2027</h3>
+      <p>N'attendons pas des politiques qu'ils s'intéressent à nous. Ici, on peut se
+        mettre d'accord sans eux. Et si on est beaucoup, les élections deviendront
+        peut-être un peu plus intéressantes&nbsp;;)</p>
+    </a>
+  </div>
+</section>
+
+{#
+  « Le site en chiffres » (chantier I) : quatre valeurs déjà calculées ailleurs sur
+  le site — aucune n'est écrite en dur. Trois viennent des variables déjà passées à
+  cette page (`total_propositions_ouvertes`, `participants_semaine`,
+  `periode_recalcul`) ; la quatrième, `total_votes`, est une addition mineure à
+  `accueil_service` pour brancher ce composant sur une vraie donnée (voir
+  NOTES-CHANTIER-I.md). AUCUNE ne suit le filtre de thème : c'est le site qu'elles
+  décrivent, pas la sélection courante.
+#}
+<section>
+  <h2>Le site en chiffres</h2>
+  <div class="site-chiffres">
+    {#
+      `total_propositions_ouvertes`, et non `propositions_ouvertes` : ce dernier suit le
+      filtre de thème, ce qui est juste au-dessus d'une liste filtrée mais faux ici. Une
+      section intitulée « Le site en chiffres » ne peut pas annoncer le compte d'un seul
+      thème parce qu'un filtre est actif.
+    #}
+    <div class="site-chiffre">
+      <span class="chiffre-grand">{{ total_propositions_ouvertes }}</span>
+      <span>proposition{{ 's' if total_propositions_ouvertes > 1 else '' }} ouverte{{ 's' if total_propositions_ouvertes > 1 else '' }}</span>
+    </div>
+    <div class="site-chiffre">
+      <span class="chiffre-grand">{{ participants_semaine }}</span>
+      <span>participant{{ 's' if participants_semaine > 1 else '' }} cette semaine</span>
+    </div>
+    <div class="site-chiffre">
+      <span class="chiffre-grand">{{ total_votes }}</span>
+      <span>vote{{ 's' if total_votes > 1 else '' }} exprimé{{ 's' if total_votes > 1 else '' }}</span>
+    </div>
+    <div class="site-chiffre">
+      <span class="chiffre-grand">{{ periode_recalcul }}</span>
+      <span>entre deux recalculs des groupes</span>
+    </div>
+  </div>
+</section>
+{% endblock %}

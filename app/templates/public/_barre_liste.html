@@ -1,0 +1,111 @@
+{#
+  La barre au-dessus d'une liste de débats — accueil et page « Débats ».
+
+  Sortie des deux gabarits au chantier J6, quand le troisième onglet et la ligne de
+  filtre s'y sont ajoutés : recopiée, elle aurait divergé, et le filtre aurait fini par
+  se comporter autrement selon la page. C'est le même raisonnement qu'au G10 pour la
+  carte d'un débat.
+
+  `base` et `adresse` sont passés en arguments plutôt que puisés dans le contexte de la
+  page appelante : une macro qui puise dans les variables de son appelant ne peut plus
+  être appelée d'ailleurs.
+#}
+{% macro barre(base, tri, tris, filtre, adresse, libelle_theme, mes_themes_reglees, propositions_ouvertes, tri_mesure=false, lien_tout=none, compte=true) %}
+<nav class="barre-tri" aria-label="Trier et filtrer les débats">
+  <ul class="tris">
+    {#
+      Les onglets de TRI. Chacun conserve le filtre courant : sans cela, un clic sur
+      « Le plus voté » effacerait silencieusement ce que la personne a demandé.
+
+      Ils sont DEUX ou QUATRE : « Le plus clivant » et « Le plus consensuel » n'entrent
+      dans `tris` que si un débat est mesuré (L4), et ils y entrent ensemble. Le gabarit
+      n'en sait rien et n'a pas à le savoir — il rend ce qu'on lui donne, et c'est
+      `accueil.tris_proposes` qui décide.
+    #}
+    {% for cle, intitule in tris.items() %}
+    <li><a href="{{ adresse(base, tri=cle, filtre=filtre) }}"
+           {% if cle == tri %}aria-current="page"{% endif %}>{{ intitule }}</a></li>
+    {% endfor %}
+
+    {#
+      Le troisième onglet, séparé des deux autres — et le séparateur n'est pas un
+      ornement. « Récent » et « Le plus voté » répondent à *dans quel ordre* ; « Mes
+      centres d'intérêt » répond à *lesquels*. Ce sont deux questions, et deux marques
+      actives peuvent donc être vraies en même temps ; sans le séparateur, deux
+      soulignements dans une même rangée se liraient comme un défaut d'affichage.
+
+      Il n'apparaît que pour qui a réglé ses thèmes : un onglet qui ne ferait que
+      reprocher de ne pas l'avoir rempli est une impasse. À sa place, un lien vers le
+      réglage — qui sert aussi de point d'entrée aux visiteurs anonymes.
+    #}
+    <li class="separateur-filtre" aria-hidden="true">·</li>
+    {% if mes_themes_reglees %}
+    <li><a href="{% if filtre.sur_mes_themes %}{{ adresse(base, tri=tri, filtre=filtre, mes_themes=None) }}{% else %}{{ adresse(base, tri=tri, filtre=filtre, mes_themes=1) }}{% endif %}"
+           {% if filtre.sur_mes_themes %}aria-current="page"{% endif %}>Mes centres d'intérêt</a></li>
+    {% else %}
+    <li><a class="lien-discret" href="/mes-themes?retour={{ base | urlencode }}">Choisir mes centres d'intérêt</a></li>
+    {% endif %}
+  </ul>
+
+  {#
+    Le bout de ligne, à droite. Deux occupants possibles, jamais les deux — chaque page
+    dit lequel elle veut (chantier I2, instruction 8).
+
+    `lien_tout` : l'accueil ne montre que cinq débats, il porte donc ici le lien vers le
+    catalogue complet, en emportant le tri et le filtre courants. Il était jusqu'ici à
+    côté du titre de section ; il descend sur cette ligne, au bout de la rangée dont il
+    prolonge le sens (« voici comment la liste est triée — et voici la liste entière »).
+
+    `compte` : le compteur de propositions ouvertes. L'accueil le met à `false` — il est
+    déjà dans « Le site en chiffres », plus bas sur la même page, et l'afficher deux fois
+    n'apprend rien la seconde. La page « Débats » le garde : elle n'a pas cette section,
+    et c'est son seul endroit.
+
+    Le chiffre est en chasse tabulaire, et il SUIT le filtre : « 128 propositions
+    ouvertes » au-dessus de trois débats filtrés est une contradiction visible à l'œil nu.
+  #}
+  {% if lien_tout %}
+  <a class="lien-section lien-barre" href="{{ lien_tout }}">Tous les débats
+    <span class="fleche" aria-hidden="true">→</span></a>
+  {% elif compte %}
+  <p class="mu compte-propositions">
+    <span class="chiffre">{{ propositions_ouvertes }}</span>
+    proposition{{ 's' if propositions_ouvertes > 1 else '' }} ouverte{{ 's' if propositions_ouvertes > 1 else '' }}
+  </p>
+  {% endif %}
+</nav>
+
+{#
+  Ce qu'un tri de mesure laisse à la fin, et il faut le dire. Un débat sans calcul abouti
+  n'a pas un score nul — il n'a pas de score : le classer au bout de la liste est juste,
+  mais sans un mot, la fin de la liste se lirait « les moins clivants », ou « ceux qui
+  s'accordent le moins », ce qu'elle n'est pas.
+
+  `tri_mesure` vient du service et non d'une comparaison écrite ici : la liste des tris
+  concernés est une décision, et elle n'a pas à vivre à deux endroits.
+
+  C'est la même honnêteté que la ligne de filtre ci-dessous et que la mini-barre grise
+  du G3 : le lecteur voit ce qu'il voit, et sait pourquoi.
+#}
+{% if tri_mesure %}
+<p class="mu ligne-tri">
+  Les débats dont les groupes d'opinion ne sont pas encore calculés figurent à la suite,
+  du plus récent au plus ancien.
+</p>
+{% endif %}
+
+{#
+  La ligne de sortie. Elle nomme ce qui est retenu et porte le lien qui l'enlève : le
+  lecteur voit ce qu'il ne voit pas, et en sort d'un clic. C'est la condition qui rend
+  la décision « filtrer plutôt que réordonner » honnête — rien n'est retiré de la liste
+  sans que le visiteur l'ait demandé, et sans qu'il puisse le défaire.
+#}
+{% if filtre.actif %}
+<p class="mu ligne-filtre">
+  {% if filtre.sur_mes_themes %}Vos thèmes{% else %}Thème{% endif %} :
+  {% for code in filtre.codes %}{{ libelle_theme(code) }}{{ ', ' if not loop.last }}{% endfor %}
+  — <a href="{{ adresse(base, tri=tri, theme=None, mes_themes=None) }}">voir tous les débats</a>
+  {% if filtre.sur_mes_themes %}· <a href="/mes-themes?retour={{ base | urlencode }}">modifier</a>{% endif %}
+</p>
+{% endif %}
+{% endmacro %}

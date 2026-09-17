@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  L'anneau, version favicon : serré, sans marge, parce qu'à 16 px chaque pixel
+  compte. La version des icônes d'application (icone.svg) garde au contraire une
+  marge, exigée par les masques d'Android et d'iOS.
+
+  Le fond blanc est DESSINÉ et non laissé transparent : le contre-poinçon fait
+  partie du dessin, et sur une barre d'onglets sombre un anneau d'encre posé sur du
+  transparent disparaîtrait purement et simplement.
+
+  Les couleurs sont écrites en clair, pas en variables : un favicon est chargé hors
+  de toute feuille de style. Si la palette change, ce fichier change avec elle.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <rect width="32" height="32" fill="#FFFFFF"/>
+  <circle cx="16" cy="16" r="11.75" fill="none" stroke="#1F2A44" stroke-width="5.5"/>
+  <circle cx="16" cy="16" r="3.5" fill="#EBE81A"/>
+</svg>

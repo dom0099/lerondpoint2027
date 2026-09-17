@@ -1,0 +1,15 @@
+{% extends "public/base.html" %}
+{% block title %}Confirmation — Le Rond-Point 2027{% endblock %}
+{% block body %}
+<h1>Confirmation de votre adresse</h1>
+{% if done %}
+  <div class="msg ok">Votre adresse est confirmée. Merci.</div>
+{% elif already %}
+  <div class="msg ok">Cette adresse était déjà confirmée.</div>
+{% else %}
+  <div class="msg err">{{ error }}</div>
+  <p class="mu">Vous pouvez participer sans confirmer votre adresse. La confirmation
+  sert uniquement à pouvoir récupérer votre mot de passe.</p>
+{% endif %}
+<p><a href="/">Retour à l'accueil</a></p>
+{% endblock %}

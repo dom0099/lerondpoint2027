@@ -1,0 +1,68 @@
+{% extends "public/base.html" %}
+{% block title %}Supprimer mes données — Le Rond-Point 2027{% endblock %}
+{% block body %}
+{% if done %}
+  <h1>C'est fait</h1>
+  <div class="msg ok">Vos données ont été supprimées. Il ne reste rien qui vous
+    rattache à cette consultation.</div>
+  <p class="mu">Les propositions que vous aviez publiées restent en ligne, mais plus
+    rien n'indique qu'elles viennent de vous — d'autres personnes ont voté dessus, les
+    retirer réécrirait leur consultation.</p>
+  <p><a href="/">Retour à l'accueil</a></p>
+{% else %}
+  <h1>Supprimer mes données</h1>
+  {% if error %}<div class="msg err">{{ error }}</div>{% endif %}
+
+  {% if account %}
+    <p class="lead">Cette action est <strong>définitive</strong> et prend effet
+      immédiatement.</p>
+    <div class="card">
+      <p><strong>Ce qui est supprimé</strong></p>
+      <ul>
+        <li>votre compte : adresse e-mail, nom affiché, mot de passe ;</li>
+        <li><strong>tous vos votes</strong>, sur toutes les consultations ;</li>
+        <li>votre position dans les groupes d'opinion, recalculée sans vous ;</li>
+        <li>vos badges et vos points.</li>
+      </ul>
+      <p><strong>Ce qui reste</strong></p>
+      <ul>
+        <li>les propositions et conversations que vous avez publiées, <strong>détachées
+          de votre nom</strong> : d'autres personnes ont voté dessus.</li>
+      </ul>
+    </div>
+
+    <form method="post" action="/compte/suppression" class="card">
+      <label for="password">Confirmez avec votre mot de passe</label>
+      <input type="password" id="password" name="password" required autocomplete="current-password"
+             {% if champ == 'password' %}class="invalide" aria-invalid="true"
+             aria-describedby="erreur-password"{% endif %}>
+      {% if champ == 'password' %}<p class="erreur-champ" id="erreur-password">{{ error }}</p>{% endif %}
+      <p class="mu">Redemandé pour qu'un cookie volé ne
+        suffise pas à détruire votre historique.</p>
+      <p class="actions"><button type="submit" class="bouton-encre">Supprimer définitivement</button>
+        <a href="/compte" class="mu">Annuler</a></p>
+    </form>
+  {% elif anonyme %}
+    <p class="lead">Vous participez sans compte. Vos votes sont rattachés à un
+      identifiant déposé dans ce navigateur — c'est lui qui sert de preuve ici.</p>
+    <div class="card">
+      <p><strong>Ce qui est supprimé</strong> : tous vos votes et votre position dans
+        les groupes d'opinion. <strong>Ce qui reste</strong> : vos propositions
+        publiées, détachées de tout auteur.</p>
+    </div>
+    <form method="post" action="/compte/suppression" class="card">
+      <label><input type="checkbox" name="confirmation" value="1" required
+             {% if champ == 'confirmation' %}aria-invalid="true"
+             aria-describedby="erreur-confirmation"{% endif %}>
+        Je confirme vouloir supprimer définitivement mes données</label>
+      {% if champ == 'confirmation' %}<p class="erreur-champ" id="erreur-confirmation">{{ error }}</p>{% endif %}
+      <p class="actions"><button type="submit" class="bouton-encre">Supprimer définitivement</button>
+        <a href="/" class="mu">Annuler</a></p>
+    </form>
+  {% else %}
+    <p class="lead">Aucune donnée n'est rattachée à ce navigateur.</p>
+    <p class="mu">Si vous avez un compte, <a href="/compte/connexion?suivant=/compte/suppression">connectez-vous</a>
+      pour pouvoir le supprimer.</p>
+  {% endif %}
+{% endif %}
+{% endblock %}

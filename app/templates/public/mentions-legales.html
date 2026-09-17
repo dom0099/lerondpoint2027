@@ -1,0 +1,32 @@
+{% extends "public/base.html" %}
+{% block title %}Mentions légales — Le Rond-Point 2027{% endblock %}
+{% block body %}
+<h1>Mentions légales</h1>
+<p class="lead">Dernière mise à jour : {{ maj }}.</p>
+
+<h2>Éditeur du site</h2>
+<p>Ce site est édité à titre <strong>non professionnel</strong>, sans publicité et sans
+  aucun revenu. Conformément à la loi pour la confiance dans l'économie numérique
+  (LCEN, article 6, III, 2°), l'éditeur a choisi de ne pas rendre publique son identité.
+  Celle-ci est détenue par l'hébergeur, à qui elle a été communiquée, et ne peut être
+  révélée que sur réquisition de l'autorité judiciaire. Le directeur de la publication est l'éditeur du site mentionné ci-dessus ; conformément au choix opéré au titre de la LCEN, son identité n'est pas rendue publique et reste détenue par l'hébergeur.</p>
+<p>Contact : <a href="mailto:{{ contact }}">{{ contact }}</a></p>
+
+<h2>Hébergeur</h2>
+<p>
+  OVH SAS<br>
+  2 rue Kellermann, 59100 Roubaix, France<br>
+  SIREN 424 761 419 — SIRET (siège) 424 761 419 00045 - Téléphone : 1007 (ou +33 9 72 10 10 07 depuis l'étranger)
+</p>
+
+<h2>Propriété et contributions</h2>
+<p>Les propositions écrites par les participants sont publiées sous la responsabilité
+  de leurs auteurs. Elles sont relues avant publication : une proposition peut être
+  refusée sans que ce refus ait à être motivé. Pour signaler un contenu, écrivez à
+  l'adresse de contact ci-dessus.</p>
+
+<h2>Données personnelles</h2>
+<p>Le traitement des données est décrit dans la
+  <a href="/confidentialite">politique de confidentialité</a>, qui indique aussi
+  comment supprimer ses données.</p>
+{% endblock %}
